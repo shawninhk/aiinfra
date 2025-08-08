@@ -25,13 +25,13 @@ Kaplan et al.于2020年发表的论文[Scaling Laws for Neural Language Models](
 该研究的三大核心发现如下：
 
 **数据集大小 (D) 与损失**：  
-在不受其他因素限制下，性能随数据集大小$D$的增加而幂律提升， 
+在不受其他因素限制下，性能随数据集大小 $D$ 的增加而幂律提升， 
 
 $$
 L(D) \approx \left( \frac{D_c}{D} \right)^{\alpha_D}
 $$  
 
-其中，$\alpha_D \approx 0.095, D_c=5.4*10^13$。
+其中， $\alpha_D \approx 0.095, D_c=5.4*10^{13}$ 。
 
 **模型规模 (N) 与损失**：  
 在不受其他因素限制下，语言模型性能随非嵌入参数数量$N$的增加而幂律提升。非嵌入参数是排除了词汇和位置嵌入的模型参数，是真正在训练中用于学习数据分布的参数。
@@ -40,22 +40,22 @@ $$
 L(N) \approx \left( \frac{N_c}{N} \right)^{\alpha_N}
 $$  
 
-其中，$\alpha_N \approx 0.076, N_c=8.8*10^13$。
+其中， $\alpha_N \approx 0.076, N_c=8.8*10^{13}$ 。
 
 **计算量 (C) 与损失**：  
-在不受其他因素限制下，性能随优化分配的训练计算量$C_{\text{min}}$的增加而幂律提升，  
+在不受其他因素限制下，性能随优化分配的训练计算量 $C_{\text{min}}$ 的增加而幂律提升，  
 
 $$
-L(C_{\text{min}}) \approx \left( \frac{C_c}}{C_{\text{min}}}} \right)^{\alpha_C}
-$$ 
+L(C_{\text{min}}) \approx \left( \frac{C_c}{C_{\text{min}}} \right)^{\alpha_C}
+$$
 
-其中，$\alpha_C} \approx 0.050，C_c=2.3*10^8$。
+其中， $\alpha_C \approx 0.050，C_c=2.3*10^8$ 。
 
-计算量$C \approx 6NBS$。其中$B$表示batch size，$S$表示训练步长。$L(C_{\text{min}})$的图与其他两个图的不同在于，其是由多个曲线的最低点相连得出的。这多个曲线就是不同batch size下，模型随训练步长的变化。这里在展示的是要让模型到达指定性能需要最少投入的计算资源。从另一面看，$L(C_{\text{min}})$展示了在计算资源固定的前提下，模型性能能收敛到哪里。
+计算量 $C \approx 6NBS$ 。其中 $B$ 表示batch size，$S$表示训练步长。$L(C_{\text{min}})$的图与其他两个图的不同在于，其是由多个曲线的最低点相连得出的。这多个曲线就是不同batch size下，模型随训练步长的变化。这里在展示的是要让模型到达指定性能需要最少投入的计算资源。从另一面看， $L(C_{\text{min}})$ 展示了在计算资源固定的前提下，模型性能能收敛到哪里。
 
 ![模型性能与计算量、数据集大小、模型规模之间的关系](images/01ScalingLaw01.png)
 
-在模型规模$N$确定的前提下，$C$由batch size $B$和训练步长$S$影响。
+在模型规模$N$确定的前提下， $C$ 由batch size $B$ 和训练步长$S$影响。
 
 增大batch size能有效降低梯度估计中的随机噪声，使优化路径更为稳定且接近理论最优方向。研究表明存在一个关键阈值——最优batch size，在此阈值之下，批量规模的增长与模型收敛速度呈正相关；而一旦超过此阈值，继续扩大批量带来的性能提升则趋于边际化。
 因此，为最大化计算资源利用效率和训练时间价值，应当优先采用接近最优batch size的配置。
@@ -68,7 +68,7 @@ $$
 
 前面的结论成立有一个前提，就是不受其他因素限制，这在实际情况下很难成立。
 在资源受限时，模型性能的持续提升依赖于模型规模N和数据集大小$D$的同步扩展。如果$N$或$D$固定而另一个持续增加，模型性能会在达到一定水平后呈现边际递减效应，提升速度显著减缓。
-建议在给定$C$时，模型与数据应符合如下比例：$N_{opt} \propto C^{0.74}, D_{opt} \propto C^{0.27}$
+建议在给定 $C$ 时，模型与数据应符合如下比例： $N_{opt} \propto C^{0.74}, D_{opt} \propto C^{0.27}$ 。
 
 ![模型参数与数据](images/01ScalingLaw03.png)
 ![模型参数与数据](images/01ScalingLaw05.png)
@@ -79,7 +79,7 @@ $$
 ![样本效率](images/01ScalingLaw02.png)
 
 
-后续论文[Training Compute-Optimal Large Language Models](https://arxiv.org/abs/2203.15556)进一步扩充了模型和数据规模，提出了对最优资源分配策略的修正。其核心发现是，对于给定的计算预算，模型参数和数据集应以大致相等的比例缩放，即$N_{opt} \propto C^{0.5}, D_{opt} \propto C^{0.5}$，而非Kaplan et al.建议的侧重模型参数。
+后续论文[Training Compute-Optimal Large Language Models](https://arxiv.org/abs/2203.15556)进一步扩充了模型和数据规模，提出了对最优资源分配策略的修正。其核心发现是，对于给定的计算预算，模型参数和数据集应以大致相等的比例缩放，即 $N_{opt} \propto C^{0.5}, D_{opt} \propto C^{0.5}$ ，而非Kaplan et al.建议的侧重模型参数。
 
 ![作者使用三种不同方法的预测最优模型大小，发现当时的大模型训练严重不足。这也导致2021年大家复现GPT3都没有做出特别好的效果。](images/01ScalingLaw06.png)
 
@@ -126,8 +126,12 @@ Kaplan et al.发现模型在域外数据上的性能相比于训练集会出现�
 ## 参考资料
 
 Scaling Laws for Neural Language Models -Kaplan et al.
+
 Training Compute-Optimal Large Language Models -Hoffmann et al.
+
 Predictable Scale: Part I, Step Law – Optimal Hyperparameter Scaling Law in Large Language Model Pre-training -Li et al. 
+
 Deep Dive into LLMs like ChatGPT -Andrej Karpathy
+
 和张祥雨聊，多模态研究的挣扎史和未来两年的2个“GPT-4时刻” -张小珺Jùn｜商业访谈录
 
