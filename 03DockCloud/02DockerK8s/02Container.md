@@ -65,14 +65,14 @@ Author by: 张柯帆
 
 ```c
 struct task_struct {
-    unsigned int		    __state; // 表示当前进程状态，例如可运行、睡眠、僵死等。
-    void				        *stack;  // 指向进程的内核栈。
-	  struct sched_entity	se;      // CFS（完全公平调度器）的调度实体。
-    struct mm_struct	  *mm;     // 指向进程的内存描述符结构（mm_struct），管理进程的虚拟内存。
-	  pid_t				        pid;     // 进程 ID
-	  struct fs_struct	  *fs;     // 指向文件系统信息结构，记录进程的当前工作目录、根目录等文件系统相关信息。
-    struct files_struct	*files;  // 指向进程打开的文件表
-    ...
+	unsigned int        __state; // 表示当前进程状态，例如可运行、睡眠、僵死等。
+	void                *stack;  // 指向进程的内核栈。
+	struct sched_entity se;      // CFS（完全公平调度器）的调度实体。
+	struct mm_struct    *mm;     // 指向进程的内存描述符结构（mm_struct），管理进程的虚拟内存。
+	pid_t               pid;     // 进程 ID
+	struct fs_struct    *fs;     // 指向文件系统信息结构，记录进程的当前工作目录、根目录等文件系统相关信息。
+	struct files_struct *files;  // 指向进程打开的文件表
+	...
 }
 ```
 
@@ -112,7 +112,7 @@ PID     USER   TIME COMMAND
 PID Namespace 的使用也非常简单，在创建 Linux 子进程的时候传入一个参数即可：
 
 ```sh
-int pid = clone(fn, stack, SIGCHLD | CLONE_NEWPID, NULL); 
+int pid = clone(fn, stack, SIGCHLD | CLONE_NEWPID, NULL);
 ```
 
 只要设置 `CLONE_NEWPID` 这个 flag，子进程就会被创建到一个新的 PID Namespace 里。在这个新的 Namespace 中，这个子进程就是第一个进程，因此它的 PID 为 1。但是父进程拿到的 `pid` 还是其在物理机上的真实 PID。
@@ -125,6 +125,25 @@ Docker 正是巧妙地将 Namespace 的视图隔离和 Cgroups 的资源限制�
 
 不过 [PID Namespace](https://man7.org/linux/man-pages/man7/pid_namespaces.7.html) 只能隔离 PID 的视图。为了隔离其他内核资源，Linux 还提供了 [Cgroup](https://man7.org/linux/man-pages/man7/cgroup_namespaces.7.html)、[IPC](https://man7.org/linux/man-pages/man7/ipc_namespaces.7.html)、[Network](https://man7.org/linux/man-pages/man7/network_namespaces.7.html)、[Mount](https://man7.org/linux/man-pages/man7/mount_namespaces.7.html)、[Time](https://www.man7.org/linux/man-pages/man7/time_namespaces.7.html)、[User](https://man7.org/linux/man-pages/man7/user_namespaces.7.html)、[UTS](https://man7.org/linux/man-pages/man7/uts_namespaces.7.html) 等 Namespace。
 
-总结一下：**容器的隔离，本质就是资源的隔离**，技术上利用了 Linux 内核提供的两大特性：Namespace 负责构建“与世隔绝”的独立视图；而 Cgroups 则像一个“资源管家”，严格限制每个容器能消耗的资源配额。
+这些 API 可以通过 `clone()`, `setns()`, `unshare()` 等系统调用来使用。从版本号为 3.8 的内核开始，`/proc/(pid)/ns` 目录下会包含进程所属的 namespace 信息，可以直接使用如下命令查看当前进程所属的 namespace 信息：
+
+```sh
+/ # ls -l /proc/$$/ns
+total 0
+lrwxrwxrwx 1 root root 0 Aug  1 12:00 cgroup -> cgroup:[4026531835]
+lrwxrwxrwx 1 root root 0 Aug  1 12:00 ipc -> ipc:[4026531839]
+lrwxrwxrwx 1 root root 0 Aug  1 12:00 mnt -> mnt:[4026531840]
+lrwxrwxrwx 1 root root 0 Aug  1 12:00 net -> net:[4026531993]
+lrwxrwxrwx 1 root root 0 Aug  1 12:00 pid -> pid:[4026531836]
+lrwxrwxrwx 1 root root 0 Aug  1 12:00 pid_for_children -> pid:[4026531836]
+lrwxrwxrwx 1 root root 0 Aug  1 12:00 user -> user:[4026531837]
+lrwxrwxrwx 1 root root 0 Aug  1 12:00 uts -> uts:[4026531838]
+```
+
+这些都是链接文件。链接文件的内容的格式为 xxx:[inode number]。其中的 xxx 为 namespace 的类型，inode number 则用来标识一个 namespace，可以理解为 namespace 的 ID。如果两个进程的某个 namespace 文件指向同一个链接文件，说明其相关资源在同一个 namespace 中。
+
+## 总结
+
+**容器的隔离，本质就是资源的隔离**，技术上利用了 Linux 内核提供的两大特性：Namespace 负责构建“与世隔绝”的独立视图；而 Cgroups 则像一个“资源管家”，严格限制每个容器能消耗的资源配额。
 
 在接下来的文章中，我们还会详细介绍 Cgroups 的技术细节。
