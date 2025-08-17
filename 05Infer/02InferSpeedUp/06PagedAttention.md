@@ -1,23 +1,29 @@
-# Paged Attention原理
+# Paged Attention 原理
 
 ## 大模型推理的内存管理挑战
 
-大模型推理中，处理推理请求的数量受到GPU内存容量的限制，也就是说，推理服务系统的吞吐量是memory-bound，克服这个内存限制需要解决以下内存管理方面的挑战：
-1. KV Cache内存大。KV Cache的大小随着请求数量的增加而迅速增长，如图所示，KV Cache所占内存接近大模型参数的一半。
+大模型推理中，处理推理请求的数量受到 GPU 内存容量的限制，也就是说，推理服务系统的吞吐量是 memory-bound，克服这个内存限制需要解决以下内存管理方面的挑战：
+1. KV Cache 内存大。KV Cache 的大小随着请求数量的增加而迅速增长，如图所示，KV Cache 所占内存接近大模型参数的一半。
 2. 复杂的解码策略。大模型推理有多种解码策略，每种算法对内存管理的影响各不相同。
-3. 输入与输出序列长度未知。在大模型推理中，输入prompt与最终输出长度是不确定的。
+3. 输入与输出序列长度未知。在大模型推理中，输入 prompt 与最终输出长度是不确定的。
 
 
-## Paged Attention原理
+## Paged Attention 原理
 
 ### 操作系统虚拟内存概念
 
+<<<<<<< HEAD
 ### Paged Attention算法
 PagedAttention算法
 - PageAttention允许在非连续的内存空间中存储连续的键和值【与传统attention算法不同的是】
 - 将每个序列的KV 缓存划分为KV block，每个block包含固定数量的key，value vectors（kv block size）
 - 在注意力计算时，PagedAttention kernel 分别对不同的KV块进行识别和fetch
 ### KV Cache管理
+=======
+### Paged Attention 算法
+
+### KV Cache 管理
+>>>>>>> main
 
 ### 不同解码策略下的表现
 

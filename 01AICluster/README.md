@@ -14,7 +14,7 @@ xxx
 
 ## 课程知识
 
-xxx
+![AIInfra](./images/arch02.png)
 
 ## 备注
 
