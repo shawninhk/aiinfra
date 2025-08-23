@@ -13,8 +13,6 @@ Author by: 陈悦孜
 - 高性能存储器：从容量扩展到存算协同。
 - 高性能服务器：从单机性能到绿色化集群。
 
-
-
 ## 高性能处理器
 
 ### CPU 主导时代
@@ -26,8 +24,6 @@ Intel Xeon系列自 1998 年诞生起专注服务器市场，早期通过 Pentiu
 AMD Opteron系列第五代至强（Emerald Rapids）支持单 CPU 64 核心，三级缓存容量扩大近 3 倍，通过 DDR5 内存和 UPI 2.0 互连提升并行吞吐量，AI 推理性能提升 42%。2010 年代 Opteron 6100 系列推出 12 核型号（如 6180 SE），在 2.5GHz 主频下实现高密度计算（如戴尔 PowerEdge C6145 服务器支持单机柜 96 核）。
 
 ![Intel Xeon和AMD Opteron](images/02TrendHard01.png)
-
-
 
 #### 主频提升达瓶颈
 
@@ -58,11 +54,9 @@ Phi 7120|	61|	1.2 TFlops|	16 GB|	352 GB/s	|300W|	$4,129|
 
 ![PHI](images/02TrendHard03.png)
 
-
 ​​GPU 加速​​也属于协处理器范畴，NV CUDA 革命性地将 GPU 用于通用计算， Tesla 成为通用并行计算标杆。首代 Tesla 架构（如 G80）引入统一着色器设计，将矢量计算单元拆分为标量核心（CUDA Core），支持 C 语言编程，实现 SIMT（单指令多线程）执行模型，奠定通用计算基础，将 GPU 从图形协处理器升级为通用计算引擎，定义“CPU+GPU”异构标准。
 
 ![Tesla](images/02TrendHard04.png)
-
 
 #### 国产 CPU 突破
 
@@ -92,8 +86,6 @@ NVIDIA Grace CPU 实现内存子系统革新。​​LPDDR5X 和纠错码​​�
 |核心规模|多核低频（能效优先）|512核以上众核架构（Fujitsu A64FX）|
 |内存系统|低带宽LPDDR|HBM2e（>1TB/s带宽）|
 |功耗管理|动态调频（DVFS）|精细功耗门控（Per-core PowerGating）|
-
-
 
 ### 处理器发展趋势
 
@@ -130,9 +122,7 @@ Chiplet是一种先进的芯片设计和制造方法。Chiplet 即小芯粒，�
 
 - 存内计算即狭义的存算一体在芯片设计过程中，不再区分存储单元和计算单元，真正实现存算融合。存内计算是计算新范式的研究热点，其本质是利用不同存储介质的物理特性，对存储电路进行重新设计使其同时具备计算和存储能力，直接消除“存”"算个界限，使计算能效达到数量级提升的目标。
 
-
 存算技术这种技术大幅减少数据搬运，从而显著提升能效比（数十倍甚至百倍） 和计算速度，特别适用于数据密集型的 AI 推理/训练、大数据分析等场景。台积电 3D Fabric 技术将计算单元堆叠至存储层（比如 CXL 协议设备），突破冯·诺依曼瓶颈。
-
 
 ## 高性能网络
 
@@ -170,7 +160,6 @@ Chiplet是一种先进的芯片设计和制造方法。Chiplet 即小芯粒，�
 
 ![高性能网络发展趋势](images/02TrendHard11.png)
 
-
 ## 高性能存储
 
 ### 发展历程1：硬盘时代
@@ -184,7 +173,6 @@ SSD（固态硬盘）是硬盘技术后起之秀，相比HDD具有明显的性�
 ![硬盘革命](images/02TrendHard12.png)
 
 ### 发展历程2：分布式存储和新存储文件系统
-
 
 #### 分布式文件系统
 
@@ -208,9 +196,8 @@ SSD（固态硬盘）是硬盘技术后起之秀，相比HDD具有明显的性�
 
 ![wekaIO全闪存储集群](images_src/02TrendHard19.png)
 
-
-
 ### 高性能存储发展历程3： 新存储技术革命
+
 #### SCM（存储级内存）：Intel Optane 持久内存试图弥合内存与存储间的性能鸿沟。
 
 SCM的全称为Storage Class Memory，即“存储级内存”。有时它也被人们称作Persisent Memory（持久内存）或Non-Volatile Memory（非易失性内存）。它是一种拥有近似于硬盘的持久性（Sotrage-Class），又如内存般高速（Memory）的存储介质。
@@ -226,10 +213,13 @@ Intel Optance傲腾是英特尔率先投入商用的SCM产品，P4800X固态硬�
 PCM通过改变温度的方式进行数据写入。在低温下，介质处于低电阻的结晶状态；而在高温加热后，介质的电阻升高，转变为不定型状态。物质的不同状态，就对应了二进制数据的0与1。3DXpoint借此完成对数据的存储与记录。
 
 这项技术给傲腾带来哪些技术优势呢？
+
 1. 减少电子泄露，增强断电后的数据保持能力，改善“冷数据”问题。
+
 固态硬盘存在“冷数据”问题，传统固态硬盘使用的是NAND“与非门”，以电子来存储记录数据。但在不通电时，NAND中的电子会随着时间而泄露，在下一次读取时，这便会引发错误，导致读取速度缓慢，甚至数据丢失。而3DXpoint以电阻记录数据的独特原理，从根本上断绝了电子泄露的可能。PCM材料的相变需要上百摄氏度的极苛刻条件，这让傲腾在断电后的数据保持能力大大增强，“冷数据”问题大幅改善。
 
 2. 大幅降低数据的读取延迟，有卓越的随机读写性能。
+
 现今，动辄突破7GB/s读写速度的NAND固态硬盘，多半仰仗于SLC Cache技术。SLC Cache为NAND带来“鸡血”的同时，也造就了更大的发热与写入放大问题。日常生活也有相当部分软件不支持SLC Cache的速度进行读取器。3DXPoint比SLC更快，因此无需SLC Cache的介入。规避了SLC Cache存在的种种问题，傲腾不存在“出缓掉速”的可能，更保持了使用中的性能一致性。
 
 同时，由于不需要DRAM缓存的优化，无需断电保护电容，傲腾自身就能达成停电保护的能力。
@@ -238,9 +228,7 @@ PCM通过改变温度的方式进行数据写入。在低温下，介质处于�
 
 #### HBM（高带宽内存）：NPU/GPU 高度集成与依赖， HBM3 每引脚数据速率提高到 6.4Gb/s，单设备带宽 819GB/s 。
 
-
 存储与运算之间的“内存墙”于计算速度的影响由于数据、算力需求的增长愈发显现，提升内存带宽是存储芯片关注的重要问题。HBM（High Bandwidth Memory）高带宽存储器，被视作是新一代DRAM技术，它通过使用硅通孔（TSV）垂直堆叠多个 DRAM，和NPU/GPU封装一起，实现大容量、高位宽的DDR组合阵列。
-
 
 ![HBM技术示意图](images/02TrendHard14.png)
 
@@ -267,28 +255,34 @@ HBM在2013年由SK海力士将TSV技术应用于DRAM而首次研发出来，HBM1
 
 其中HBM3E由SK海力士、美光和三星共同发布。
 
-
-
 在AI芯片中，高带宽存储主要用于加速模型执行。对于大型神经网络，模型权重和中间激活会占据数GB到数十GB内存，HBM提供的高带宽使得这些数据可以在算力单元和内存之间高速交换，减少等待时间。例如，NVIDIA A100 GPU配备了40GB HBM2e显存，带宽达1.5TB/s，能够高效训练上百亿参数的模型；在推理时，HBM也使得批处理、并发推理的吞吐大幅提升。AI芯片通常会将HBM带宽与片上SRAM缓存相配合：频繁访问的数据尽量留存在片上缓存，不常用的大数据则从HBM取用。高带宽存储的出现甚至影响了算法设计，当内存带宽不再是主要限制，研究人员可以设计更宽的网络或更大的并行度。
-
 
 ### 高性能存储：近计算与层级优化
 
 这里总结高性能存储未来发展趋势。
+
 1. 存储级内存 SCM：CXL 3.0 协议推动存储池化，实现 CPU/GPU 共享内存资源。
+
 存储级内存（SCM）在CXL 3.0协议的推动下，将实现跨CPU/GPU/FPGA的内存资源池化，打破传统内存墙限制。通过高速互联技术，不同处理器可动态共享SCM资源，显著提升异构计算的效率，同时降低延迟和系统复杂度。
+
 2. HBM3e 与 HBM4​​：2025 年 HBM3 带宽突破 1TB/s，成 AI 芯片标配。
+
 HBM技术持续迭代，2025年HBM3e将实现1TB/s以上的带宽，HBM4更可能采用3D堆叠与硅通孔（TSV）优化，成为AI训练芯片的标配。其高带宽特性可满足大模型参数实时加载的需求，推动千亿级参数模型的部署。
+
 3. 存算一体架构：计算单元嵌入存储层，减少数据搬运。
+
 存算一体架构通过将计算单元嵌入存储层，彻底重构传统冯·诺依曼架构。近内存计算（如三星HBM-PIM）和内存内计算（如存内逻辑）可减少数据搬运能耗，特别适合矩阵运算密集型任务。
+
 4. 存算一体器件：忆阻器 Memristor、相变存储器 PCM 支持内存计算，降低搬运功耗。
+
 新型存算一体器件如忆阻器（Memristor）、相变存储器（PCM）和铁电存储器（FeRAM）利用其物理特性直接进行模拟计算，在边缘AI场景中展现出超低功耗优势。例如，基于忆阻器的神经形态芯片可实现能效比提升100倍，为端侧智能设备带来突破。
 
 ![高性能发展趋势](images/02TrendHard15.png)
 
-
 ## 高性能服务器
+
 ### 发展历程 1：性能导向阶段（2000s）
+
 #### 刀片服务器普及：HP BladeSystem、IBM BladeCenter 通过高密度设计提升机架利用率。
 
 刀片服务器其实是一种采用模块化设计的“精简版”服务器，为了尽量少占用机柜空间而进行了优化。整个刀片系统由刀片机箱和刀片设备组成。刀片机箱可容纳多个刀片服务器，它同时提供了共享的电源、冷却、网络及各种互连和管理组件。当然，不同刀片厂商在刀片和机箱里面添加哪些组件，有着不一样的设计思想。
@@ -318,7 +312,9 @@ P.S. PUE（Power Usage Effectiveness，电能使用效率） 是衡量数据中�
 同时因为服务器工作负载量大，且在对安全性和可靠性要求较高的场合，如政府机关、银行、证券、通信、企业等领域，特殊的工作性质，要求服务7X24不间断工作，服务器的处理器始终处于高负载状态，使之发热量也随之加大。如今，散热设计与散热能力已经成为服务器设计者的首要考虑问题，它不仅关系到服务器的稳定性和安全性，而且还要考虑到散热系统所需的能耗。
 
 ### 发展历程 2：绿色化阶段（2010s ~ 至今）
+
 #### 散热技术突破，从传统风冷机架到高密度液冷机架演进：
+
 ##### 冷板液冷：直接冷却CPU/GPU（比如曙光浸没式液冷，PUE ≈ 1.04）
 
 冷板式液冷作为非接触式液冷，通过液冷板将发热器件的热量间接传递给封闭在循环管路中的冷却液体带走热量。冷板式液冷对于服务器芯片组件及附属部件改动较小，主要途径为加装液冷模块，采用集中式或分布式CDU供液、Manifold分液，对芯片、内存等部件进行精准制冷。主要可分为部分冷板式、全冷板式以及冷板背门式。
@@ -397,51 +393,30 @@ Frontier超级计算机部署于美国能源部橡树岭国家实验室，由74�
 
 ![华为昇腾384超节点](images/02TrendHard18.jpg)
 
-
-
 ## 本节视频
 
 <html>
 <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=114767700172746&bvid=BV16A3wzEELU&cid=30765482532&p=1&as_wide=1&high_quality=1&danmaku=0&t=30&autoplay=0" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
 </html>
 
-
 ## reference
-https://www.witintech.com/upfiles/202312051029031006456460.pdf
 
-https://pdf.dfcfw.com/pdf/H3_AP202307091592122354_1.pdf 
-
-https://www.dell.com/support/contents/zh-cn/article/product-support/self-support-knowledgebase/data-storage-backup-and-recovery/support-for-hard-disk-drive
-
-https://aws.amazon.com/cn/compare/the-difference-between-ssd-hard-drive/
-
-https://post.smzdm.com/p/a90el8pp/
-
-https://zhuanlan.zhihu.com/p/23269431888
-
-https://zhuanlan.zhihu.com/p/597784274
-
-https://server.51cto.com/article/143125.html
-
-https://dataenergy.sugon.com/c48283.jsp
-
-https://dataenergy.sugon.com/c81871.jsp
-
-https://mp.weixin.qq.com/s/ZVklrCPV7oNHvfcJpnPdJA
-
-https://developer.aliyun.com/article/74471
-
-https://www.eet-china.com/mp/a135747.html
-
-https://zh.wikipedia.org/wiki/%E5%89%8D%E6%B2%BF_(%E8%B6%85%E7%B4%9A%E9%9B%BB%E8%85%A6)
-
-https://www.baogaobox.com/insights/250602000011116.html
-
-https://server.zol.com.cn/731/7319835.html
-
-https://baike.baidu.com/item/%E7%A1%85%E7%AB%8B%E6%96%B9/24229490?anchor=1&fragment=1#1
-
-https://www.sohu.com/a/915158063_115479?scm=10001.325_13-325_13.0.0.5_32
-
-https://www.jiuyangongshe.com/a/2g6hckcy8nz
-
+- https://www.witintech.com/upfiles/202312051029031006456460.pdf
+- https://pdf.dfcfw.com/pdf/H3_AP202307091592122354_1.pdf 
+- https://www.dell.com/support/contents/zh-cn/article/product-support/self-support-knowledgebase/data-storage-backup-and-recovery/support-for-hard-disk-drive
+- https://aws.amazon.com/cn/compare/the-difference-between-ssd-hard-drive/
+- https://post.smzdm.com/p/a90el8pp/
+- https://zhuanlan.zhihu.com/p/23269431888
+- https://zhuanlan.zhihu.com/p/597784274
+- https://server.51cto.com/article/143125.html
+- https://dataenergy.sugon.com/c48283.jsp
+- https://dataenergy.sugon.com/c81871.jsp
+- https://mp.weixin.qq.com/s/ZVklrCPV7oNHvfcJpnPdJA
+- https://developer.aliyun.com/article/74471
+- https://www.eet-china.com/mp/a135747.html
+- https://zh.wikipedia.org/wiki/%E5%89%8D%E6%B2%BF_(%E8%B6%85%E7%B4%9A%E9%9B%BB%E8%85%A6)
+- https://www.baogaobox.com/insights/250602000011116.html
+- https://server.zol.com.cn/731/7319835.html
+- https://baike.baidu.com/item/%E7%A1%85%E7%AB%8B%E6%96%B9/24229490?anchor=1&fragment=1#1
+- https://www.sohu.com/a/915158063_115479?scm=10001.325_13-325_13.0.0.5_32
+- https://www.jiuyangongshe.com/a/2g6hckcy8nz

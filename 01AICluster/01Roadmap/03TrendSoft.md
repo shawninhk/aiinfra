@@ -32,7 +32,6 @@ Intel Fortran编译器是英特尔开发的编译器，有支持Windows系统和
 
 PGI编译器是Portland Group提供的 Fortran 编译器。Portland Group (也称作 PGI ) 是领先的软件供应商，提供用于并行运算的编译器与工具。PGI 编译器为 Intel 和 AMD 64-位 x86 CPU 进行大幅度优化，并提供针对 NVIDIA GPU Accelerator的广泛支持与优化。其中用到的PGI Unified Binary 技术确保利用 PGI 编译器构建而成的应用程序能够在基于 Intel 或 AMD CPU 的系统上正确高效地执行，并在可用时能够动态地检测与使用 NVIDIA GPU Accelerator。PGI编译器是针对高性能计算优化的编译器，支持多种 Fortran 标准，并提供了一些高级特性，如自动向量化、高级循环优化等。
 
-
 #### OpenMP 初现 ：1997 年推出共享内存并行编程模型，支持多线程优化。
 
 随着数据处理需求激增，并行计算倒逼编译器发展。1997年10月发布的OpenMP for Fortran 1.0是初代跨平台共享内存方式的多线程并发编程模型，从此宣告OpenMP的出现。
@@ -42,7 +41,6 @@ PGI编译器是Portland Group提供的 Fortran 编译器。Portland Group (也�
 OpenMP（Open Multi-Processing）由OpenMP Architecture Review Board牵头提出的，并已被广泛接受的，用于共享内存并行系统的多线程程序设计的一套指导性注释（Compiler Directive）。它是一套支持跨平台共享内存方式的多线程并发的编程API，使用C,C++和Fortran语言，可以在大多数的处理器体系和操作系统中运行，包括Solaris, AIX, HP-UX, GNU/Linux, Mac OS X, 和Microsoft Windows。包括一套编译器指令、库和一些能够影响运行行为的环境变量。OpenMP采用可移植的、可扩展的模型，为程序员提供了一个简单而灵活的开发平台，从标准桌面电脑到超级计算机的并行应用程序接口。混合并行编程模型构建的应用程序可以同时使用OpenMP和MPI，或更透明地通过使用OpenMP扩展的非共享内存系统上运行的计算机集群。
 
 通俗语言来讲，OpenMP实现跨平台的多线程，主线程(顺序的执行指令)生成一系列的子线程，并将任务划分给这些子线程进行执行。这些子线程并行的运行，由运行时环境将线程分配给不同的处理器。
-
 
 ### 发展历程：异构编译时代（2010s-至今）
 
@@ -59,11 +57,8 @@ CUDA 是统一计算设备架构（Compute Unified Device Architecture）的代�
 NVCC（NVIDIA CUDA Compiler）是 NVIDIA 提供的 CUDA 代码编译器，其编译过程分为 主机（Host）代码 和 设备（Device）代码 两部分，流程如下：
 
 1. 代码分离：NVCC 首先将 CUDA 代码（.cu 文件）中的主机代码（C/C++）和设备代码（GPU 核函数）分离。
-
 2. 主机代码编译：主机代码由主机编译器（如 GCC、MSVC）编译生成目标平台的 CPU 汇编（如 x86、ARM），最终链接为可执行文件。
-
 3. 设备代码处理：设备代码由 NVCC 转换为 PTX（虚拟 GPU 指令）或直接通过 JIT 编译器生成目标 GPU 的 SASS 指令（如 NVIDIA Ampere/Turing 架构）。
-
 4. 运行时整合：执行时，主机代码调用 GPU 核函数，PTX 或 SASS 指令由 GPU 驱动动态加载到显卡执行。
 
 图中展示CUDA代码生成分层的流程：主机代码走传统编译路径（CPU），设备代码通过 NVCC 和 JIT 编译生成 GPU 可执行指令，最终实现 CPU-GPU 协同计算。
@@ -72,11 +67,9 @@ NVCC（NVIDIA CUDA Compiler）是 NVIDIA 提供的 CUDA 代码编译器，其编
 
 OpenCL 是开放计算语言的缩略词，由苹果公司和 Khronos 集团推出，旨在为异构计算提供一个基准，突破 NVIDIA GPU 的限制。OpenCL为GPU编程提供了一种可移植语言，使用了 CPU、GPU、数字信号处理器等。这种可移植语言用于设计程序或应用程序，让程序具有足够的通用性，可以在迥异的体系结构上运行，同时保持足够的适应性，提升每个硬件平台的性能。OpenCL依赖clBuildProgram在运行时编译内核代码（动态生成设备二进制），但开发者仍需手动管理异构逻辑。
 
-
 #### SYCL和oneAPI：基于 C++ 的 SYCL编译器实现一次编写，多架构运行。
 
 oneAPI是英特尔（Intel）推出的一个编程模型和工具集合，旨在简化跨多种处理器架构的软件开发。它是一个统一的、开放的、标准化的编程环境，可用于编写并行代码，覆盖了CPU、GPU、FPGA等不同类型的处理器。通过oneAPI，开发人员可以使用相同的代码库来针对不同的硬件进行优化，并实现更高的性能和更好的可移植性。oneAPI一个重要的特性是开放性，支持多种类型的架构和不同的硬件供应商，是一种统一的编程模型。使得开发人员拥有可以选择最佳硬件来做加速计算的自由，不用锁定某些厂商专有的硬件即可提高软件的开发生产力，并且获得与硬件加速设备相匹配的性能。
-
 
 下图展示英特尔oneAPI工具的组成以及应用。oneAPI支持两种编程模型，所示第一种是直接编程（Direct Programming）有统一的编程语言SYCL，它是基于C++标准的编程语言。另一种是基于库的编程（API-Based Programming）。对于Level 0，这个跟硬件加速设备打交道的层上，如果硬件厂商实现了这层接口，那么它的设备就可以被oneAPI上层的框架使用。
 
@@ -95,7 +88,7 @@ oneAPI的体系架构为开发者提供了一个统一、开放、标准化的�
 ![oneAPI更详细的生态位置](images/03TrendSoft02.jpeg)
 
 #### 国产突破：华为毕昇编译器优化鲲鹏 CPU 与昇腾 GPU 异构计算。
- 
+
 眼光放到中国，毕昇编译器是华为公司自主研发的高性能编译器工具链，首版于2020年9月30日发布，专为鲲鹏920处理器架构深度优化。该编译器基于开源LLVM框架开发，支持C、C++和Fortran编程语言，通过内存优化增强、自动矢量化等先进编译算法提升代码执行效率，结合鲲鹏Neon/Sve/Sme等内嵌指令技术，深度优化指令流水线及指令调度算法，发挥鲲鹏架构的最佳表现。下图为毕昇编译器的组成和支持情况。
 
 ![毕昇编译器](images/03TrendSoft04.jpeg)
@@ -110,8 +103,6 @@ CANN异构计算架构下毕昇编译器提供异构编程编译能力。
 
 ![CANN下毕昇编译器](images/03TrendSoft05.jpeg)
 
-
-
 ### 未来趋势
 
 AI编译器未来发展有以下三个趋势。AI驱动自动调优通过机器学习生成最优的计算方法，提升计算效率；多级中间层表示的设计实现跨架构代码转换，降低编译器开发成本，使得多种不同硬件平台兼容更高效轻松；新兴流行的编程方式Triton进一步降低开发者开发GPU程序的学习成本。
@@ -125,11 +116,8 @@ AI编译器未来发展有以下三个趋势。AI驱动自动调优通过机器�
 自动调优的过程通常包括以下几个步骤：
 
 1. 性能分析：通过分析程序的运行情况，识别性能瓶颈和优化机会。
-
 2. 参数搜索：系统地探索不同的编译选项和运行参数，寻找最佳的配置。
-
 3. 性能评估：对不同的配置进行测试，评估其对性能的影响。
-
 4. 反馈学习：根据性能评估的结果，调整搜索策略，进一步优化参数选择。
 
 自动调优可以显著提高 AI 应用的运行效率，尤其是在深度学习等计算密集型任务中。然而，由于 AI 应用的多样性和复杂性，自动调优仍然是一个活跃的研究领域，研究人员和工程师们正在不断探索更高效、更智能的调优方法。在自动调优中，TVM 是走在前列的 AI 编译器，其自动调优系统已经历经三代，这里简单介绍 TVM 的这三代自动调优系统。
@@ -140,7 +128,7 @@ AutoTVM 是 TVM 的第一代自动调优系统，其是基于模板的。AutoTVM
 
 AutoTVM 需要事先编写模板来组成调度的搜索空间，最佳性能的上限取决于模板的设计，这对模板的编写带来了很高的要求。作为第二代调优系统，Ansor（Auto Scheduler）取消了模板机制，优化过程可以自动、无干预的进行：无需手动指定优化方式，编译器自动应用调度原语。Ansor 自动生成一个覆盖全面的优化的大搜索空间，并为空间中的每个张量程序提供被选择的机会。首先，它自动构建一个大的搜索空间，以覆盖给定计算定义的尽可能多的张量程序。其次，在大搜索空间中高效搜索，该搜索空间可能比现有模板可以覆盖的范围大几个数量级。最后，在优化具有许多子图的整个 DNN 时，识别对端到端性能至关重要的子图并对其进行优先级排序，因为资源是有限的，应该将调优时间和算力资源分配给对性能有更大影响的子图。
 
-Meta Schedule 是第三代调优系统，提供以下特性： 
+Meta Schedule 是第三代调优系统，提供以下特性：
 
 1.用于实现手动调优、AutoTVM 风格和 AutoScheduler 风格的统一 API。
 
@@ -202,7 +190,7 @@ Triton是一种围绕 “分块（tile）” 概念构建的语言和编译器�
 LAPACK（Linear Algebra PACKage）是Fortran语言开发的一个线性代数库，用于数值计算的函数集。 LAPACK提供了丰富的工具函数，可用于诸如解多元线性方程式、线性系统方程组的最小二乘解、计算特征向量、用于计算矩阵QR分解的Householder变换、以及奇异值分解等问题。 
 
 BLAS（Basic Linear Algebra Subprograms，基础线性代数程序集）是一个应用程序接口（API）标准，用以规范发布基础线性代数操作的数值库（如矢量或矩阵乘法）。该程序集最初发布于1979年，并用于建立更大的数值程序包（如LAPACK）。在高性能计算领域，BLAS被广泛使用。例如，LINPACK的运算成绩则很大程度上取决于BLAS中子程序DGEMM的表现。， 其中包含用于向量-向量运算、矩阵-向量运算和矩阵-矩阵运算三个级别的基本线性代数子程序。
- 
+
 为提高性能，各软硬件厂商则针对其产品对BLAS接口实现进行高度优化。比如英特尔的MKL和OpenBLAS (http://www.openblas.net)都是线性代数库，都用于优化矩阵计算，提高运算性能。很多开源的python库如SciPy和NumPy都基于OpenBLAS/MKL实现。
 
 #### FFTW：快速傅里叶变换库支持千万级数据点计算。
@@ -303,6 +291,7 @@ Qiskit包含几个有用的组件，如：
 ![sciML支持的领域和接口](images/03TrendSoft14.jpeg)
 
 对于需要频繁迭代科学模型的研究（如气候模拟、AI驱动的材料设计），SciML 的 DSL 设计能显著减少“代码翻译”成本，让研究者更聚焦于问题本身。
+
 ## 存储系统：本地IO到分布式高速访问
 
 AI时代来临，对于存储系统也有相当大的影响。存储系统从本地存储到上云实现分布式系统，读取和存入数据的总量需求提升，同时读取和存入的速度也大大提升，
@@ -344,27 +333,20 @@ Ceph和Gluster是Red Hat旗下的成熟的开源存储产品。Ceph基于一个�
 目前，业界有多种开源的并行文件系统，但在性能、高可用与一致性等方面依然有较大的改进空间。
 
 DeepSeek研发的3FS（Fire-Flyer File System，萤火虫文件系统）基于软硬件协同的思想，采用RDMA网络和SSD存储盘实现了自己的高性能并行文件系统。由于RDMA网络和SSD存储盘本身就可以通过NVMe协议来协同工作，且RDMA网络可以绕过远端CPU的中断处理直接读取远端SSD/内存中的数据，3FS能够在180个存储节点构成的集群上，取得6.6TiB/s的吞吐性能。3FS可以在25节点集群中GraySort基准测试吞吐量达到3.66TiB/s，在客户端节点的KV Cache查找峰值吞吐量超过40GiB/s。
-                        
+
 ### 未来趋势
 
 ### 存储计算融合：CXL 协议实现存储池化，支持 GPU 直接访问远程持久内存。
 
-
 CXL（Compute Express Link）是一种高速串行协议，它允许在计算机系统内部的不同组件之间进行快速、可靠的数据传输。CXL在2020年推出，由英特尔、戴尔和惠普等公司共同设计。它旨在解决高性能计算中的瓶颈问题，包括内存容量、内存带宽和I/O延迟等问题。CXL还可以实现内存扩展和内存共享，并且可与计算加速器（如GPU、FPGA）等外设通信，提供更快、更灵活的数据交换和处理方式。存储级内存（SCM）在CXL 3.0协议的推动下，将实现跨CPU/GPU/FPGA的内存资源池化，打破传统内存墙限制。通过高速互联技术，不同处理器可动态共享SCM资源，显著提升异构计算的效率，同时降低延迟和系统复杂度。
-
-                        
-
 
 ### 智能数据预取：基于机器学习的 IO 预测减少数据读写延迟。
 
 智能数据预取（Intelligent Data Prefetching）利用机器学习预测即将访问的I/O模式，提前将数据加载至缓存，从而减少读写延迟。字节跳动存储团队与清华大学联合发布的CDSBen是用于预测数据库存储系统性能测试的模型，覆盖了各种主流存储设备，包括 HDD、SSD 和 NVMe SSD，满足了不同场景下的基准测试需求。其广泛的适用性让用户能够全面评估数据库在不同存储设备上的性能表现。再比如，可以利用机器学习的技术与大数据技术结合分析抖音数据预测热度热点等等。
 
-
 ### 冷热数据分级：结合 SSD/NVMe 与 HDD 混合存储架构，成本降低 30% 同时保障性能。
 
 存储介质分层架构分级冷热数据，将 NVMe SSD、SATA SSD、HDD 等不同类型的存储设备进行混合部署，根据数据的访问频率与性能需求动态分配存储资源。高频访问的热数据存储在 NVMe SSD 中，利用其低延迟、高 IOPS 的特性满足实时读写需求；中频访问的温数据存储在 SATA SSD 或高效 HDD 中，衡性能与成本；低频访问的冷数据则存储在大容量 HDD 或磁带库中，降低长期存储成本。天翼云系统开发了数据自动迁移引擎，基于数据访问日志与预设的生命周期策略，将数据在不同介质之间自动迁移。例如，对于新写入的业务数据，首先存储在 NVMe SSD 中，随着访问频率的降低，逐步迁移至 SATA SSD 或 HDD 存储池。同时，针对 IO 密集型业务的临时数据（如数据库临时表、实时计算中间结果），系统提供单个的高性能存储分区，确保这类数据的快速读写不受其他业务影响。通过存储介质的精细化管理，系统在混合负荷场景下的整体 IO 性能提升超过 50%。
-
-
 
 ## 通信中间件：从MPI到跨架构互联
 
@@ -401,66 +383,38 @@ CXL（Compute Express Link）是一种高速串行协议，它允许在计算机
 ## 本节视频
 
 <html>
-<iframe src="https:&danmaku=0&t=30&autoplay=0" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+<iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=114786238992560&bvid=BV1Sr3YzXEQa&cid=30819877532&p=1&as_wide=1&high_quality=1&danmaku=0&t=30&autoplay=0" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
 </html>
 
 ## reference
-https://zh.wikipedia.org/wiki/Fortran#FORTRAN
 
-https://www.qast.com/pgroup/htm/about.htm 
-
-https://zh.wikipedia.org/wiki/OpenMP
-
-https://www.incredibuild.cn/blog/cuda-vs-opencl-gpu-bianchenggaiyongshenme
-
-https://zhuanlan.zhihu.com/p/697611565
-
-https://www.intel.com/content/www/us/en/developer/tools/oneapi/overview.html
-
-https://www.intel.cn/content/www/cn/zh/developer/articles/technical/oneapi-what-is-it.html
-
-https://www.hiascend.com/software/cann
-
-https://developer.huawei.com/home/forum/kunpeng/thread-02106154315995186024-1-1.html
-
-https://e.huawei.com/cn/news/ebg/2022/bisheng-c-upgrades-bisheng-compiler
-
-https://baike.baidu.com/item/%E6%AF%95%E6%98%87/53936900?fr=aladdin#reference-3
-
-https://developer.aliyun.com/article/1644057
-
-https://cloud.tencent.com/developer/article/2540075
-
-https://www.eecs.harvard.edu/~htk/publication/2019-mapl-tillet-kung-cox.pdf
-
-https://zhuanlan.zhihu.com/p/12890124532
-
-https://zhuanlan.zhihu.com/p/1895776568367894849
-
-https://ia800600.us.archive.org/5/items/ittushu-2470/%E6%B8%85%E5%8D%8E%E5%A4%A7%E5%AD%A6%E5%9B%BE%E4%B9%A6%E9%A6%86-%E6%88%98%E7%96%AB%E7%89%88/%E6%96%87%E6%B3%89sp1%E8%A1%A5%E4%B8%81/3207901_%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0_%E8%AF%AD%E9%9F%B3%E8%AF%86%E5%88%AB%E6%8A%80%E6%9C%AF%E5%AE%9E%E8%B7%B5_text.pdf
-
-https://zh.wikipedia.org/wiki/BLAS
-
-https://zh.wikipedia.org/wiki/LAPACK
-
-https://massedcompute.com/faq-answers/?question=How%20do%20cuSPARSE%20and%20SuiteSparse%20compare%20to%20other%20sparse%20linear%20algebra%20libraries%20such%20as%20MKL%20and%20PETSc?
-
-https://zhuanlan.zhihu.com/p/353918898
-
-https://zhuanlan.zhihu.com/p/625259682
-
-https://docs.sciml.ai/Overview/stable/overview/
-
-https://blog.csdn.net/weixin_54015549/article/details/130704776
-
-http://afsapply.ihep.ac.cn/cchelp/zh/local-cluster/storage/Lustre/
-
-https://blog.csdn.net/happy_king_zi/article/details/140865357
-
-https://cloud.tencent.com/developer/article/2501721
-
-https://blog.csdn.net/Long_xu/article/details/131317471
-
-https://www.bytezonex.com/archives/Uh18Kp6l.html
-
-https://www.ctyun.cn/developer/article/680317292572741
+- https://zh.wikipedia.org/wiki/Fortran#FORTRAN
+- https://www.qast.com/pgroup/htm/about.htm
+- https://zh.wikipedia.org/wiki/OpenMP
+- https://www.incredibuild.cn/blog/cuda-vs-opencl-gpu-bianchenggaiyongshenme
+- https://zhuanlan.zhihu.com/p/697611565
+- https://www.intel.com/content/www/us/en/developer/tools/oneapi/overview.html
+- https://www.intel.cn/content/www/cn/zh/developer/articles/technical/oneapi-what-is-it.html
+- https://www.hiascend.com/software/cann
+- https://developer.huawei.com/home/forum/kunpeng/thread-02106154315995186024-1-1.html
+- https://e.huawei.com/cn/news/ebg/2022/bisheng-c-upgrades-bisheng-compiler
+- https://baike.baidu.com/item/%E6%AF%95%E6%98%87/53936900?fr=aladdin#reference-3
+- https://developer.aliyun.com/article/1644057
+- https://cloud.tencent.com/developer/article/2540075
+- https://www.eecs.harvard.edu/~htk/publication/2019-mapl-tillet-kung-cox.pdf
+- https://zhuanlan.zhihu.com/p/12890124532
+- https://zhuanlan.zhihu.com/p/1895776568367894849
+- https://ia800600.us.archive.org/5/items/ittushu-2470/%E6%B8%85%E5%8D%8E%E5%A4%A7%E5%AD%A6%E5%9B%BE%E4%B9%A6%E9%A6%86-%E6%88%98%E7%96%AB%E7%89%88/%E6%96%87%E6%B3%89sp1%E8%A1%A5%E4%B8%81/3207901_%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0_%E8%AF%AD%E9%9F%B3%E8%AF%86%E5%88%AB%E6%8A%80%E6%9C%AF%E5%AE%9E%E8%B7%B5_text.pdf
+- https://zh.wikipedia.org/wiki/BLAS
+- https://zh.wikipedia.org/wiki/LAPACK
+- https://massedcompute.com/faq-answers/?question=How%20do%20cuSPARSE%20and%20SuiteSparse%20compare%20to%20other%20sparse%20linear%20algebra%20libraries%20such%20as%20MKL%20and%20PETSc?
+- https://zhuanlan.zhihu.com/p/353918898
+- https://zhuanlan.zhihu.com/p/625259682
+- https://docs.sciml.ai/Overview/stable/overview/
+- https://blog.csdn.net/weixin_54015549/article/details/130704776
+- http://afsapply.ihep.ac.cn/cchelp/zh/local-cluster/storage/Lustre/
+- https://blog.csdn.net/happy_king_zi/article/details/140865357
+- https://cloud.tencent.com/developer/article/2501721
+- https://blog.csdn.net/Long_xu/article/details/131317471
+- https://www.bytezonex.com/archives/Uh18Kp6l.html
+- https://www.ctyun.cn/developer/article/680317292572741
