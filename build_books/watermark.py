@@ -1,9 +1,9 @@
 import os
 from PIL import Image
 
-watermark_path = "/Users/a1-6/Workspaces/AIInfer/statics/watermark.png" # 水印图片的路径
-source_folder = "/Users/a1-6/Workspaces/AIInfer/01AICluster/01Roadmap/images" # 原始图片的文件夹
-output_folder = "/Users/a1-6/Workspaces/AIInfer/01AICluster/01Roadmap/images_src" # 输出图片的文件夹
+watermark_path = "/Users/a1-6/Workspaces/AIInfer/static/watermark.png" # 水印图片的路径
+source_folder = "/Users/a1-6/Workspaces/AIInfer/01AICluster/03SuperPod/images_src" # 原始图片的文件夹
+output_folder = "/Users/a1-6/Workspaces/AIInfer/01AICluster/03SuperPod/watermark" # 输出图片的文件夹
 
 
 def check_image(img_path):
@@ -74,5 +74,5 @@ for filename in os.listdir(source_folder): # 遍历原始图片的文件夹
 
             image_out.save(output_path, quality=100) # 保存输出文件
             print("\t Finished image:" + filename)
-        except:
-            print("\t >>>>>>>>>>> Cant deling with image:" + filename)
+        except Exception as e:
+            print(f"\t >>>>>>>>>>> Cannot deling with image: {filename} for reasion: {e}")
