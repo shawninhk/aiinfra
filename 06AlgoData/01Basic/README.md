@@ -18,6 +18,11 @@
 | Transformer 架构 | 06 Transformer 长序列架构 | [PPT](./06LongSeq.pdf), [视频](https://www.bilibili.com/video/BV16PN6z6ELg), [文章](./06LongSeq.md) |
 | Transformer 架构 | 07 大模型参数设置 | [PPT](./07Parameter.pdf), [视频](https://www.bilibili.com/video/BV1nTNkzjE3J), [文章](./07Parameter.md) |
 
+| 大纲 | 小节 | 链接 |
+|:--- |:---- |:-------------------- |
+| 代码实践 | 01 手把手实现 Sinusoidal 绝对位置编码 | [Markdown](./Practice01sinusoidal.md), [Jupyter](./Practice01sinusoidal.ipynb) |
+| 代码实践 | 03 手把手实现迷你版 Transformer | [Markdown](./Practice03Minitransformer.md), [Jupyter](./Practice03Minitransformer.ipynb) |
+
 ## 内容大纲
 
 ![](./images/00outline.png)
