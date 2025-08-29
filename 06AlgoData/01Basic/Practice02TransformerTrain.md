@@ -6,6 +6,8 @@ author by: ZOMI
 
 本实验将完全从零开始，手撕最简 Transformer 从零实现《Attention Is All You Need》架构。仅使用 PyTorch 张量操作，实现原始 Transformer 论文中的最简架构。通过这个"造轮子"的过程，我们将深入理解 Transformer 的数据流动和核心机制，为后续学习更复杂的大模型打下坚实基础。
 
+![](./images/Practice02TransformerTrain02.png)
+
 ## 1. 环境准备与导入
 
 首先，我们导入必要的库。注意，我们只使用 PyTorch 的基础张量操作，不依赖任何高级 Transformer 实现。
@@ -131,6 +133,8 @@ class PositionalEncoding(nn.Module):
 
 这是 Transformer 的核心机制，用于计算查询（Query）与键（Key）的相似度，并以此对值（Value）进行加权求和。
 
+![](./images/Practice02TransformerTrain01.png)
+
 **原理公式**：
 
 $$
@@ -245,6 +249,8 @@ class MultiHeadAttention(nn.Module):
 ### 2.5 前馈网络 (Feed Forward Network)
 
 每个注意力层后面都有一个前馈网络，由两个线性变换和一个ReLU激活函数组成。
+
+![](./images/Practice01MiniTranformer02.png)
 
 **原理公式**：
 
@@ -363,6 +369,8 @@ class EncoderLayer(nn.Module):
 ### 3.2 解码器层 (Decoder Layer)
 
 解码器层包含两个多头注意力机制（自注意力和编码器-解码器注意力）和一个前馈网络。
+
+![](./images/Practice02TransformerTrain03.png)
 
 ```python
 class DecoderLayer(nn.Module):

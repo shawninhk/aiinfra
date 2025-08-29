@@ -4,7 +4,7 @@
 
 Author by: lwh & ZOMI
 
-## Sinusoidal 绝对位置编码原理
+## 1. Sinusoidal 绝对位置编码原理
 
 在 Transformer 模型中，由于缺乏循环结构或卷积结构，模型本身不具备处理序列中位置信息的能力。为了解决这一问题，论文《Attention is All You Need》中引入了 Sinusoidal（正弦函数）位置编码，它将序列中每个位置编码成一个具有特定模式的向量，并加到输入的词向量中，从而注入位置信息。  
 
@@ -14,6 +14,8 @@ Sinusoidal 绝对位置编码具有以下几个特点：
 - 每个位置使用一组不同频率的正余弦函数；
 - 不同位置之间的编码具有良好的相对位置可区分性；
 - 编码具有一定的平移不变性，便于模型学习相对位置信息。
+
+![](./images/Practice04Sinusoidal01.png)
 
 给定一个位置 `pos` 和一个维度索引 `i`，位置编码向量中第 `i` 个维度的值由如下公式给出：
 
@@ -32,7 +34,7 @@ $$
 - $d_{\text{model}}$：表示位置编码的维度大小；
 - $PE_{(pos, k)}$：表示位置 $pos$ 在第 $k$ 维的编码值。
 
-## Sinusoidal 绝对位置编码实现
+## 2. Sinusoidal 绝对位置编码实现
 
 下面我们来实现一种非常经典的位置编码方式：正余弦位置编码（Sinusoidal Positional Encoding），它被广泛应用于 Transformer 模型中，为没有时序感知能力的结构显式引入位置信息。
 
@@ -81,7 +83,7 @@ def sinusoidal_pos_encoding(seq_len: int, d_model: int) -> torch.Tensor:
 
 在代码的主程序部分，调用 `sinusoidal_pos_encoding(seq_len=3, d_model=4)` 来生成一个长度为 3，每个位置编码为 4 维的正弦位置编码矩阵，并将其保存在变量 pe 中。
 
-## Sinusoidal 结果输出
+## 3. Sinusoidal 结果输出
 
 接着通过 `print()` 语句输出编码结果，方便观察每个位置对应的编码值。打印信息前后分别加上“开始输出”和“结束”标记，用于清晰地划分输出区域，下面是代码部分:
 

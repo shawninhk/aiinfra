@@ -6,7 +6,9 @@ author by: ZOMI
 
 在大型语言模型的训练和应用中，分词是一个至关重要的预处理步骤。BPE（Byte Pair Encoding，字节对编码）作为目前主流的分词算法之一，被广泛应用于 GPT、BERT 等模型中。本文将带你从零开始实现一个支持中英文的 BPE 分词器，帮助你深入理解其工作原理。
 
-## 什么是 BPE
+![](./images/Practice06Embedding01.png)
+
+## 1. 什么是 BPE
 
 BPE 是一种 subword 分词算法，它的核心思想是：
 
@@ -17,7 +19,9 @@ BPE 是一种 subword 分词算法，它的核心思想是：
 
 这种方法特别适合处理多语言场景，包括中文和英文的混合文本。
 
-## 准备工作
+![](./images/Practice05BPE01.png)
+
+## 2. 文本处理
 
 首先，我们需要导入必要的库，主要是正则表达式和一些数据结构工具：
 
@@ -26,8 +30,6 @@ BPE 是一种 subword 分词算法，它的核心思想是：
 import re
 from collections import defaultdict, Counter
 ```
-
-## 实现 BPE 类框架
 
 下面将创建一个 BPE 类，包含初始化、预处理、训练和分词等核心方法：
 
@@ -49,10 +51,9 @@ class BPE:
 - `merges`：记录所有合并操作的历史，用于后续分词
 - `pattern`：正则表达式用于文本预处理
 
-## 4. 文本预处理
+### 2.1 文本预处理
 
 BPE需要将原始文本转换为适合处理的形式。对于中英文混合文本，我们需要不同的处理策略：
-
 
 ```python
 def preprocess(self, text):
@@ -88,10 +89,9 @@ def preprocess(self, text):
 
 `我 爱 P y t h o n  </w>编 程 ！`
 
-## 5. 辅助方法：提取字符对
+### 2.2 提取字符对
 
 BPE的核心是合并频繁出现的字符对，我们需要一个方法来提取词内部的所有相邻字符对：
-
 
 ```python
 def get_pairs(self, word):
@@ -110,7 +110,34 @@ def get_pairs(self, word):
 
 `('P', 'y'), ('y', 't'), ('t', 'h'), ('h', 'o'), ('o', 'n'), ('n', '</w>')`
 
-## 6. 训练BPE模型
+### 2.3 合并字符对
+
+下面实现`_merge_pair`方法，用于在整个词表中合并指定的字符对：
+
+
+```python
+def _merge_pair(self, word_counts, pair, new_entry):
+    """将词表中的指定字符对合并为新的条目"""
+    
+    merged_word_counts = defaultdict(int)
+    bigram = re.escape(' '.join(pair))
+    
+    # 确保只匹配整个词中的这对字符
+    pattern = re.compile(r'(?<!\S)' + bigram + r'(?!\S)')
+    
+    for word, count in word_counts.items():
+        # 替换所有出现的字符对
+        merged_word = pattern.sub(new_entry, word)
+        merged_word_counts[merged_word] += count
+    
+    return merged_word_counts
+```
+
+这个方法使用正则表达式在所有词中找到并替换目标字符对，确保合并操作在整个词汇表中生效。
+
+## 3 实现 BPE 模型
+
+### 3.1 训练 BPE 模型
 
 训练过程是BPE的核心，通过迭代合并最频繁的字符对来构建词汇表：
 
@@ -141,6 +168,8 @@ def train(self, corpus):
 1. 预处理整个语料库
 2. 统计每个预处理后的"词"的出现次数
 3. 初始化词汇表，包含所有出现的单个字符
+
+![](./images/Practice05BPE02.png)
 
 接下来是迭代合并过程：
 
@@ -186,32 +215,7 @@ def train(self, corpus):
 4. 更新词汇表和词频统计
 5. 重复指定次数或直到没有可合并的字符对
 
-## 7. 合并字符对的辅助方法
-
-下面实现`_merge_pair`方法，用于在整个词表中合并指定的字符对：
-
-
-```python
-def _merge_pair(self, word_counts, pair, new_entry):
-    """将词表中的指定字符对合并为新的条目"""
-    
-    merged_word_counts = defaultdict(int)
-    bigram = re.escape(' '.join(pair))
-    
-    # 确保只匹配整个词中的这对字符
-    pattern = re.compile(r'(?<!\S)' + bigram + r'(?!\S)')
-    
-    for word, count in word_counts.items():
-        # 替换所有出现的字符对
-        merged_word = pattern.sub(new_entry, word)
-        merged_word_counts[merged_word] += count
-    
-    return merged_word_counts
-```
-
-这个方法使用正则表达式在所有词中找到并替换目标字符对，确保合并操作在整个词汇表中生效。
-
-## 8. 分词方法实现
+### 3.2 分词方法实现
 
 训练完成后，我们需要使用学到的合并规则对新文本进行分词：
 
@@ -311,8 +315,6 @@ for text in test_texts:
     print(f"分词数量: {len(tokens)}")
     print("-" * 50)
 ```
-
-## 10. 结果分析
 
 运行上述测试代码，我们会得到类似以下的输出：
 

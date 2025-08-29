@@ -10,6 +10,8 @@
 4. **分组查询注意力（GQA）**：MHA和MQA的折中方案，头分组共享K和V
 5. **多潜在注意力（MLA）**：使用可学习的潜在向量作为K和V，与序列长度无关
 
+![](./images/Practice07Attention01.png)
+
 ## 1. 注意力机制基础
 
 ### 1.1 Scaled Dot-Product Attention
@@ -73,6 +75,8 @@ def scaled_dot_product_attention(query, key, value, mask=None):
 
 标准的多头注意力将输入线性投影到 `h` 个不同的头中，在每个头上独立进行注意力计算，最后将结果拼接并投影回原维度。这样可以让模型共同关注来自不同位置的不同表示子空间的信息。
 
+![](./images/Practice02TransformerTrain01.png)
+
 **公式如下：**
 
 $$
@@ -134,13 +138,15 @@ class MultiHeadAttention(nn.Module):
         return output, attention_weights
 ```
 
-## 2. 注意力机制的变种
+## 2. 注意力机制变种
 
 标准 MHA 在推理时，`K` 和 `V` 的缓存会占用大量显存（`batch_size * num_heads * seq_len * d_head`）。为了解决这个问题，研究者提出了以下变种。
 
 ### 2.1 Multi-Query Attention (MQA)
 
 核心思想是所有头**共享**同一套 `K` 和 `V` 投影。这显著减少了 `K` 和 `V` 的缓存大小。最早在 **《Fast Transformer Decoding: One Write-Head is All You Need》** 中提出。在 **PaLM**、**T5** 等模型中广泛应用。
+
+![](./images/Practice07Attention02.png)
 
 ```python
 class MultiQueryAttention(nn.Module):
@@ -200,6 +206,8 @@ class MultiQueryAttention(nn.Module):
 ### 2.2 Grouped-Query Attention (GQA)
 
 核心思想是 MHA 和 MQA 的折中方案。将头分成 `g` 组，组内共享同一套 `K` 和 `V` 投影。当 `g=1` 时，GQA 退化为 MQA；当 `g=h` 时，GQA 就是 MHA。
+
+![](./images/Practice07Attention03.png)
 
 论文引用自《GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints》** (Google, 2023)，**LLaMA-2**、**Falcon**、**QWEN 系列** 等最新模型采用。
 
@@ -274,6 +282,9 @@ class GroupedQueryAttention(nn.Module):
 ### 2.3 Multi-Latent Attention (MLA)
 
 核心思想是引入一组可学习的潜在向量（Latent Vector）作为 `K` 和 `V`，代替原始的 `K` 和 `V`。这极大地压缩了 `K` 和 `V` 的缓存，使其与序列长度无关。论文引用自 DeepSeek 的《MLA: Multi-Latent Attention for Large Language Models》** (2024)
+
+![](./images/Practice07Attention04.png)
+
 
 ```python
 class MultiLatentAttention(nn.Module):
@@ -410,7 +421,7 @@ Benchmarking with seq_len=1024, d_model=512, num_heads=8
         MultiLatentAttention: Time =  0.35 ms, Params =  657920
 ```
 
-## 总结与思考
+## 4. 总结与思考
 
 这四种注意力机制的核心差异在于如何处理K和V Cache的投影，选择哪种注意力机制取决于具体应用场景：追求极致性能且资源充足时选MHA；需要高效推理时选MQA或GQA；处理极长序列时MLA是更好的选择。
 

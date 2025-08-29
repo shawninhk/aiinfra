@@ -20,6 +20,8 @@ Transformer 是一种基于 自注意力机制（Self-Attention）的深度学�
 4. 残差连接 + 层归一化（Residual + LayerNorm）：为了解决深层网络中梯度消失和训练不稳定的问题，在注意力层和前馈网络后分别添加残差连接与 LayerNorm，增强模型表达能力。
 5. 前馈网络（Feed-Forward Network）：对每个位置的表示分别通过两层全连接网络，进一步提取特征并引入非线性表达。
 
+![](./images/Practice01MiniTranformer01.png)
+
 最终，编码器的每个模块都以“子层 → 残差连接 → 层归一化”的方式组成结构块，构成了一个可堆叠的 Transformer 编码器框架。
 
 ## Transformer 编码实现
@@ -88,6 +90,8 @@ def scaled_dot_product_attention(q, k, v):
 - 注意力层（Self-Attention）：使用缩放点积注意力机制提取全局上下文信息；
 - 前馈网络（Feedforward）：对每个位置的表示进行非线性变换；
 - 层归一化（LayerNorm）：分别应用在注意力子层和前馈子层之后，配合残差连接使用，有助于训练稳定。
+
+![](./images/Practice01MiniTranformer02.png)
 
 此外，为每个位置添加了固定的 正余弦位置编码（Positional Encoding），使模型可以识别 token 的先后顺序。
 

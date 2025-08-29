@@ -6,6 +6,8 @@ Author by：ZOMI
 
 在Transformer模型中，Embedding（嵌入）机制是将离散的文本符号转换为连续的向量表示的关键步骤。除了词嵌入本身，位置信息的编码也至关重要，这是因为Transformer模型本身不具备对序列顺序的感知能力。
 
+![](./images/Practice06Embedding01.png)
+
 本文将实现Transformer中的核心嵌入机制，包括三种主流的位置编码方式：
 
 - APE（Absolute Position Embedding，绝对位置嵌入）
@@ -27,7 +29,7 @@ import re
 from collections import defaultdict, Counter
 ```
 
-## 2. 实现支持中英文的分词器
+## 2. 实现中英文分词器
 
 在进行嵌入之前，需要一个支持中英文的分词器。这里基于之前实现的BPE算法：
 
@@ -240,7 +242,7 @@ class WordEmbedding(nn.Module):
 2. 这些向量是可学习的参数，在训练过程中不断优化
 3. 通常会对嵌入向量进行缩放（乘以嵌入维度的平方根），这是Transformer原论文中的做法
 
-## 4. 绝对位置嵌入（APE）
+### 3.1 绝对位置嵌入（APE）
 
 绝对位置嵌入是Transformer原论文中使用的位置编码方式，直接将位置信息编码为固定或可学习的向量：
 
@@ -296,7 +298,7 @@ class AbsolutePositionEmbedding(nn.Module):
 - 固定的正弦余弦编码具有更好的外推性，能处理比训练时更长的序列
 - 实现简单，直接将位置嵌入与词嵌入相加
 
-## 5. 相对位置嵌入（RPE）
+### 3.2. 相对位置嵌入（RPE）
 
 相对位置嵌入考虑的是 tokens 之间的相对距离，而不是绝对位置。这在许多场景下更符合直觉：
 
@@ -348,9 +350,11 @@ class RelativePositionEmbedding(nn.Module):
 - 更符合语言的特性，因为词语间的关系更多取决于它们的相对位置
 - 通常作为注意力分数的偏置项使用，而不是直接与词嵌入相加
 
-## 6. 旋转位置嵌入（RoPE）
+### 3.3 旋转位置嵌入（RoPE）
 
 旋转位置嵌入（RoPE）是一种较新的位置编码方式，通过旋转操作将位置信息融入到词向量中，在许多大模型中表现出色：
+
+![](./images/Practice06Embedding02.png)
 
 ```python
 class RotaryPositionEmbedding(nn.Module):
@@ -413,7 +417,7 @@ RoPE的核心原理：
 - 满足旋转不变性，即相对位置编码只与相对距离有关
 - 在长文本处理上表现优异，已被应用于LLaMA、GPT-NeoX等模型
 
-## 7. 完整的嵌入层实现
+## 4. 完整 Embedding 实现
 
 现在将词嵌入和三种位置嵌入组合起来，形成完整的嵌入模块：
 
@@ -477,7 +481,7 @@ class TransformerEmbedding(nn.Module):
 - 根据配置自动选择位置编码类型
 - 处理了不同位置编码的输出差异（有些返回嵌入，有些返回注意力偏置）
 
-## 8. 测试 Embedding
+## 5. 测试 Embedding
 
 让用中英文文本测试实现的Embedding：
 
@@ -557,8 +561,6 @@ rope_output, _ = rope_embedding(input_ids)
 print(f"RoPE输出形状: {rope_output.shape}")  # 应为 [2, 20, 128]
 ```
 
-## 9. 结果分析
-
 运行上述测试代码，会得到类似以下的输出：
 
 ```
@@ -581,7 +583,7 @@ RoPE输出形状: torch.Size([2, 20, 128])
 
 结果表明BPE分词器成功训练并构建了包含500个token的词汇表，三种位置嵌入机制都能正常工作，并输出预期形状的张量。APE和RoPE直接修改词嵌入向量，而RPE则生成额外的注意力偏置。
 
-## 10. 位置编码对比
+## 6. 总结与思考
 
 | 位置编码类型 | 优点 | 缺点 | 适用场景 |
 |------------|------|------|---------|
