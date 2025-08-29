@@ -23,9 +23,7 @@
 | Transformer 架构 | 05 Attention 变种算法 | [PPT](./01Basic/05GQAMLA.pdf), [视频](https://www.bilibili.com/video/BV1GzMUz8Eav), [文章](./01Basic/05GQAMLA.md) |
 | Transformer 架构 | 06 Transformer 长序列架构 | [PPT](./01Basic/06LongSeq.pdf), [视频](https://www.bilibili.com/video/BV16PN6z6ELg), [文章](./01Basic/06LongSeq.md) |
 | Transformer 架构 | 07 大模型参数设置 | [PPT](./01Basic/07Parameter.pdf), [视频](https://www.bilibili.com/video/BV1nTNkzjE3J), [文章](./01Basic/07Parameter.md) |
-
-| 大纲 | 小节 | 链接 |
-|:--- |:---- |:-------------------- |
+|---|----|--------------------|
 | 代码实践 | 01 搭建迷你 Transformer | [Markdown](./01Basic/Practice01MiniTranformer.md), [Jupyter](./01Basic/Practice01MiniTranformer.ipynb) |
 | 代码实践 | 02 从零实现 Transformer 训练 | [Markdown](./01Basic/Practice02TransformerTrain.md), [Jupyter](./01Basic/Practice02TransformerTrain.ipynb) |
 | 代码实践 | 03 实战 Transformer 机器翻译 | [Markdown](./01Basic/Practice03MachineTrans.md), [Jupyter](./01Basic/Practice03MachineTrans.ipynb) |
