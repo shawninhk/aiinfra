@@ -22,8 +22,11 @@ MoE（Mixture of Experts）架构，即专家混合架构，是一种通过多�
 | 大模型遇 MOE | 10 MoE 参数与专家  | [PPT](./10MOELLM.pdf), [视频](https://www.bilibili.com/video/BV1UERNYqEwU/) |
 | 手撕 MOE 代码 | 11 单机单卡 MoE  | [PPT](./11MOECode.pdf), [视频](https://www.bilibili.com/video/BV1UTRYYUE5o) |
 | 手撕 MOE 代码 | 12 单机多卡 MoE  | [PPT](./11MOECode.pdf), [视频](https://www.bilibili.com/video/BV1JaR5YSEMN) |
-| 手撕 MOE 代码 | 13 MoE 性能分析  | PPT, 视频 |
-| 视觉 MoE | 14 视觉 MoE 模型  | [PPT](./12MOEFuture.pdf), [视频](https://www.bilibili.com/video/BV1JNQVYBEq7) |
+| 视觉 MoE | 13 视觉 MoE 模型  | [PPT](./12MOEFuture.pdf), [视频](https://www.bilibili.com/video/BV1JNQVYBEq7) |
+|:sparkling_heart:|:star2:|:sparkling_heart:|
+| MOE 实践 | 01 手撕 MoE 单机版 | [Markdown](./Practice01SignalMOE.md), [Jupyter](./Practice01SignalMOE.ipynb) |
+| MOE 实践 | 01 手撕 MoE 单机八卡 | [Markdown](./Practice02IntrtaMOE.md), [Jupyter](./Practice02IntrtaMOE.ipynb) |
+
 
 ## 备注
 
