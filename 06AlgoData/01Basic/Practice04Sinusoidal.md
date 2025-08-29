@@ -1,8 +1,8 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# 手把手实现 Sinusoidal 绝对位置编码
+# 手把手实现核心机制 Sinusoidal 编码(DONE)
 
-Author by: lwh
+Author by: lwh & ZOMI
 
 ## Sinusoidal 绝对位置编码原理
 
@@ -99,9 +99,6 @@ print("=== 结束 ===")
             [ 0.9093, -0.4161,  0.0200,  0.9998]])
     === 结束 ===
 
-
 运行该脚本后，程序首先输出提示信息，表明 `sinusoidal_test.py` 已开始执行。
 
 随后，函数 `sinusoidal_pos_encoding(seq_len=3, d_model=4)` 返回了一个形状为 `(3, 4)` 的张量，其中每一行表示一个位置的编码，每一列对应一个特定频率下的正弦或余弦值。
-
-

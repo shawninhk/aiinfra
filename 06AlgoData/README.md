@@ -10,7 +10,29 @@
 
 ## 课程简介
 
-- [**01. Transformer 架构**](./01Basic/)：Transformer 作为自注意力机制的 AI 架构，广泛应用于 NLP 任务。摒弃了传统的循环神经网络（RNN）和卷积神经网络（CNN），完全依赖注意力机制来捕捉输入序列中的全局依赖关系。Transformer 由编码器和解码器组成，每层包含多头自注意力机制和前馈神经网络。本节重点打开自注意力机制通过计算序列中每个元素与其他元素的相关性，动态分配权重，从而捕捉长距离依赖。
+### 01. Transformer 架构
+
+[**01. Transformer 架构**](./01Basic/)：Transformer 作为自注意力机制的 AI 架构，广泛应用于 NLP 任务。摒弃了传统的循环神经网络（RNN）和卷积神经网络（CNN），完全依赖注意力机制来捕捉输入序列中的全局依赖关系。Transformer 由编码器和解码器组成，每层包含多头自注意力机制和前馈神经网络。本节重点打开自注意力机制通过计算序列中每个元素与其他元素的相关性，动态分配权重，从而捕捉长距离依赖。
+
+| 大纲 | 小节 | 链接 |
+|:--- |:---- |:-------------------- |
+| Transformer 架构 | 01 Transformer 基础结构 | [PPT](./01Basic/01Transformer.pdf), [视频](https://www.bilibili.com/video/BV1rt421476q/), [文章](./01Basic/01Transformer.md) |
+| Transformer 架构 | 02 大模型 Tokenizer 算法 | [PPT](./01Basic/02Tokenizer.pdf), [视频](https://www.bilibili.com/video/BV16pTJz9EV4), [文章](./01Basic/02Tokenizer.md) |
+| Transformer 架构 | 03 大模型 Embedding 算法 | [PPT](./01Basic/03Embeding.pdf), [视频](https://www.bilibili.com/video/BV1SSTgzLEzf), [文章](./01Basic/03Embeding.md) |
+| Transformer 架构 | 04 Attention 注意力机制 | [PPT](./01Basic/04Attention.pdf), [视频](https://www.bilibili.com/video/BV11AMHzuEet), [文章](./01Basic/04Attention.md) |
+| Transformer 架构 | 05 Attention 变种算法 | [PPT](./01Basic/05GQAMLA.pdf), [视频](https://www.bilibili.com/video/BV1GzMUz8Eav), [文章](./01Basic/05GQAMLA.md) |
+| Transformer 架构 | 06 Transformer 长序列架构 | [PPT](./01Basic/06LongSeq.pdf), [视频](https://www.bilibili.com/video/BV16PN6z6ELg), [文章](./01Basic/06LongSeq.md) |
+| Transformer 架构 | 07 大模型参数设置 | [PPT](./01Basic/07Parameter.pdf), [视频](https://www.bilibili.com/video/BV1nTNkzjE3J), [文章](./01Basic/07Parameter.md) |
+
+| 大纲 | 小节 | 链接 |
+|:--- |:---- |:-------------------- |
+| 代码实践 | 01 搭建迷你 Transformer | [Markdown](./01Basic/Practice01MiniTranformer.md), [Jupyter](./01Basic/Practice01MiniTranformer.ipynb) |
+| 代码实践 | 02 从零实现 Transformer 训练 | [Markdown](./01Basic/Practice02TransformerTrain.md), [Jupyter](./01Basic/Practice02TransformerTrain.ipynb) |
+| 代码实践 | 03 实战 Transformer 机器翻译 | [Markdown](./01Basic/Practice03MachineTrans.md), [Jupyter](./01Basic/Practice03MachineTrans.ipynb) |
+| 代码实践 | 04 手把手实现核心机制 Sinusoidal 编码 | [Markdown](./01Basic/Practice04Sinusoidal.md), [Jupyter](./01Basic/Practice04Sinusoidal.ipynb) |
+| 代码实践 | 05 手把手实现核心机制 BPE 分词算法 | [Markdown](./01Basic/Practice05BPE.md), [Jupyter](.01Basic/Practice05BPE.ipynb) |
+| 代码实践 | 06 手把手实现核心机制 Embedding 词嵌入 | [Markdown](./01Basic/Practice06Embedding.md), [Jupyter](./01Basic/Practice06Embedding.ipynb) |
+| 代码实践 | 07 深入注意力机制 MHA、MQA、GQA、MLA | [Markdown](./01Basic/Practice07Attention.md), [Jupyter](./01Basic/Practice07Attention.ipynb) |
 
 - [**02. MoE 算法架构**](./02MoE/)：MoE（Mixture of Experts）架构，即专家混合架构，是一种通过多个专家模块并行处理不同子任务，由门控网络依据输入数据动态分配，决定各专家模块参与度，以实现更高效、灵活处理复杂任务，提升模型表现与泛化能力的技术。
 

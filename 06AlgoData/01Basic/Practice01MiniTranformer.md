@@ -1,8 +1,8 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# 手把手实现迷你版 Transformer 
+# 搭建迷你 Transformer(DONE)
 
-Author by: lwh
+Author by: lwh & ZOMI
 
 ## Transformer 知识原理
 
@@ -42,12 +42,12 @@ def sinusoidal_pos_encoding(seq_len: int, d_model: int) -> torch.Tensor:
         raise ValueError("d_model 必须为偶数")
 
     # 生成位置向量和维度向量
-    pos = torch.arange(0, seq_len).unsqueeze(1).float()        # shape: (seq_len, 1)
-    i = torch.arange(0, d_model // 2).float()                  # shape: (d_model/2,)
+    pos = torch.arange(0, seq_len).unsqueeze(1).float() # shape: (seq_len, 1)
+    i = torch.arange(0, d_model // 2).float() # shape: (d_model/2,)
 
     # 计算频率除数项
-    denom = torch.pow(10000, 2 * i / d_model)                  # shape: (d_model/2,)
-    angle = pos / denom                                        # shape: (seq_len, d_model/2)
+    denom = torch.pow(10000, 2 * i / d_model) # shape: (d_model/2,)
+    angle = pos / denom # shape: (seq_len, d_model/2)
 
     # 初始化编码矩阵
     pe = torch.zeros(seq_len, d_model)
@@ -61,7 +61,7 @@ def sinusoidal_pos_encoding(seq_len: int, d_model: int) -> torch.Tensor:
 
 这个函数返回一个 `(seq_len, d_model)` 的位置编码张量，用于为输入序列添加位置信息。该位置编码函数完成后，就可以进入 Transformer 的核心：注意力机制的实现。点积注意力机制，它会使用三个输入张量：
 
-- `q`（Query）：表示当前 token 想关注什么； 
+- `q`（Query）：表示当前 token 想关注什么；
 - `k`（Key）：表示序列中每个位置的“关键词”；
 - `v`（Value）：表示每个位置实际携带的信息。
 
@@ -167,4 +167,4 @@ print("=== 结束 ===")
     === 结束 ===
 
 
-至此，就完成了一个最小的 Transformer 编码器搭建。它结构清晰、功能完整，非常适合用作 Transformer 学习的入门代码框架。
+至此完成了一个最小的 Transformer 编码器搭建。它结构清晰、功能完整，非常适合用作 Transformer 学习的入门代码框架。

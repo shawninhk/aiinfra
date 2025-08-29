@@ -20,8 +20,13 @@
 
 | 大纲 | 小节 | 链接 |
 |:--- |:---- |:-------------------- |
-| 代码实践 | 01 手把手实现 Sinusoidal 绝对位置编码 | [Markdown](./Practice01sinusoidal.md), [Jupyter](./Practice01sinusoidal.ipynb) |
-| 代码实践 | 03 手把手实现迷你版 Transformer | [Markdown](./Practice03Minitransformer.md), [Jupyter](./Practice03Minitransformer.ipynb) |
+| 代码实践 | 01 搭建迷你 Transformer | [Markdown](./Practice01MiniTranformer.md), [Jupyter](./Practice01MiniTranformer.ipynb) |
+| 代码实践 | 02 从零实现 Transformer 训练 | [Markdown](./Practice02TransformerTrain.md), [Jupyter](./Practice02TransformerTrain.ipynb) |
+| 代码实践 | 03 实战 Transformer 机器翻译 | [Markdown](./Practice03MachineTrans.md), [Jupyter](./Practice03MachineTrans.ipynb) |
+| 代码实践 | 04 手把手实现核心机制 Sinusoidal 编码 | [Markdown](./Practice04Sinusoidal.md), [Jupyter](./Practice04Sinusoidal.ipynb) |
+| 代码实践 | 05 手把手实现核心机制 BPE 分词算法 | [Markdown](./Practice05BPE.md), [Jupyter](./Practice05BPE.ipynb) |
+| 代码实践 | 06 手把手实现核心机制 Embedding 词嵌入 | [Markdown](./Practice06Embedding.md), [Jupyter](./Practice06Embedding.ipynb) |
+| 代码实践 | 07 深入注意力机制 MHA、MQA、GQA、MLA | [Markdown](./Practice07Attention.md), [Jupyter](./Practice07Attention.ipynb) |
 
 ## 内容大纲
 
