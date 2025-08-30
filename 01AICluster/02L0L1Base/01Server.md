@@ -88,7 +88,7 @@
 该 AI 服务器采用"4U 机架式"设计（高度约 17.78 cm），更大的内部空间用于容纳更多 GPU 与散热组件：
 
 - **核心硬件配置**：
-  - CPU：2 颗 AMD EPYC 900极4/9005 系列处理器，负责任务调度、数据预处理与 GPU 协同管理
+  - CPU：2 颗 AMD EPYC 900 极 4/9005 系列处理器，负责任务调度、数据预处理与 GPU 协同管理
   - GPU：8 张 NVIDIA HGX H100，基于 Hopper 架构，支持 FP8 精度计算，单卡 FP8 算力达 200 PFlops，8 张总算力 1.6 PFlops
   - GPU 互联：通过 NVIDIA NVLink 与 NVSwitch 实现 GPU 间高速通信，总带宽 900 GB/s
   - 内存与存储：12 通道 DDR5 RDIMM（最大 1.5 TB），8×2.5 英寸 Gen5 NVMe 热插拔硬盘（单盘速率 7.4 GB/s）
@@ -111,7 +111,7 @@ NV GPU 型 AI 服务器的物理结构以"最大化 GPU 性能"为核心，各�
 
 #### 逻辑结构
 
-逻辑结构体现了"CPU-GPU-DPU"的数据流关系：CPU 通过 PCIe Switch 将训练任务分配给 GPU，GPU 间通过 NVLink 同步参数，DP极U 负责节点极间通信与网络任务卸载。文档明确其核心支持能力包括 NVIDIA HGX H100 8-GPU、双 AMD EPYC 处理器、12 通道 DDR5 内存、8×NVMe 硬盘及冗余电源设计。
+逻辑结构体现了"CPU-GPU-DPU"的数据流关系：CPU 通过 PCIe Switch 将训练任务分配给 GPU，GPU 间通过 NVLink 同步参数，DP 极 U 负责节点极间通信与网络任务卸载。文档明确其核心支持能力包括 NVIDIA HGX H100 8-GPU、双 AMD EPYC 处理器、12 通道 DDR5 内存、8×NVMe 硬盘及冗余电源设计。
 
 ### Ascend NPU 型 AI 服务器
 
@@ -139,7 +139,7 @@ Ascend NPU 型 AI 服务器的物理结构适配鲲鹏、昇腾芯片特性，�
 | 11   | 电源模块         | 2+1 冗余 2000W 电源（80 PLUS Platinum 认证），总功率满足高功耗需求 |
 | 13   | Riser 模组       | 扩展 PCIe 插槽，支持外接 NVMe 阵列卡、高速网卡，保障信号稳定性 |
 | 15   | CPU 主板         | 承载 4 路鲲鹏 920，集成 Hydra mesh 互联芯片，支持 DDR4 ECC 内存 |
-| 16极 | CPU 风冷散热器   | 采用多热管+大面积鳍片设计，快速散热，确保 CPU 稳定运行 |
+| 16 极 | CPU 风冷散热器   | 采用多热管+大面积鳍片设计，快速散热，确保 CPU 稳定运行 |
 | 17   | DIMM（内存）     | DDR4 RDIMM 速率 3200 MT/s，最大 2 TB 容量，缓存模型参数与输入数据 |
 
 ### 超节点扩展

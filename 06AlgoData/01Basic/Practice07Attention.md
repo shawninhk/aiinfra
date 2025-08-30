@@ -5,10 +5,10 @@
 本实验将从头实现标准的多头注意力（MHA），并在此基础上，逐步实现其三种重要的变体：**MQA**、**GQA** 和 **MLA**。通过对比它们的代码差异和性能指标，我们将深入理解它们的设计动机和优劣。
 
 1. **基础缩放点积注意力**：所有注意力机制的基础组件
-2. **多头注意力（MHA）**：经典的多头设计，每个头有独立的Q、K、V投影
-3. **多查询注意力（MQA）**：所有头共享K和V投影，提高效率
-4. **分组查询注意力（GQA）**：MHA和MQA的折中方案，头分组共享K和V
-5. **多潜在注意力（MLA）**：使用可学习的潜在向量作为K和V，与序列长度无关
+2. **多头注意力（MHA）**：经典的多头设计，每个头有独立的 Q、K、V 投影
+3. **多查询注意力（MQA）**：所有头共享 K 和 V 投影，提高效率
+4. **分组查询注意力（GQA）**：MHA 和 MQA 的折中方案，头分组共享 K 和 V
+5. **多潜在注意力（MLA）**：使用可学习的潜在向量作为 K 和 V，与序列长度无关
 
 ![](./images/Practice07Attention01.png)
 
@@ -59,7 +59,7 @@ def scaled_dot_product_attention(query, key, value, mask=None):
     
     # 3. 可选：应用掩码（在解码器中用于掩盖未来位置）
     if mask is not None:
-        # 将掩码中为0的位置置为一个非常大的负数，softmax后概率为0
+        # 将掩码中为 0 的位置置为一个非常大的负数，softmax 后概率为 0
         scaled_attention_logits += (mask * -1e9)
     
     # 4. 计算注意力权重 (softmax on the last axis, seq_len_k)
@@ -316,7 +316,7 @@ class MultiLatentAttention(nn.Module):
     def forward(self, q, k, v, mask=None):
         batch_size = q.size(0)
         
-        # 1. 对原始输入进行投影（可选，有时MLA直接作用于原始输入）
+        # 1. 对原始输入进行投影（可选，有时 MLA 直接作用于原始输入）
         q = self.wq(q)
         # 注意：这里我们不再使用输入的 k, v，而是使用可学习的潜在向量
         
@@ -368,7 +368,7 @@ def benchmark_attention(attention_class, config, seq_len, batch_size=2, device='
     # 创建随机输入
     x = torch.randn(batch_size, seq_len, d_model).to(device)
     
-    # 清空GPU缓存
+    # 清空 GPU 缓存
     torch.cuda.empty_cache()
     
     # 预热
@@ -423,19 +423,19 @@ Benchmarking with seq_len=1024, d_model=512, num_heads=8
 
 ## 4. 总结与思考
 
-这四种注意力机制的核心差异在于如何处理K和V Cache的投影，选择哪种注意力机制取决于具体应用场景：追求极致性能且资源充足时选MHA；需要高效推理时选MQA或GQA；处理极长序列时MLA是更好的选择。
+这四种注意力机制的核心差异在于如何处理 K 和 V Cache 的投影，选择哪种注意力机制取决于具体应用场景：追求极致性能且资源充足时选 MHA；需要高效推理时选 MQA 或 GQA；处理极长序列时 MLA 是更好的选择。
 
-| 机制 | K/V处理方式 | 主要优势 | 主要劣势 |
+| 机制 | K/V 处理方式 | 主要优势 | 主要劣势 |
 |------|------------|---------|---------|
 | MHA | 每个头独立 | 表达能力最强 | 参数多，计算慢，内存占用大 |
 | MQA | 所有头共享 | 速度快，参数少，内存占用小 | 可能损失一些表达能力 |
 | GQA | 分组共享 | 平衡性能和效率 | 需要调整分组超参数 |
 | MLA | 潜在向量替代 | 内存占用与序列长度无关 | 可能丢失序列细节信息 |
 
-参数数量上，MHA参数最多（约100万），因为每个头都有独立的Q、K、V投影；MQA参数最少（约53万），因为所有头共享K和V投影；GQA参数介于两者之间（约79万），取决于分组数量；MLA参数较少（约66万），因为使用固定数量的潜在向量。
+参数数量上，MHA 参数最多（约 100 万），因为每个头都有独立的 Q、K、V 投影；MQA 参数最少（约 53 万），因为所有头共享 K 和 V 投影；GQA 参数介于两者之间（约 79 万），取决于分组数量；MLA 参数较少（约 66 万），因为使用固定数量的潜在向量。
 
-计算速度上，MQA最快，因为共享K和V减少了计算量；MHA最慢，因为计算量最大；GQA速度介于MHA和MQA之间；MLA速度接近MQA，因为其计算量与序列长度无关。
+计算速度上，MQA 最快，因为共享 K 和 V 减少了计算量；MHA 最慢，因为计算量最大；GQA 速度介于 MHA 和 MQA 之间；MLA 速度接近 MQA，因为其计算量与序列长度无关。
 
-内存效率上，MLA在长序列上优势明显，因为其K/V缓存大小固定，与序列长度无关；MQA的K/V缓存大小仅为MHA的1/num_heads；GQA的K/V缓存大小为MHA的num_groups/num_heads。
+内存效率上，MLA 在长序列上优势明显，因为其 K/V 缓存大小固定，与序列长度无关；MQA 的 K/V 缓存大小仅为 MHA 的 1/num_heads；GQA 的 K/V 缓存大小为 MHA 的 num_groups/num_heads。
 
 通过本实验，我们不仅实现了这些机制，更重要的是通过代码理解了其设计动机和内在联系。你可以尝试调整 `d_model`, `num_heads`, `seq_len` 等参数，更深入地观察它们在不同场景下的表现。

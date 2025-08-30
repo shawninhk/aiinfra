@@ -24,9 +24,10 @@ MoE（Mixture of Experts）架构，即专家混合架构，是一种通过多�
 | 手撕 MOE 代码 | 12 单机多卡 MoE  | [PPT](./11MOECode.pdf), [视频](https://www.bilibili.com/video/BV1JaR5YSEMN) |
 | 视觉 MoE | 13 视觉 MoE 模型  | [PPT](./12MOEFuture.pdf), [视频](https://www.bilibili.com/video/BV1JNQVYBEq7) |
 |:sparkling_heart:|:star2:|:sparkling_heart:|
-| MOE 实践 | 01 手撕 MoE 单机版 | [Markdown](./Practice01SignalMOE.md), [Jupyter](./Practice01SignalMOE.ipynb) |
-| MOE 实践 | 01 手撕 MoE 单机八卡 | [Markdown](./Practice02IntrtaMOE.md), [Jupyter](./Practice02IntrtaMOE.ipynb) |
-
+| MOE 实践 :computer: | 01 基于 Huggingface 实现 MOE 推理任务 | [Markdown](./Practice01MOEInfer.md), [Jupyter](./Practice01MOEInfer.ipynb) |
+| MOE 实践 :computer: | 02 从零开始手撕 MoE | [Markdown](./Practice02SignalMOE.md), [Jupyter](./Practice02SignalMOE.ipynb) |
+| MOE 实践 :computer: | 03 MoE 从原理到分布式实现 | [Markdown](./Practice03IntrtaMOE.md), [Jupyter](./Practice03IntrtaMOE.ipynb) |
+| MOE 实践 :computer: | 04 MoE 分布式性能分析 | [Markdown](./Practice04MOEAnalysize.md), [Jupyter](./Practice04MOEAnalysize.ipynb) |
 
 ## 备注
 

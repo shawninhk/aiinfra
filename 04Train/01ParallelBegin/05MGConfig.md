@@ -28,9 +28,9 @@ Intra Node 指将通信更多放在机内，对带宽要求比较高；Inter Nod
 
 $$world\_size = tp * cp * dp * pp = etp * ep * edp * pp$$
 
-若为**稠密模型**，将选用前者建立通信域；若为 **MoE 模型**，可在 ATTN 部分选用前者建立通信域，在 MLP 部分选用后者。这意味着，原本需要 CP8 x EP8 = 64卡，在这种设计下针对 MoE 模型仅需要8卡，这种设计也叫 **MoE Folding Parallel**. 因此将会引出两种 Rank Generator —— decoder_rank_generator, expert_decoder_rank_generator。
+若为**稠密模型**，将选用前者建立通信域；若为 **MoE 模型**，可在 ATTN 部分选用前者建立通信域，在 MLP 部分选用后者。这意味着，原本需要 CP8 x EP8 = 64 卡，在这种设计下针对 MoE 模型仅需要 8 卡，这种设计也叫 **MoE Folding Parallel**. 因此将会引出两种 Rank Generator —— decoder_rank_generator, expert_decoder_rank_generator。
 
-本节以双机16卡进行通信域建立的讲解例子，先给出并行策略并画出切分图示。
+本节以双机 16 卡进行通信域建立的讲解例子，先给出并行策略并画出切分图示。
 
 ### Dense 模型 TP4-PP2-DP2
 
@@ -66,7 +66,7 @@ $$global\_rank = tp\_rank  + dp\_rank * tp\_size + pp\_rank * tp\_size * dp\_siz
 
 $$dp\_group[dp\_group\_index] = tp\_rank + range(0, dp\_size) * tp\_size + pp\_rank * tp\_size * dp\_size\ \ (3)$$
 
-可以观察到式(1)是将式(2)中要求的**域 mask（对应 rank 置为0，对应 size 置为1）** 而导出的，而式(3)又是由式(1)与式(2)推导出来的。
+可以观察到式(1)是将式(2)中要求的**域 mask（对应 rank 置为 0，对应 size 置为 1）** 而导出的，而式(3)又是由式(1)与式(2)推导出来的。
 
 依据上述并行策略的具体推导例子：
 
@@ -204,7 +204,7 @@ ep_group[3] = 0 + range(0, 4) * 1 * 1 * 1 * 4 + 1 * 1 * 4 * 2 ==> [12, 13, 14, 1
 """
 ```
 
-以上述形式继续推导 edp 域，pp 域（etp为1，则会默认生成16个 groups）
+以上述形式继续推导 edp 域，pp 域（etp 为 1，则会默认生成 16 个 groups）
 
 ```python
 etp1 ==> etp_rank: [0]

@@ -69,7 +69,7 @@ class MultiHeadAttention(nn.Module):
     def forward(self, query, key, value, mask=None):
         nbatches = query.size(0)
         
-        # 线性投影并分成h个头
+        # 线性投影并分成 h 个头
         query = self.w_q(query).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
         key = self.w_k(key).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
         value = self.w_v(value).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
@@ -157,7 +157,7 @@ class Decoder(nn.Module):
         return self.norm(x)
 
 class Transformer(nn.Module):
-    """完整的Transformer模型"""
+    """完整的 Transformer 模型"""
     def __init__(self, encoder, decoder, src_embed, tgt_embed, generator):
         super(Transformer, self).__init__()
         self.encoder = encoder

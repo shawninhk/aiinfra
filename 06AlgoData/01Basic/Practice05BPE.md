@@ -46,20 +46,20 @@ class BPE:
 ```
 
 `__init__`方法初始化了一些关键参数：
-- `num_merges`：控制BPE的合并次数，直接影响词汇表大小
+- `num_merges`：控制 BPE 的合并次数，直接影响词汇表大小
 - `vocab`：存储最终的词汇表
 - `merges`：记录所有合并操作的历史，用于后续分词
 - `pattern`：正则表达式用于文本预处理
 
 ### 2.1 文本预处理
 
-BPE需要将原始文本转换为适合处理的形式。对于中英文混合文本，我们需要不同的处理策略：
+BPE 需要将原始文本转换为适合处理的形式。对于中英文混合文本，我们需要不同的处理策略：
 
 ```python
 def preprocess(self, text):
     """预处理文本，分离中英文和特殊字符"""
     
-    # 分割文本为tokens，保留中文、英文单词和特殊字符
+    # 分割文本为 tokens，保留中文、英文单词和特殊字符
     tokens = self.pattern.split(text)
     tokens = [t for t in tokens if t and t.strip() != '']
     
@@ -73,7 +73,7 @@ def preprocess(self, text):
             # 英文按字符分割，添加词尾标记，用空格连接
             processed.append(' '.join(list(token)) + ' </w>')
         else:  # 特殊字符
-            # 特殊字符直接作为一个token
+            # 特殊字符直接作为一个 token
             processed.append(token)
     
     return ' '.join(processed)
@@ -83,15 +83,15 @@ def preprocess(self, text):
 
 - 中文：按字符分割，因为每个汉字本身就是有意义的单位
 - 英文：按字母分割，并在词尾添加`</w>`标记，用于区分词边界
-- 特殊字符：如标点符号，直接作为独立token保留
+- 特殊字符：如标点符号，直接作为独立 token 保留
 
-例如，"我爱Python编程！"会被处理为：
+例如，"我爱 Python 编程！"会被处理为：
 
 `我 爱 P y t h o n  </w>编 程 ！`
 
 ### 2.2 提取字符对
 
-BPE的核心是合并频繁出现的字符对，我们需要一个方法来提取词内部的所有相邻字符对：
+BPE 的核心是合并频繁出现的字符对，我们需要一个方法来提取词内部的所有相邻字符对：
 
 ```python
 def get_pairs(self, word):
@@ -139,12 +139,12 @@ def _merge_pair(self, word_counts, pair, new_entry):
 
 ### 3.1 训练 BPE 模型
 
-训练过程是BPE的核心，通过迭代合并最频繁的字符对来构建词汇表：
+训练过程是 BPE 的核心，通过迭代合并最频繁的字符对来构建词汇表：
 
 
 ```python
 def train(self, corpus):
-    """训练BPE模型"""
+    """训练 BPE 模型"""
     
     # 预处理语料
     processed_corpus = [self.preprocess(text) for text in corpus]
@@ -204,7 +204,7 @@ def train(self, corpus):
         if (i + 1) % 10 == 0:
             print(f"完成第 {i + 1}/{self.num_merges} 次合并，当前词汇表大小: {len(self.vocab)}")
     
-    print(f"BPE训练完成，总合并次数: {len(self.merges)}，最终词汇表大小: {len(self.vocab)}")
+    print(f"BPE 训练完成，总合并次数: {len(self.merges)}，最终词汇表大小: {len(self.vocab)}")
 ```
 
 训练的核心循环：
@@ -222,9 +222,9 @@ def train(self, corpus):
 
 ```python
 def tokenize(self, text):
-    """使用训练好的BPE模型对文本进行分词"""
+    """使用训练好的 BPE 模型对文本进行分词"""
     if not self.merges:
-        raise ValueError("BPE模型尚未训练，请先调用train方法")
+        raise ValueError("BPE 模型尚未训练，请先调用 train 方法")
     
     # 预处理文本
     processed = self.preprocess(text)
@@ -233,7 +233,7 @@ def tokenize(self, text):
     # 对每个词应用合并规则
     tokens = []
     for word in words:
-        if len(word) == 1:  # 单个字符直接作为token
+        if len(word) == 1:  # 单个字符直接作为 token
             tokens.append(word)
             continue
         
@@ -263,25 +263,25 @@ def tokenize(self, text):
 3. 合并所有可能的字符对，形成最终的子词序列
 4. 清理结果，移除词尾标记中的空格
 
-## 9. 测试BPE分词器
+## 9. 测试 BPE 分词器
 
-现在我们来测试实现的BPE分词器，使用中英文混合语料：
+现在我们来测试实现的 BPE 分词器，使用中英文混合语料：
 
 
 ```python
 # 准备训练语料
 corpus = [
     "自然语言处理是人工智能的一个重要分支。",
-    "BPE是一种常用的分词算法，广泛应用于NLP领域。",
-    "Python是一种简单易学的编程语言，非常适合快速开发。",
+    "BPE 是一种常用的分词算法，广泛应用于 NLP 领域。",
+    "Python 是一种简单易学的编程语言，非常适合快速开发。",
     "Machine learning is a subset of artificial intelligence.",
     "Byte Pair Encoding is widely used in large language models.",
     "Natural language processing enables computers to understand human language.",
-    "我爱自然语言处理，也喜欢Python编程。",
+    "我爱自然语言处理，也喜欢 Python 编程。",
     "The quick brown fox jumps over the lazy dog."
 ]
 
-# 创建并训练BPE模型
+# 创建并训练 BPE 模型
 bpe = BPE(num_merges=50)
 bpe.train(corpus)
 ```
@@ -294,7 +294,7 @@ bpe.train(corpus)
 完成第 30/50 次合并，当前词汇表大小: 358
 完成第 40/50 次合并，当前词汇表大小: 448
 完成第 50/50 次合并，当前词汇表大小: 538
-BPE训练完成，总合并次数: 50，最终词汇表大小: 538
+BPE 训练完成，总合并次数: 50，最终词汇表大小: 538
 ```
 
 接下来测试分词效果：
@@ -305,7 +305,7 @@ BPE训练完成，总合并次数: 50，最终词汇表大小: 538
 test_texts = [
     "自然语言处理很有趣！",
     "I love Python and natural language processing.",
-    "BPE算法能够有效处理中英文混合文本。"
+    "BPE 算法能够有效处理中英文混合文本。"
 ]
 
 for text in test_texts:
@@ -327,7 +327,7 @@ for text in test_texts:
 分词结果: ['I</w>', 'l', 'o', 'v', 'e</w>', 'P', 'y', 't', 'h', 'o', 'n</w>', 'a', 'n', 'd</w>', 'n', 'a', 't', 'u', 'r', 'a', 'l</w>', 'l', 'a', 'n', 'g', 'u', 'a', 'g', 'e</w>', 'p', 'r', 'o', 'c', 'e', 's', 's', 'i', 'n', 'g', '.</w>']
 分词数量: 40
 --------------------------------------------------
-原始文本: BPE算法能够有效处理中英文混合文本。
+原始文本: BPE 算法能够有效处理中英文混合文本。
 分词结果: ['B', 'P', 'E', '算', '法', '能', '够', '有', '效', '处', '理', '中', '英', '文', '混', '合', '文', '本', '。']
 分词数量: 19
 --------------------------------------------------
@@ -335,19 +335,19 @@ for text in test_texts:
 
 从结果中我们可以观察到：
 
-1. 中文主要以单个字符作为token，因为中文的字符本身就是有意义的单位
+1. 中文主要以单个字符作为 token，因为中文的字符本身就是有意义的单位
 2. 英文则开始形成一些常见的字母组合
 3. 英文单词结尾的`</w>`标记保留了词边界信息
-4. 特殊符号如标点被作为独立token处理
+4. 特殊符号如标点被作为独立 token 处理
 
 如果我们增加合并次数（如设置`num_merges=200`），会得到更大的词汇表和更长的子词单元，例如英文会合并出更多有意义的词根和词缀。
 
 ## 11. 总结与思考
 
-通过本文，我们实现了一个支持中英文的基础BPE分词器，核心步骤包括：
+通过本文，我们实现了一个支持中英文的基础 BPE 分词器，核心步骤包括：
 
 1. 文本预处理：针对中英文特点分别处理
 2. 训练过程：迭代合并最频繁的字符对
 3. 分词过程：应用学习到的合并规则对新文本进行分词
 
-BPE作为现代大语言模型的基础技术之一，理解其原理和实现对于深入掌握大模型技术至关重要。希望本文能帮助你打下坚实的基础！
+BPE 作为现代大语言模型的基础技术之一，理解其原理和实现对于深入掌握大模型技术至关重要。希望本文能帮助你打下坚实的基础！

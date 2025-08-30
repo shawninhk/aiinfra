@@ -40,7 +40,7 @@ $$\text{Embedding}(i) = W[i, :]$$
 ```python
 class Embedding(nn.Module):
     """
-    标准的嵌入层，将token索引映射为d_model维的向量
+    标准的嵌入层，将 token 索引映射为 d_model 维的向量
     
     Args:
         vocab_size: 词汇表大小
@@ -57,13 +57,13 @@ class Embedding(nn.Module):
     def forward(self, x):
         """
         Args:
-            x: 输入token索引，形状为 (batch_size, seq_len)
+            x: 输入 token 索引，形状为 (batch_size, seq_len)
             
         Returns:
             嵌入后的张量，形状为 (batch_size, seq_len, d_model)
         """
         # 根据索引从嵌入矩阵中查找对应的向量
-        # 并乘以sqrt(d_model)进行缩放，这是Transformer的标准做法
+        # 并乘以 sqrt(d_model)进行缩放，这是 Transformer 的标准做法
         # 缩放的目的是平衡嵌入向量的量级，避免后续注意力计算中因向量模长过大导致梯度问题
         return self.embed[x] * math.sqrt(self.d_model)
 ```
@@ -91,7 +91,7 @@ class PositionalEncoding(nn.Module):
     Args:
         d_model: 模型维度
         max_len: 最大序列长度
-        dropout: Dropout率
+        dropout: Dropout 率
     """
     def __init__(self, d_model, max_len=5000, dropout=0.1):
         super(PositionalEncoding, self).__init__()
@@ -114,7 +114,7 @@ class PositionalEncoding(nn.Module):
         # 添加批次维度: (1, max_len, d_model)
         pe = pe.unsqueeze(0)
         
-        # 将pe注册为缓冲区（不参与梯度更新）
+        # 将 pe 注册为缓冲区（不参与梯度更新）
         # 位置编码是固定的，无需通过训练学习
         self.register_buffer('pe', pe)
         
@@ -126,7 +126,7 @@ class PositionalEncoding(nn.Module):
         Returns:
             添加位置编码后的张量，形状与输入相同
         """
-        # 将位置编码添加到输入中（只取前seq_len个位置）
+        # 将位置编码添加到输入中（只取前 seq_len 个位置）
         x = x + self.pe[:, :x.size(1)]
         return self.dropout(x)
 ```
@@ -154,26 +154,26 @@ def attention(query, key, value, mask=None, dropout=None):
         query: 查询张量，形状为 (..., seq_len_q, d_k)
         key: 键张量，形状为 (..., seq_len_k, d_k)
         value: 值张量，形状为 (..., seq_len_v, d_v)
-        mask: 可选的掩码张量，用于屏蔽无效位置（如填充token或未来信息）
-        dropout: 可选的dropout层，防止过拟合
+        mask: 可选的掩码张量，用于屏蔽无效位置（如填充 token 或未来信息）
+        dropout: 可选的 dropout 层，防止过拟合
         
     Returns:
         输出张量和注意力权重
     """
     d_k = query.size(-1)
     
-    # 计算Q和K的点积并缩放
+    # 计算 Q 和 K 的点积并缩放
     scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
     
     # 应用掩码（如果提供）
     if mask is not None:
-        # 将掩码位置的分数设为极小值，确保softmax后概率接近0
+        # 将掩码位置的分数设为极小值，确保 softmax 后概率接近 0
         scores = scores.masked_fill(mask == 0, -1e9)
     
-    # 计算注意力权重：通过softmax将分数转换为概率分布
+    # 计算注意力权重：通过 softmax 将分数转换为概率分布
     p_attn = F.softmax(scores, dim=-1)
     
-    # 应用dropout（如果提供）
+    # 应用 dropout（如果提供）
     if dropout is not None:
         p_attn = dropout(p_attn)
     
@@ -204,17 +204,17 @@ class MultiHeadAttention(nn.Module):
     Args:
         d_model: 模型维度
         h: 注意力头的数量
-        dropout: Dropout率
+        dropout: Dropout 率
     """
     def __init__(self, d_model, h, dropout=0.1):
         super(MultiHeadAttention, self).__init__()
-        assert d_model % h == 0, "d_model必须能被h整除"  # 确保每个头的维度是整数
+        assert d_model % h == 0, "d_model 必须能被 h 整除"  # 确保每个头的维度是整数
         
         self.d_model = d_model
         self.h = h
         self.d_k = d_model // h  # 每个注意力头的维度
         
-        # 定义线性投影层：将输入映射到Q、K、V，以及最终的输出投影
+        # 定义线性投影层：将输入映射到 Q、K、V，以及最终的输出投影
         self.w_q = nn.Linear(d_model, d_model)
         self.w_k = nn.Linear(d_model, d_model)
         self.w_v = nn.Linear(d_model, d_model)
@@ -240,7 +240,7 @@ class MultiHeadAttention(nn.Module):
         
         batch_size = query.size(0)
         
-        # 1. 线性投影并分头：将高维Q、K、V拆分为h个低维子空间
+        # 1. 线性投影并分头：将高维 Q、K、V 拆分为 h 个低维子空间
         query = self.w_q(query).view(batch_size, -1, self.h, self.d_k).transpose(1, 2)
         key = self.w_k(key).view(batch_size, -1, self.h, self.d_k).transpose(1, 2)
         value = self.w_v(value).view(batch_size, -1, self.h, self.d_k).transpose(1, 2)
@@ -248,14 +248,14 @@ class MultiHeadAttention(nn.Module):
         # 2. 应用注意力机制：每个头独立计算注意力
         x, self.attn = attention(query, key, value, mask=mask, dropout=self.dropout)
         
-        # 3. 拼接头并应用最终线性层：将h个头的结果合并回高维空间
+        # 3. 拼接头并应用最终线性层：将 h 个头的结果合并回高维空间
         x = x.transpose(1, 2).contiguous().view(batch_size, -1, self.d_model)
         return self.w_o(x)
 ```
 
 ### 2.5 前馈网络 (Feed Forward Network)
 
-每个注意力层后面都有一个前馈网络，由两个线性变换和一个ReLU激活函数组成。注意力层捕捉序列中不同位置的关联，而前馈网络则对每个位置的特征进行独立的非线性变换，两者分工协作：前者关注"关系"，后者强化"特征"。
+每个注意力层后面都有一个前馈网络，由两个线性变换和一个 ReLU 激活函数组成。注意力层捕捉序列中不同位置的关联，而前馈网络则对每个位置的特征进行独立的非线性变换，两者分工协作：前者关注"关系"，后者强化"特征"。
 
 ![](./images/Practice01MiniTranformer02.png)
 
@@ -265,7 +265,7 @@ $$
 \text{FFN}(x) = \max(0, xW_1 + b_1)W_2 + b_2
 $$
 
-公式中，第一层线性变换将维度从 $d_{\text{model}}$ 扩展到 $d_{ff}$（通常是 $4 \times d_{\text{model}}$），通过增大维度提供更强的特征变换能力；ReLU激活函数引入非线性，让模型能学习复杂的映射关系；第二层线性变换将维度还原，保证前后层维度兼容。
+公式中，第一层线性变换将维度从 $d_{\text{model}}$ 扩展到 $d_{ff}$（通常是 $4 \times d_{\text{model}}$），通过增大维度提供更强的特征变换能力；ReLU 激活函数引入非线性，让模型能学习复杂的映射关系；第二层线性变换将维度还原，保证前后层维度兼容。
 
 ```python
 class FeedForward(nn.Module):
@@ -275,7 +275,7 @@ class FeedForward(nn.Module):
     Args:
         d_model: 模型维度
         d_ff: 前馈网络内部维度
-        dropout: Dropout率
+        dropout: Dropout 率
     """
     def __init__(self, d_model, d_ff, dropout=0.1):
         super(FeedForward, self).__init__()
@@ -296,7 +296,7 @@ class FeedForward(nn.Module):
 
 ### 2.6 残差连接与层归一化 (Add & Norm)
 
-Transformer 使用残差连接和层归一化来促进训练稳定性和梯度流动。在深层网络中，随着层数增加，梯度容易衰减或爆炸，残差连接（$x + \text{Sublayer}(x)$）提供了一条"捷径"，让梯度能直接从后层传到前层；而层归一化则通过标准化每个样本的特征分布（使均值为0、方差为1），避免数值偏离导致的训练不稳定。
+Transformer 使用残差连接和层归一化来促进训练稳定性和梯度流动。在深层网络中，随着层数增加，梯度容易衰减或爆炸，残差连接（$x + \text{Sublayer}(x)$）提供了一条"捷径"，让梯度能直接从后层传到前层；而层归一化则通过标准化每个样本的特征分布（使均值为 0、方差为 1），避免数值偏离导致的训练不稳定。
 
 **原理公式**：
 
@@ -313,7 +313,7 @@ class SublayerConnection(nn.Module):
     
     Args:
         size: 输入维度
-        dropout: Dropout率
+        dropout: Dropout 率
     """
     def __init__(self, size, dropout=0.1):
         super(SublayerConnection, self).__init__()
@@ -351,7 +351,7 @@ class EncoderLayer(nn.Module):
         d_model: 模型维度
         self_attn: 自注意力机制
         feed_forward: 前馈网络
-        dropout: Dropout率
+        dropout: Dropout 率
     """
     def __init__(self, d_model, self_attn, feed_forward, dropout=0.1):
         super(EncoderLayer, self).__init__()
@@ -365,7 +365,7 @@ class EncoderLayer(nn.Module):
         """
         Args:
             x: 输入张量，形状为 (batch_size, seq_len, d_model)
-            mask: 掩码张量，用于屏蔽填充token
+            mask: 掩码张量，用于屏蔽填充 token
             
         Returns:
             编码器层的输出，形状与输入相同
@@ -393,7 +393,7 @@ class DecoderLayer(nn.Module):
         self_attn: 自注意力机制
         src_attn: 编码器-解码器注意力机制
         feed_forward: 前馈网络
-        dropout: Dropout率
+        dropout: Dropout 率
     """
     def __init__(self, d_model, self_attn, src_attn, feed_forward, dropout=0.1):
         super(DecoderLayer, self).__init__()
@@ -429,7 +429,7 @@ class DecoderLayer(nn.Module):
 
 ### 4.1 编码器 (Encoder)
 
-编码器由多个编码器层堆叠而成。输入序列经过嵌入和位置编码后，依次通过所有编码器层，最终输出一个包含全局上下文信息的"记忆"张量（memory）。堆叠层数 $N$（原始论文中为6）是重要超参数：层数太少，模型难以捕捉复杂模式；层数太多，则可能过拟合且训练成本增加。最终的层归一化确保输出分布稳定，便于解码器使用。
+编码器由多个编码器层堆叠而成。输入序列经过嵌入和位置编码后，依次通过所有编码器层，最终输出一个包含全局上下文信息的"记忆"张量（memory）。堆叠层数 $N$（原始论文中为 6）是重要超参数：层数太少，模型难以捕捉复杂模式；层数太多，则可能过拟合且训练成本增加。最终的层归一化确保输出分布稳定，便于解码器使用。
 
 ```python
 class Encoder(nn.Module):
@@ -463,7 +463,7 @@ class Encoder(nn.Module):
 
 ### 4.2 解码器 (Decoder)
 
-解码器由多个解码器层堆叠而成。与编码器类似，解码器通过多层处理逐步优化目标序列的表示，但每一层都同时依赖于已生成的目标序列和编码器输出的memory。这种设计让解码器能在生成过程中不断"回顾"源序列信息，确保输出与输入的一致性（比如翻译时忠实于原文意思）。
+解码器由多个解码器层堆叠而成。与编码器类似，解码器通过多层处理逐步优化目标序列的表示，但每一层都同时依赖于已生成的目标序列和编码器输出的 memory。这种设计让解码器能在生成过程中不断"回顾"源序列信息，确保输出与输入的一致性（比如翻译时忠实于原文意思）。
 
 ```python
 class Decoder(nn.Module):
@@ -499,12 +499,12 @@ class Decoder(nn.Module):
 
 ## 5. 完整 Transformer 模型
 
-现在我们将所有组件组合成完整的 Transformer 模型。Transformer 的整体架构遵循"编码-解码"范式：编码器将源序列压缩为上下文向量（memory），解码器则基于memory和目标序列前缀生成下一个token。这种架构的优势在于并行性——编码器和解码器内部的注意力计算可以并行处理整个序列，而不像RNN那样必须按顺序计算，极大提升了训练效率。
+现在我们将所有组件组合成完整的 Transformer 模型。Transformer 的整体架构遵循"编码-解码"范式：编码器将源序列压缩为上下文向量（memory），解码器则基于 memory 和目标序列前缀生成下一个 token。这种架构的优势在于并行性——编码器和解码器内部的注意力计算可以并行处理整个序列，而不像 RNN 那样必须按顺序计算，极大提升了训练效率。
 
 ```python
 class Transformer(nn.Module):
     """
-    完整的Transformer模型
+    完整的 Transformer 模型
     
     Args:
         encoder: 编码器
@@ -557,7 +557,7 @@ class Transformer(nn.Module):
 
 ### 6.1 生成器 (Generator)
 
-生成器将解码器输出投影到词汇表空间，是模型的输出层。对于序列生成任务（如翻译、文本生成），生成器的作用是将解码器输出的隐藏状态转换为每个token的概率分布，便于后续采样或计算损失。log_softmax函数不仅能将输出转换为概率分布，还能与NLLLoss配合高效计算交叉熵损失。
+生成器将解码器输出投影到词汇表空间，是模型的输出层。对于序列生成任务（如翻译、文本生成），生成器的作用是将解码器输出的隐藏状态转换为每个 token 的概率分布，便于后续采样或计算损失。log_softmax 函数不仅能将输出转换为概率分布，还能与 NLLLoss 配合高效计算交叉熵损失。
 
 ```python
 class Generator(nn.Module):
@@ -570,7 +570,7 @@ class Generator(nn.Module):
     """
     def __init__(self, d_model, vocab):
         super(Generator, self).__init__()
-        self.proj = nn.Linear(d_model, vocab)  # 从d_model维投影到词汇表大小
+        self.proj = nn.Linear(d_model, vocab)  # 从 d_model 维投影到词汇表大小
         
     def forward(self, x):
         """
@@ -585,7 +585,7 @@ class Generator(nn.Module):
 
 ### 6.2 掩码生成函数
 
-在序列模型中，掩码用于屏蔽无效信息。`subsequent_mask` 生成的下三角掩码专门用于解码器自注意力，确保在预测第 $i$ 个token时，只能看到前 $i-1$ 个已生成的token，避免"偷看"未来信息，这是 autoregressive（自回归）生成的核心机制。
+在序列模型中，掩码用于屏蔽无效信息。`subsequent_mask` 生成的下三角掩码专门用于解码器自注意力，确保在预测第 $i$ 个 token 时，只能看到前 $i-1$ 个已生成的 token，避免"偷看"未来信息，这是 autoregressive（自回归）生成的核心机制。
 
 ```python
 def subsequent_mask(size):
@@ -596,7 +596,7 @@ def subsequent_mask(size):
         size: 序列长度
         
     Returns:
-        下三角掩码矩阵，形状为 (1, size, size)，对角线及以下为1（可见），以上为0（屏蔽）
+        下三角掩码矩阵，形状为 (1, size, size)，对角线及以下为 1（可见），以上为 0（屏蔽）
     """
     attn_shape = (1, size, size)
     subsequent_mask = torch.triu(torch.ones(attn_shape), diagonal=1).type(torch.uint8)
@@ -606,12 +606,12 @@ def subsequent_mask(size):
 
 ### 6.3 模型构建函数
 
-`make_model` 函数封装了模型的完整构建流程，通过参数控制模型规模（层数、维度、头数等）。值得注意的是，参数初始化使用了Xavier均匀分布，这种初始化方式能让各层的输入和输出方差尽可能一致，有利于深层网络的训练。
+`make_model` 函数封装了模型的完整构建流程，通过参数控制模型规模（层数、维度、头数等）。值得注意的是，参数初始化使用了 Xavier 均匀分布，这种初始化方式能让各层的输入和输出方差尽可能一致，有利于深层网络的训练。
 
 ```python
 def make_model(src_vocab, tgt_vocab, N=6, d_model=512, d_ff=2048, h=8, dropout=0.1):
     """
-    构建完整的Transformer模型
+    构建完整的 Transformer 模型
     
     Args:
         src_vocab: 源词汇表大小
@@ -620,10 +620,10 @@ def make_model(src_vocab, tgt_vocab, N=6, d_model=512, d_ff=2048, h=8, dropout=0
         d_model: 模型维度
         d_ff: 前馈网络内部维度
         h: 注意力头数
-        dropout: Dropout率
+        dropout: Dropout 率
         
     Returns:
-        完整的Transformer模型
+        完整的 Transformer 模型
     """
     # 创建注意力机制和前馈网络
     attn = MultiHeadAttention(d_model, h, dropout)
@@ -641,7 +641,7 @@ def make_model(src_vocab, tgt_vocab, N=6, d_model=512, d_ff=2048, h=8, dropout=0
         Generator(d_model, tgt_vocab)
     )
     
-    # 初始化参数：使用Xavier均匀分布，让各层输入输出方差一致
+    # 初始化参数：使用 Xavier 均匀分布，让各层输入输出方差一致
     for p in model.parameters():
         if p.dim() > 1:
             nn.init.xavier_uniform_(p)
@@ -653,7 +653,7 @@ def make_model(src_vocab, tgt_vocab, N=6, d_model=512, d_ff=2048, h=8, dropout=0
 
 ### 7.1 复制任务数据生成
 
-我们创建一个简单的复制任务来测试模型。复制任务要求模型将输入序列原样输出，虽然简单，但能有效验证Transformer的核心能力——捕捉序列的顺序依赖关系。选择这种任务的原因是：它目标明确（输入即目标），能直观反映模型是否学会了序列映射；且序列长度、词汇表大小可控，便于快速调试。
+我们创建一个简单的复制任务来测试模型。复制任务要求模型将输入序列原样输出，虽然简单，但能有效验证 Transformer 的核心能力——捕捉序列的顺序依赖关系。选择这种任务的原因是：它目标明确（输入即目标），能直观反映模型是否学会了序列映射；且序列长度、词汇表大小可控，便于快速调试。
 
 ```python
 def data_gen(batch_size, n_batches, seq_len, vocab_size):
@@ -670,13 +670,13 @@ def data_gen(batch_size, n_batches, seq_len, vocab_size):
         生成器，每次产生一个批次的(src, tgt)数据
     """
     for i in range(n_batches):
-        # 随机生成源序列（排除0，因为0通常用于填充）
+        # 随机生成源序列（排除 0，因为 0 通常用于填充）
         src = torch.randint(1, vocab_size, (batch_size, seq_len))
 
         # 目标序列与源序列相同（复制任务）
         tgt = src.clone()
 
-        # 设置填充为0
+        # 设置填充为 0
         src[:, 0] = 1  # 确保序列开始标记
 
         yield src, tgt
@@ -684,7 +684,7 @@ def data_gen(batch_size, n_batches, seq_len, vocab_size):
 
 ### 7.2 训练循环
 
-训练循环实现了模型的迭代优化过程。需要注意的是，目标序列在输入时采用了"左移"（tgt[:, :-1]），而损失计算则基于"右移"的目标（tgt[:, 1:]），这是序列生成任务的标准做法——用第 $i$ 个token预测第 $i+1$ 个token。掩码的应用确保了训练过程与推理过程的一致性（解码器同样无法看到未来信息）。
+训练循环实现了模型的迭代优化过程。需要注意的是，目标序列在输入时采用了"左移"（tgt[:, :-1]），而损失计算则基于"右移"的目标（tgt[:, 1:]），这是序列生成任务的标准做法——用第 $i$ 个 token 预测第 $i+1$ 个 token。掩码的应用确保了训练过程与推理过程的一致性（解码器同样无法看到未来信息）。
 
 ```python
 def run_epoch(model, data_iter, loss_fn, optimizer):
@@ -692,7 +692,7 @@ def run_epoch(model, data_iter, loss_fn, optimizer):
     运行一个训练周期
     
     Args:
-        model: Transformer模型
+        model: Transformer 模型
         data_iter: 数据迭代器
         loss_fn: 损失函数
         optimizer: 优化器
@@ -705,11 +705,11 @@ def run_epoch(model, data_iter, loss_fn, optimizer):
     n_batches = 0
     
     for src, tgt in data_iter:
-        # 创建掩码：src_mask屏蔽填充，tgt_mask屏蔽未来信息
+        # 创建掩码：src_mask 屏蔽填充，tgt_mask 屏蔽未来信息
         src_mask = torch.ones(src.size(0), 1, src.size(1))
         tgt_mask = subsequent_mask(tgt.size(1)).expand(tgt.size(0), -1, -1)
         
-        # 前向传播：目标序列左移作为输入（用tgt[:-1]预测tgt[1:]）
+        # 前向传播：目标序列左移作为输入（用 tgt[:-1]预测 tgt[1:]）
         out = model(src, tgt[:, :-1], src_mask, tgt_mask[:, :-1, :-1])
         
         # 计算损失：将输出和目标展平为二维（batch*seq_len, vocab）
@@ -729,22 +729,22 @@ def run_epoch(model, data_iter, loss_fn, optimizer):
 
 ### 7.3 测试模型
 
-为了快速验证模型，我们使用了较小的超参数（如d_model=32，N=2），这在保证模型功能完整的同时，大幅缩短了训练时间。测试结果显示模型能完美复制输入序列，说明我们实现的Transformer正确捕捉了序列的位置信息和依赖关系——注意力机制成功学会了"关注"输入序列的对应位置，位置编码正确传递了序列顺序，各层组件协同工作实现了预期功能。
+为了快速验证模型，我们使用了较小的超参数（如 d_model=32，N=2），这在保证模型功能完整的同时，大幅缩短了训练时间。测试结果显示模型能完美复制输入序列，说明我们实现的 Transformer 正确捕捉了序列的位置信息和依赖关系——注意力机制成功学会了"关注"输入序列的对应位置，位置编码正确传递了序列顺序，各层组件协同工作实现了预期功能。
 
 ```python
 # 设置超参数
-vocab_size = 11  # 小词汇表，包含0-10
+vocab_size = 11  # 小词汇表，包含 0-10
 seq_len = 10     # 短序列
 d_model = 32     # 小模型维度（为了快速训练）
-N = 2            # 2层编码器和解码器
-h = 4            # 4个注意力头
+N = 2            # 2 层编码器和解码器
+h = 4            # 4 个注意力头
 d_ff = 64        # 前馈网络内部维度
-dropout = 0.1    # Dropout率
+dropout = 0.1    # Dropout 率
 
 # 创建模型
 model = make_model(vocab_size, vocab_size, N, d_model, d_ff, h, dropout)
 
-# 定义优化器和损失函数：Adam优化器在Transformer中表现良好，NLLLoss配合log_softmax
+# 定义优化器和损失函数：Adam 优化器在 Transformer 中表现良好，NLLLoss 配合 log_softmax
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.98), eps=1e-9)
 loss_fn = nn.NLLLoss(ignore_index=0)  # 忽略填充位置的损失
 
@@ -760,7 +760,7 @@ for epoch in range(10):
 print("训练完成!")
 
 # 测试模型
-print("\n测试模型...")
+print("\n 测试模型...")
 model.eval()
 with torch.no_grad():  # 推理时关闭梯度计算
     # 创建一个测试样本
@@ -773,7 +773,7 @@ with torch.no_grad():  # 推理时关闭梯度计算
     
     # 进行预测
     prediction = model(test_src, test_tgt[:, :-1], src_mask, tgt_mask[:, :-1, :-1])
-    predicted_ids = prediction.argmax(dim=-1)  # 取概率最大的token作为预测结果
+    predicted_ids = prediction.argmax(dim=-1)  # 取概率最大的 token 作为预测结果
     
     print("输入序列:", test_src[0].numpy())
     print("目标序列:", test_tgt[0, 1:].numpy())  # 偏移一位
@@ -804,17 +804,17 @@ with torch.no_grad():  # 推理时关闭梯度计算
     匹配程度: 1.0
     ```
 
-实现的Transformer模型能够成功学习简单的复制任务，经过10个epoch的训练，模型损失从2.39降至0.14，表明模型有效学习了输入到输出的映射关系。测试时，模型能够完美复制输入序列，匹配程度达到100%，验证了我们从零实现的Transformer架构的正确性。
+实现的 Transformer 模型能够成功学习简单的复制任务，经过 10 个 epoch 的训练，模型损失从 2.39 降至 0.14，表明模型有效学习了输入到输出的映射关系。测试时，模型能够完美复制输入序列，匹配程度达到 100%，验证了我们从零实现的 Transformer 架构的正确性。
 
 ## 8. 总结
 
 通过本实验，我们从零实现了 Transformer 的核心组件，深入理解了每个部分的设计原理和作用：
 
-1. **嵌入层和位置编码**：将离散 token 转换为连续表示并注入位置信息——嵌入层捕捉语义，位置编码解决Transformer的时序感知问题。
-2. **缩放点积注意力**：通过计算Q、K、V的相似度实现"聚焦"，缩放操作确保训练稳定。
+1. **嵌入层和位置编码**：将离散 token 转换为连续表示并注入位置信息——嵌入层捕捉语义，位置编码解决 Transformer 的时序感知问题。
+2. **缩放点积注意力**：通过计算 Q、K、V 的相似度实现"聚焦"，缩放操作确保训练稳定。
 3. **多头注意力**：并行计算多个子空间的注意力，综合不同维度的关联信息，提升模型表达能力。
 4. **前馈网络**：对每个位置进行非线性变换，强化注意力输出的特征表示。
 5. **残差连接和层归一化**：残差连接解决深层梯度问题，层归一化稳定训练分布，共同保障深层网络的可训练性。
 6. **编码器和解码器**：编码器生成源序列的全局表示，解码器结合源信息和目标前缀生成输出，通过多层堆叠逐步提炼抽象特征。
 
-这个实验验证了Transformer架构的基本工作原理，通过简化的复制任务展示了其捕获序列依赖关系的能力。从零实现的过程帮助我们深入理解了Transformer的各个组件及其相互作用方式，为后续学习更复杂的变体（如BERT、GPT）奠定了基础。
+这个实验验证了 Transformer 架构的基本工作原理，通过简化的复制任务展示了其捕获序列依赖关系的能力。从零实现的过程帮助我们深入理解了 Transformer 的各个组件及其相互作用方式，为后续学习更复杂的变体（如 BERT、GPT）奠定了基础。

@@ -4,11 +4,11 @@
 
 Author by：ZOMI
 
-在Transformer模型中，Embedding（嵌入）机制是将离散的文本符号转换为连续的向量表示的关键步骤。除了词嵌入本身，位置信息的编码也至关重要，这是因为Transformer模型本身不具备对序列顺序的感知能力。
+在 Transformer 模型中，Embedding（嵌入）机制是将离散的文本符号转换为连续的向量表示的关键步骤。除了词嵌入本身，位置信息的编码也至关重要，这是因为 Transformer 模型本身不具备对序列顺序的感知能力。
 
 ![](./images/Practice06Embedding01.png)
 
-本文将实现Transformer中的核心嵌入机制，包括三种主流的位置编码方式：
+本文将实现 Transformer 中的核心嵌入机制，包括三种主流的位置编码方式：
 
 - APE（Absolute Position Embedding，绝对位置嵌入）
 - RPE（Relative Position Embedding，相对位置嵌入）
@@ -31,13 +31,13 @@ from collections import defaultdict, Counter
 
 ## 2. 实现中英文分词器
 
-在进行嵌入之前，需要一个支持中英文的分词器。这里基于之前实现的BPE算法：
+在进行嵌入之前，需要一个支持中英文的分词器。这里基于之前实现的 BPE 算法：
 
 ```python
 class BPE:
     def __init__(self, vocab_size=1000):
         self.vocab_size = vocab_size
-        self.vocab = {}  # 词汇到ID的映射
+        self.vocab = {}  # 词汇到 ID 的映射
         self.merges = {}  # 合并历史
         self.pattern = re.compile(r'([^\u4e00-\u9fff\w\s])|(\s+)')  # 匹配非中英文、非单词字符和空白
         self.unk_token = "<unk>"
@@ -71,7 +71,7 @@ class BPE:
         return pairs
     
     def train(self, corpus):
-        """训练BPE模型"""
+        """训练 BPE 模型"""
         # 预处理语料
         processed_corpus = [self.preprocess(text) for text in corpus]
         
@@ -131,7 +131,7 @@ class BPE:
                 print(f"当前词汇表大小: {current_vocab_size}/{self.vocab_size}")
         
         self.vocab = vocab
-        print(f"BPE训练完成，最终词汇表大小: {len(self.vocab)}")
+        print(f"BPE 训练完成，最终词汇表大小: {len(self.vocab)}")
     
     def _merge_pair(self, word_counts, pair, new_token):
         """将词表中的指定字符对合并为新的条目"""
@@ -146,9 +146,9 @@ class BPE:
         return merged_word_counts
     
     def tokenize(self, text):
-        """将文本转换为token列表"""
+        """将文本转换为 token 列表"""
         if not self.vocab:
-            raise ValueError("BPE模型尚未训练，请先调用train方法")
+            raise ValueError("BPE 模型尚未训练，请先调用 train 方法")
         
         # 预处理文本
         processed = self.preprocess(text)
@@ -157,7 +157,7 @@ class BPE:
         # 对每个词应用合并规则
         tokens = []
         for word in words:
-            if len(word) == 1:  # 单个字符直接作为token
+            if len(word) == 1:  # 单个字符直接作为 token
                 tokens.append(word)
                 continue
             
@@ -183,11 +183,11 @@ class BPE:
         return tokens
     
     def convert_tokens_to_ids(self, tokens):
-        """将token列表转换为ID列表"""
+        """将 token 列表转换为 ID 列表"""
         return [self.vocab.get(token, self.vocab[self.unk_token]) for token in tokens]
     
     def __call__(self, text, max_length=None):
-        """将文本转换为ID序列"""
+        """将文本转换为 ID 序列"""
         tokens = self.tokenize(text)
         ids = self.convert_tokens_to_ids(tokens)
         
@@ -201,16 +201,16 @@ class BPE:
         return torch.tensor(ids, dtype=torch.long)
 ```
 
-这个BPE分词器相比之前的版本做了一些改进：
+这个 BPE 分词器相比之前的版本做了一些改进：
 
 - 增加了特殊标记（unk、pad、bos、eos）
-- 实现了token到ID的映射
-- 增加了`__call__`方法，可以直接将文本转换为ID张量
+- 实现了 token 到 ID 的映射
+- 增加了`__call__`方法，可以直接将文本转换为 ID 张量
 - 支持指定最大长度，自动进行截断或填充
 
 ## 3. 词嵌入（Word Embedding）
 
-词嵌入是将离散的token ID转换为连续的向量表示，是所有Transformer模型的基础组件：
+词嵌入是将离散的 token ID 转换为连续的向量表示，是所有 Transformer 模型的基础组件：
 
 ```python
 class WordEmbedding(nn.Module):
@@ -229,7 +229,7 @@ class WordEmbedding(nn.Module):
         input_ids: 形状为 [batch_size, seq_len] 的整数张量
         返回: 形状为 [batch_size, seq_len, embedding_dim] 的词嵌入张量
         """
-        # 将ID转换为向量
+        # 将 ID 转换为向量
         embeddings = self.embedding(input_ids)
         
         # 通常会对嵌入向量进行缩放
@@ -238,13 +238,13 @@ class WordEmbedding(nn.Module):
 
 词嵌入层的工作原理：
 
-1. 本质上是一个查找表（lookup table），将每个token ID映射到一个固定维度的向量
+1. 本质上是一个查找表（lookup table），将每个 token ID 映射到一个固定维度的向量
 2. 这些向量是可学习的参数，在训练过程中不断优化
-3. 通常会对嵌入向量进行缩放（乘以嵌入维度的平方根），这是Transformer原论文中的做法
+3. 通常会对嵌入向量进行缩放（乘以嵌入维度的平方根），这是 Transformer 原论文中的做法
 
 ### 3.1 绝对位置嵌入（APE）
 
-绝对位置嵌入是Transformer原论文中使用的位置编码方式，直接将位置信息编码为固定或可学习的向量：
+绝对位置嵌入是 Transformer 原论文中使用的位置编码方式，直接将位置信息编码为固定或可学习的向量：
 
 ```python
 class AbsolutePositionEmbedding(nn.Module):
@@ -256,7 +256,7 @@ class AbsolutePositionEmbedding(nn.Module):
             # 可学习的位置嵌入
             self.position_embedding = nn.Embedding(max_seq_len, embedding_dim)
         else:
-            # 固定的正弦余弦位置编码（Transformer原论文）
+            # 固定的正弦余弦位置编码（Transformer 原论文）
             position_embedding = torch.zeros(max_seq_len, embedding_dim)
             position = torch.arange(0, max_seq_len, dtype=torch.float).unsqueeze(1)
             div_term = torch.exp(torch.arange(0, embedding_dim, 2).float() * 
@@ -310,7 +310,7 @@ class RelativePositionEmbedding(nn.Module):
         self.max_relative_position = max_relative_position
         
         # 相对位置范围: [-max_relative_position, max_relative_position]
-        # 为了用索引表示，偏移max_relative_position，范围变为 [0, 2*max_relative_position]
+        # 为了用索引表示，偏移 max_relative_position，范围变为 [0, 2*max_relative_position]
         self.relative_embedding = nn.Embedding(2 * max_relative_position + 1, embedding_dim)
         
     def forward(self, x):
@@ -386,7 +386,7 @@ class RotaryPositionEmbedding(nn.Module):
         self.register_buffer("sin_emb", emb.sin())
         
     def rotate_half(self, x):
-        """将x的后半部分旋转"""
+        """将 x 的后半部分旋转"""
         x1 = x[..., :x.size(-1)//2]
         x2 = x[..., x.size(-1)//2:]
         return torch.cat((-x2, x1), dim=-1)
@@ -411,11 +411,11 @@ class RotaryPositionEmbedding(nn.Module):
         return x * cos + self.rotate_half(x) * sin
 ```
 
-RoPE的核心原理：
+RoPE 的核心原理：
 
 - 通过旋转操作将位置信息编码到词向量中
 - 满足旋转不变性，即相对位置编码只与相对距离有关
-- 在长文本处理上表现优异，已被应用于LLaMA、GPT-NeoX等模型
+- 在长文本处理上表现优异，已被应用于 LLaMA、GPT-NeoX 等模型
 
 ## 4. 完整 Embedding 实现
 
@@ -441,7 +441,7 @@ class TransformerEmbedding(nn.Module):
             self.position_encoding = AbsolutePositionEmbedding(
                 max_seq_len=max_seq_len,
                 embedding_dim=embedding_dim,
-                learnable=False  # 使用Transformer原论文的正弦余弦编码
+                learnable=False  # 使用 Transformer 原论文的正弦余弦编码
             )
         elif position_encoding_type == "rpe":
             self.position_encoding = RelativePositionEmbedding(
@@ -466,11 +466,11 @@ class TransformerEmbedding(nn.Module):
         
         # 应用位置编码
         if self.position_encoding_type == "rpe":
-            # RPE返回注意力偏置，词嵌入保持不变
+            # RPE 返回注意力偏置，词嵌入保持不变
             attention_bias = self.position_encoding(word_emb)
             return word_emb, attention_bias
         else:
-            # APE和RoPE直接修改词嵌入
+            # APE 和 RoPE 直接修改词嵌入
             embeddings = self.position_encoding(word_emb)
             return embeddings, None
 ```
@@ -483,32 +483,32 @@ class TransformerEmbedding(nn.Module):
 
 ## 5. 测试 Embedding
 
-让用中英文文本测试实现的Embedding：
+让用中英文文本测试实现的 Embedding：
 
 ```python
 # 1. 准备训练数据（中英文混合）
 corpus = [
     "自然语言处理是人工智能的一个重要分支。",
-    "Transformer模型在NLP领域取得了巨大成功。",
-    "RoPE是一种高效的位置编码方式。",
+    "Transformer 模型在 NLP 领域取得了巨大成功。",
+    "RoPE 是一种高效的位置编码方式。",
     "Word embedding converts tokens to vectors.",
     "Attention is all you need.",
     "Rotary position embedding improves long text understanding.",
     "我爱自然语言处理和深度学习。",
-    "Python是实现深度学习算法的好工具。"
+    "Python 是实现深度学习算法的好工具。"
 ]
 
-# 2. 训练BPE分词器
+# 2. 训练 BPE 分词器
 bpe = BPE(vocab_size=500)
 bpe.train(corpus)
 
 # 3. 准备测试文本
 test_texts = [
-    "Transformer中的嵌入机制很重要。",
+    "Transformer 中的嵌入机制很重要。",
     "Rotary Position Embedding is powerful."
 ]
 
-# 4. 将文本转换为ID
+# 4. 将文本转换为 ID
 max_length = 20
 input_ids = []
 for text in test_texts:
@@ -521,7 +521,7 @@ embedding_dim = 128
 vocab_size = len(bpe.vocab)
 padding_idx = bpe.vocab[bpe.pad_token]
 
-# 测试APE
+# 测试 APE
 print("测试绝对位置嵌入（APE）:")
 ape_embedding = TransformerEmbedding(
     vocab_size=vocab_size,
@@ -532,10 +532,10 @@ ape_embedding = TransformerEmbedding(
 )
 
 ape_output, _ = ape_embedding(input_ids)
-print(f"APE输出形状: {ape_output.shape}")  # 应为 [2, 20, 128]
+print(f"APE 输出形状: {ape_output.shape}")  # 应为 [2, 20, 128]
 
-# 测试RPE
-print("\n测试相对位置嵌入（RPE）:")
+# 测试 RPE
+print("\n 测试相对位置嵌入（RPE）:")
 rpe_embedding = TransformerEmbedding(
     vocab_size=vocab_size,
     embedding_dim=embedding_dim,
@@ -545,11 +545,11 @@ rpe_embedding = TransformerEmbedding(
 )
 
 rpe_output, rpe_bias = rpe_embedding(input_ids)
-print(f"RPE输出形状: {rpe_output.shape}")  # 应为 [2, 20, 128]
-print(f"RPE注意力偏置形状: {rpe_bias.shape}")  # 应为 [2, 20, 20]
+print(f"RPE 输出形状: {rpe_output.shape}")  # 应为 [2, 20, 128]
+print(f"RPE 注意力偏置形状: {rpe_bias.shape}")  # 应为 [2, 20, 20]
 
-# 测试RoPE
-print("\n测试旋转位置嵌入（RoPE）:")
+# 测试 RoPE
+print("\n 测试旋转位置嵌入（RoPE）:")
 rope_embedding = TransformerEmbedding(
     vocab_size=vocab_size,
     embedding_dim=embedding_dim,
@@ -558,7 +558,7 @@ rope_embedding = TransformerEmbedding(
     padding_idx=padding_idx
 )
 rope_output, _ = rope_embedding(input_ids)
-print(f"RoPE输出形状: {rope_output.shape}")  # 应为 [2, 20, 128]
+print(f"RoPE 输出形状: {rope_output.shape}")  # 应为 [2, 20, 128]
 ```
 
 运行上述测试代码，会得到类似以下的输出：
@@ -569,19 +569,19 @@ print(f"RoPE输出形状: {rope_output.shape}")  # 应为 [2, 20, 128]
 当前词汇表大小: 300/500
 当前词汇表大小: 400/500
 当前词汇表大小: 500/500
-BPE训练完成，最终词汇表大小: 500
+BPE 训练完成，最终词汇表大小: 500
 测试绝对位置嵌入（APE）:
-APE输出形状: torch.Size([2, 20, 128])
+APE 输出形状: torch.Size([2, 20, 128])
 
 测试相对位置嵌入（RPE）:
-RPE输出形状: torch.Size([2, 20, 128])
-RPE注意力偏置形状: torch.Size([2, 20, 20])
+RPE 输出形状: torch.Size([2, 20, 128])
+RPE 注意力偏置形状: torch.Size([2, 20, 20])
 
 测试旋转位置嵌入（RoPE）:
-RoPE输出形状: torch.Size([2, 20, 128])
+RoPE 输出形状: torch.Size([2, 20, 128])
 ```
 
-结果表明BPE分词器成功训练并构建了包含500个token的词汇表，三种位置嵌入机制都能正常工作，并输出预期形状的张量。APE和RoPE直接修改词嵌入向量，而RPE则生成额外的注意力偏置。
+结果表明 BPE 分词器成功训练并构建了包含 500 个 token 的词汇表，三种位置嵌入机制都能正常工作，并输出预期形状的张量。APE 和 RoPE 直接修改词嵌入向量，而 RPE 则生成额外的注意力偏置。
 
 ## 6. 总结与思考
 
@@ -591,10 +591,10 @@ RoPE输出形状: torch.Size([2, 20, 128])
 | RPE（相对） | 更符合语言特性，关注相对关系 | 实现复杂，计算成本高 | 对上下文关系敏感的任务 |
 | RoPE（旋转） | 数学优雅，外推性好，计算高效 | 理解难度较大 | 长文本处理，大语言模型 |
 
-通过本文的实现，掌握了Transformer中核心的嵌入机制，包括：
+通过本文的实现，掌握了 Transformer 中核心的嵌入机制，包括：
 
-1. 支持中英文的BPE分词器，能够将原始文本转换为token ID
-2. 词嵌入层，将离散ID转换为连续向量
-3. 三种主流的位置编码方式：APE、RPE和RoPE
+1. 支持中英文的 BPE 分词器，能够将原始文本转换为 token ID
+2. 词嵌入层，将离散 ID 转换为连续向量
+3. 三种主流的位置编码方式：APE、RPE 和 RoPE
 
-这些组件是构建Transformer模型的基础，理解它们的工作原理对于深入掌握大语言模型至关重要。在实际应用中，可以根据具体任务特点选择合适的位置编码方式。
+这些组件是构建 Transformer 模型的基础，理解它们的工作原理对于深入掌握大语言模型至关重要。在实际应用中，可以根据具体任务特点选择合适的位置编码方式。

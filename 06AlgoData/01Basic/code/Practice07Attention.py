@@ -28,7 +28,7 @@ def scaled_dot_product_attention(query, key, value, mask=None):
     
     # 3. 可选：应用掩码（在解码器中用于掩盖未来位置）
     if mask is not None:
-        # 将掩码中为0的位置置为一个非常大的负数，softmax后概率为0
+        # 将掩码中为 0 的位置置为一个非常大的负数，softmax 后概率为 0
         scaled_attention_logits += (mask * -1e9)
     
     # 4. 计算注意力权重 (softmax on the last axis, seq_len_k)
@@ -288,7 +288,7 @@ def benchmark_attention(attention_class, config, seq_len, batch_size=2, device='
     # 创建随机输入
     x = torch.randn(batch_size, seq_len, d_model).to(device)
     
-    # 清空GPU缓存
+    # 清空 GPU 缓存
     if device == 'cuda':
         torch.cuda.empty_cache()
     

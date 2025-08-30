@@ -138,15 +138,38 @@ Transformer 架构的详细内容：
 | Transformer 架构 | 04 Attention 注意力机制 | [PPT](./06AlgoData/01Basic/04Attention.pdf), [视频](https://www.bilibili.com/video/BV11AMHzuEet), [文章](./01Basic/04Attention.md) |
 | Transformer 架构 | 05 Attention 变种算法 | [PPT](./06AlgoData/01Basic/05GQAMLA.pdf), [视频](https://www.bilibili.com/video/BV1GzMUz8Eav), [文章](./01Basic/05GQAMLA.md) |
 | Transformer 架构 | 06 Transformer 长序列架构 | [PPT](./06AlgoData/01Basic/06LongSeq.pdf), [视频](https://www.bilibili.com/video/BV16PN6z6ELg), [文章](./01Basic/06LongSeq.md) |
-|---|----|--------------------|
 | Transformer 架构 | 07 大模型参数设置 | [PPT](./06AlgoData/01Basic/07Parameter.pdf), [视频](https://www.bilibili.com/video/BV1nTNkzjE3J), [文章](./01Basic/07Parameter.md) |
-| Transformer 实践 | 01 搭建迷你 Transformer | [Markdown](./06AlgoData/01Basic/Practice01MiniTranformer.md), [Jupyter](./01Basic/Practice01MiniTranformer.ipynb) |
-| Transformer 实践 | 02 从零实现 Transformer 训练 | [Markdown](./06AlgoData/01Basic/Practice02TransformerTrain.md), [Jupyter](./01Basic/Practice02TransformerTrain.ipynb) |
-| Transformer 实践 | 03 实战 Transformer 机器翻译 | [Markdown](./06AlgoData/01Basic/Practice03MachineTrans.md), [Jupyter](./01Basic/Practice03MachineTrans.ipynb) |
-| Transformer 实践 | 04 手把手实现核心机制 Sinusoidal 编码 | [Markdown](./06AlgoData/01Basic/Practice04Sinusoidal.md), [Jupyter](./01Basic/Practice04Sinusoidal.ipynb) |
-| Transformer 实践 | 05 手把手实现核心机制 BPE 分词算法 | [Markdown](./06AlgoData/01Basic/Practice05BPE.md), [Jupyter](.01Basic/Practice05BPE.ipynb) |
-| Transformer 实践 | 06 手把手实现核心机制 Embedding 词嵌入 | [Markdown](./06AlgoData/01Basic/Practice06Embedding.md), [Jupyter](./01Basic/Practice06Embedding.ipynb) |
-| Transformer 实践 | 07 深入注意力机制 MHA、MQA、GQA、MLA | [Markdown](./06AlgoData/01Basic/Practice07Attention.md), [Jupyter](./01Basic/Practice07Attention.ipynb) |
+|:sparkling_heart:|:star2:|:sparkling_heart:|
+| Transformer 实践 :computer: | 01 搭建迷你 Transformer | [Markdown](./06AlgoData/01Basic/Practice01MiniTranformer.md), [Jupyter](./01Basic/Practice01MiniTranformer.ipynb) |
+| Transformer 实践 :computer: | 02 从零实现 Transformer 训练 | [Markdown](./06AlgoData/01Basic/Practice02TransformerTrain.md), [Jupyter](./01Basic/Practice02TransformerTrain.ipynb) |
+| Transformer 实践 :computer: | 03 实战 Transformer 机器翻译 | [Markdown](./06AlgoData/01Basic/Practice03MachineTrans.md), [Jupyter](./01Basic/Practice03MachineTrans.ipynb) |
+| Transformer 实践 :computer: | 04 手把手实现核心机制 Sinusoidal 编码 | [Markdown](./06AlgoData/01Basic/Practice04Sinusoidal.md), [Jupyter](./01Basic/Practice04Sinusoidal.ipynb) |
+| Transformer 实践 :computer: | 05 手把手实现核心机制 BPE 分词算法 | [Markdown](./06AlgoData/01Basic/Practice05BPE.md), [Jupyter](.01Basic/Practice05BPE.ipynb) |
+| Transformer 实践 :computer: | 06 手把手实现核心机制 Embedding 词嵌入 | [Markdown](./06AlgoData/01Basic/Practice06Embedding.md), [Jupyter](./01Basic/Practice06Embedding.ipynb) |
+| Transformer 实践 :computer: | 07 深入注意力机制 MHA、MQA、GQA、MLA | [Markdown](./06AlgoData/01Basic/Practice07Attention.md), [Jupyter](./01Basic/Practice07Attention.ipynb) |
+
+MOE 架构原理的详细内容：
+
+| 大纲 | 小节 | 链接 |
+|:--- |:---- |:-------------------- |
+| MOE 基本介绍 | 01 MOE 架构剖析  | [PPT](./06AlgoData/02MoE/01MOEIntroducion.pdf), [视频](https://www.bilibili.com/video/BV17PNtekE3Y/), [文章](./06AlgoData/02MoE/01MOEIntroducion.md) |
+| MOE 前世今生 | 02 MOE 前世今生  | [PPT](./06AlgoData/02MoE/02MOEHistory.pdf), [视频](https://www.bilibili.com/video/BV1y7wZeeE96/), [文章](./06AlgoData/02MoE/02MOEHistory.md) |
+| MOE 核心论文 | 03 MOE 奠基论文  | [PPT](./06AlgoData/02MoE/03MOECreate.pdf), [视频](https://www.bilibili.com/video/BV1MiAYeuETj/), [文章](./06AlgoData/02MoE/03MOECreate.md) |
+| MOE 核心论文 | 04 MOE 初遇 RNN  | [PPT](./06AlgoData/02MoE/04MOERNN.pdf), [视频](https://www.bilibili.com/video/BV1RYAjeKE3o/), [文章](./06AlgoData/02MoE/04MOERNN.md) |
+| MOE 核心论文 | 05 GSard 解读  | [PPT](./06AlgoData/02MoE/05MOEGshard.pdf), [视频](https://www.bilibili.com/video/BV1r8ApeaEyW/), [文章](./06AlgoData/02MoE/05MOEGshard.md) |
+| MOE 核心论文 | 06 Switch Trans 解读  | [PPT](./06AlgoData/02MoE/06MOESwitch.pdf), [视频](https://www.bilibili.com/video/BV1UsPceJEEQ/), [文章](./06AlgoData/02MoE/06MOESwitch.md) |
+| MOE 核心论文 | 07 GLaM & ST-MOE 解读  | [PPT](./06AlgoData/02MoE/07MOEGLaM_STMOE.pdf), [视频](https://www.bilibili.com/video/BV1L59qYqEVw/), [文章](./06AlgoData/02MoE/07GLaM_STMOE.md) |
+| MOE 核心论文 | 08 DeepSeek MOE 解读  | [PPT](./06AlgoData/02MoE/08DeepSeekMoE.pdf), [视频](https://www.bilibili.com/video/BV1tE9HYUEdz/), [文章](./06AlgoData/02MoE/08DeepSeekMoE.md) |
+| MOE 架构原理 | 09 MOE 模型可视化  | [PPT](./06AlgoData/02MoE/09MoECore.pdf), [视频](https://www.bilibili.com/video/BV1Gj9ZYdE4N/), [文章](./06AlgoData/02MoE/09MoECore.md) |
+| 大模型遇 MOE | 10 MoE 参数与专家  | [PPT](./06AlgoData/02MoE/10MOELLM.pdf), [视频](https://www.bilibili.com/video/BV1UERNYqEwU/), [文章](./06AlgoData/02MoE/10MOELLM.md) |
+| 手撕 MOE 代码 | 11 单机单卡 MoE  | [PPT](./06AlgoData/02MoE/11MOECode.pdf), [视频](https://www.bilibili.com/video/BV1UTRYYUE5o) |
+| 手撕 MOE 代码 | 12 单机多卡 MoE  | [PPT](./06AlgoData/02MoE/11MOECode.pdf), [视频](https://www.bilibili.com/video/BV1JaR5YSEMN) |
+| 视觉 MoE | 13 视觉 MoE 模型  | [PPT](./06AlgoData/02MoE/12MOEFuture.pdf), [视频](https://www.bilibili.com/video/BV1JNQVYBEq7), [文章](./06AlgoData/02MoE/12MOEFuture.md) |
+|:sparkling_heart:|:star2:|:sparkling_heart:|
+| MOE 实践 :computer: | 01 基于 Huggingface 实现 MOE 推理任务 | [Markdown](./06AlgoData/02MoE/Practice01MOEInfer.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice01MOEInfer.ipynb) |
+| MOE 实践 :computer: | 02 从零开始手撕 MoE | [Markdown](./06AlgoData/02MoE/Practice02SignalMOE.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice02SignalMOE.ipynb) |
+| MOE 实践 :computer: | 03 MoE 从原理到分布式实现 | [Markdown](./06AlgoData/02MoE/Practice03IntrtaMOE.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice03IntrtaMOE.ipynb) |
+| MOE 实践 :computer: | 04 MoE 分布式性能分析 | [Markdown](./06AlgoData/02MoE/Practice04MOEAnalysize.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice04MOEAnalysize.ipynb) |
 
 ### **[07. 大模型应用](./07Application/)**
 

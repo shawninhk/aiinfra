@@ -12,7 +12,7 @@ np.random.seed(42)
 
 class Embedding(nn.Module):
     """
-    标准的嵌入层，将token索引映射为d_model维的向量
+    标准的嵌入层，将 token 索引映射为 d_model 维的向量
     
     Args:
         vocab_size: 词汇表大小
@@ -28,13 +28,13 @@ class Embedding(nn.Module):
     def forward(self, x):
         """
         Args:
-            x: 输入token索引，形状为 (batch_size, seq_len)
+            x: 输入 token 索引，形状为 (batch_size, seq_len)
             
         Returns:
             嵌入后的张量，形状为 (batch_size, seq_len, d_model)
         """
         # 根据索引从嵌入矩阵中查找对应的向量
-        # 并乘以sqrt(d_model)进行缩放，这是Transformer的标准做法
+        # 并乘以 sqrt(d_model)进行缩放，这是 Transformer 的标准做法
         return self.embed[x] * math.sqrt(self.d_model)
 
 
@@ -45,7 +45,7 @@ class PositionalEncoding(nn.Module):
     Args:
         d_model: 模型维度
         max_len: 最大序列长度
-        dropout: Dropout率
+        dropout: Dropout 率
     """
     def __init__(self, d_model, max_len=5000, dropout=0.1):
         super(PositionalEncoding, self).__init__()
@@ -67,7 +67,7 @@ class PositionalEncoding(nn.Module):
         # 添加批次维度: (1, max_len, d_model)
         pe = pe.unsqueeze(0)
         
-        # 将pe注册为缓冲区（不参与梯度更新）
+        # 将 pe 注册为缓冲区（不参与梯度更新）
         self.register_buffer('pe', pe)
         
     def forward(self, x):
@@ -78,7 +78,7 @@ class PositionalEncoding(nn.Module):
         Returns:
             添加位置编码后的张量，形状与输入相同
         """
-        # 将位置编码添加到输入中（只取前seq_len个位置）
+        # 将位置编码添加到输入中（只取前 seq_len 个位置）
         x = x + self.pe[:, :x.size(1)]
         return self.dropout(x)
 
@@ -92,14 +92,14 @@ def attention(query, key, value, mask=None, dropout=None):
         key: 键张量，形状为 (..., seq_len_k, d_k)
         value: 值张量，形状为 (..., seq_len_v, d_v)
         mask: 可选的掩码张量
-        dropout: 可选的dropout层
+        dropout: 可选的 dropout 层
         
     Returns:
         输出张量和注意力权重
     """
     d_k = query.size(-1)
     
-    # 计算Q和K的点积并缩放
+    # 计算 Q 和 K 的点积并缩放
     scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
     
     # 应用掩码（如果提供）
@@ -109,7 +109,7 @@ def attention(query, key, value, mask=None, dropout=None):
     # 计算注意力权重
     p_attn = F.softmax(scores, dim=-1)
     
-    # 应用dropout（如果提供）
+    # 应用 dropout（如果提供）
     if dropout is not None:
         p_attn = dropout(p_attn)
     
@@ -124,11 +124,11 @@ class MultiHeadAttention(nn.Module):
     Args:
         d_model: 模型维度
         h: 注意力头的数量
-        dropout: Dropout率
+        dropout: Dropout 率
     """
     def __init__(self, d_model, h, dropout=0.1):
         super(MultiHeadAttention, self).__init__()
-        assert d_model % h == 0, "d_model必须能被h整除"
+        assert d_model % h == 0, "d_model 必须能被 h 整除"
         
         self.d_model = d_model
         self.h = h
@@ -180,7 +180,7 @@ class FeedForward(nn.Module):
     Args:
         d_model: 模型维度
         d_ff: 前馈网络内部维度
-        dropout: Dropout率
+        dropout: Dropout 率
     """
     def __init__(self, d_model, d_ff, dropout=0.1):
         super(FeedForward, self).__init__()
@@ -205,7 +205,7 @@ class SublayerConnection(nn.Module):
     
     Args:
         size: 输入维度
-        dropout: Dropout率
+        dropout: Dropout 率
     """
     def __init__(self, size, dropout=0.1):
         super(SublayerConnection, self).__init__()
@@ -214,7 +214,7 @@ class SublayerConnection(nn.Module):
         
     def forward(self, x, sublayer):
         """
-        应用残差连接和层归一化（修正为标准Transformer顺序）
+        应用残差连接和层归一化（修正为标准 Transformer 顺序）
         
         Args:
             x: 输入张量
@@ -223,7 +223,7 @@ class SublayerConnection(nn.Module):
         Returns:
             归一化后的输出
         """
-        # 标准Transformer实现: norm(x + dropout(sublayer(x)))
+        # 标准 Transformer 实现: norm(x + dropout(sublayer(x)))
         return self.norm(x + self.dropout(sublayer(x)))
 
 
@@ -235,7 +235,7 @@ class EncoderLayer(nn.Module):
         d_model: 模型维度
         self_attn: 自注意力机制
         feed_forward: 前馈网络
-        dropout: Dropout率
+        dropout: Dropout 率
     """
     def __init__(self, d_model, self_attn, feed_forward, dropout=0.1):
         super(EncoderLayer, self).__init__()
@@ -269,7 +269,7 @@ class DecoderLayer(nn.Module):
         self_attn: 自注意力机制
         src_attn: 编码器-解码器注意力机制
         feed_forward: 前馈网络
-        dropout: Dropout率
+        dropout: Dropout 率
     """
     def __init__(self, d_model, self_attn, src_attn, feed_forward, dropout=0.1):
         super(DecoderLayer, self).__init__()
@@ -363,7 +363,7 @@ class Decoder(nn.Module):
 
 class Transformer(nn.Module):
     """
-    完整的Transformer模型
+    完整的 Transformer 模型
     
     Args:
         encoder: 编码器
@@ -467,7 +467,7 @@ def subsequent_mask(size):
 
 def make_model(src_vocab, tgt_vocab, N=6, d_model=512, d_ff=2048, h=8, dropout=0.1):
     """
-    构建完整的Transformer模型
+    构建完整的 Transformer 模型
     
     Args:
         src_vocab: 源词汇表大小
@@ -476,10 +476,10 @@ def make_model(src_vocab, tgt_vocab, N=6, d_model=512, d_ff=2048, h=8, dropout=0
         d_model: 模型维度
         d_ff: 前馈网络内部维度
         h: 注意力头数
-        dropout: Dropout率
+        dropout: Dropout 率
         
     Returns:
-        完整的Transformer模型
+        完整的 Transformer 模型
     """
     # 创建注意力机制和前馈网络
     attn = MultiHeadAttention(d_model, h, dropout)
@@ -519,7 +519,7 @@ def data_gen(batch_size, n_batches, seq_len, vocab_size):
         生成器，每次产生一个批次的(src, tgt)数据
     """
     for i in range(n_batches):
-        # 随机生成源序列（排除0，因为0通常用于填充）
+        # 随机生成源序列（排除 0，因为 0 通常用于填充）
         src = torch.randint(1, vocab_size, (batch_size, seq_len))
         # 目标序列与源序列相同（复制任务）
         tgt = src.clone()
@@ -532,7 +532,7 @@ def data_gen(batch_size, n_batches, seq_len, vocab_size):
 
 class NoamOpt:
     """
-    带warmup的学习率调度器
+    带 warmup 的学习率调度器
     """
     def __init__(self, model_size, factor, warmup, optimizer):
         self.optimizer = optimizer
@@ -562,7 +562,7 @@ def run_epoch(model, data_iter, loss_fn, optimizer):
     运行一个训练周期
     
     Args:
-        model: Transformer模型
+        model: Transformer 模型
         data_iter: 数据迭代器
         loss_fn: 损失函数
         optimizer: 优化器
@@ -605,7 +605,7 @@ def greedy_decode(model, src, src_mask, max_len, start_symbol, end_symbol):
     自回归贪婪解码
     
     Args:
-        model: Transformer模型
+        model: Transformer 模型
         src: 源序列
         src_mask: 源序列掩码
         max_len: 最大生成长度
@@ -660,13 +660,13 @@ def test_model(model, vocab_size, seq_len):
 # 主函数
 def main():
     # 设置超参数
-    vocab_size = 11  # 小词汇表，包含0-10，其中1是开始标记，10是结束标记
+    vocab_size = 11  # 小词汇表，包含 0-10，其中 1 是开始标记，10 是结束标记
     base_seq_len = 10  # 短序列
     d_model = 32     # 小模型维度（为了快速训练）
-    N = 2            # 2层编码器和解码器
-    h = 4            # 4个注意力头
+    N = 2            # 2 层编码器和解码器
+    h = 4            # 4 个注意力头
     d_ff = 64        # 前馈网络内部维度
-    dropout = 0.1    # Dropout率
+    dropout = 0.1    # Dropout 率
 
     # 创建模型
     model = make_model(vocab_size, vocab_size, N, d_model, d_ff, h, dropout)
@@ -686,7 +686,7 @@ def main():
     print("训练完成!")
 
     # 测试模型
-    print("\n测试模型...")
+    print("\n 测试模型...")
     test_model(model, vocab_size, base_seq_len)
 
 
