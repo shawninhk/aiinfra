@@ -17,6 +17,14 @@
 | Transformer 架构 | 05 Attention 变种算法 | [PPT](./05GQAMLA.pdf), [视频](https://www.bilibili.com/video/BV1GzMUz8Eav), [文章](./05GQAMLA.md) |
 | Transformer 架构 | 06 Transformer 长序列架构 | [PPT](./06LongSeq.pdf), [视频](https://www.bilibili.com/video/BV16PN6z6ELg), [文章](./06LongSeq.md) |
 | Transformer 架构 | 07 大模型参数设置 | [PPT](./07Parameter.pdf), [视频](https://www.bilibili.com/video/BV1nTNkzjE3J), [文章](./07Parameter.md) |
+|:sparkling_heart:|:star2:|:sparkling_heart:|
+| 代码实践 | 01 搭建迷你 Transformer | [Markdown](./Practice01MiniTranformer.md), [Jupyter](./Practice01MiniTranformer.ipynb) |
+| 代码实践 | 02 从零实现 Transformer 训练 | [Markdown](./Practice02TransformerTrain.md), [Jupyter](./Practice02TransformerTrain.ipynb) |
+| 代码实践 | 03 实战 Transformer 机器翻译 | [Markdown](./Practice03MachineTrans.md), [Jupyter](./Practice03MachineTrans.ipynb) |
+| 代码实践 | 04 手把手实现核心机制 Sinusoidal 编码 | [Markdown](./Practice04Sinusoidal.md), [Jupyter](./Practice04Sinusoidal.ipynb) |
+| 代码实践 | 05 手把手实现核心机制 BPE 分词算法 | [Markdown](./Practice05BPE.md), [Jupyter](./Practice05BPE.ipynb) |
+| 代码实践 | 06 手把手实现核心机制 Embedding 词嵌入 | [Markdown](./Practice06Embedding.md), [Jupyter](./Practice06Embedding.ipynb) |
+| 代码实践 | 07 深入注意力机制 MHA、MQA、GQA、MLA | [Markdown](./Practice07Attention.md), [Jupyter](./Practice07Attention.ipynb) |
 
 ## 内容大纲
 
