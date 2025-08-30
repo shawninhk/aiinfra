@@ -41,7 +41,7 @@
 
 ## 课程部分
 
-### **[00. 大模型系统概述](./00Summary/)**
+### :checkered_flag: **[00. 大模型系统概述](./00Summary/)**
 
 大模型系统概述、Scaling Law 解读、训练推理流程、系统区别及未来趋势。
 
@@ -52,7 +52,7 @@
 | 3      | [与 AI 系统区别](./00Summary/03Different) | AI 系统与大模型系统的通用性、资源与软件栈差异  |
 | 3      | [大模型系统发展](./00Summary/04Develop) | 大模型系统未来趋势：技术演进、场景应用与算力生态升级  |
 
-### **[01. AI 计算集群](./01AICluster/)**
+### :checkered_flag: **[01. AI 计算集群](./01AICluster/)**
 
 AI 集群架构演进、万卡集群方案、性能建模与优化，GPU/NPU 精度差异及定位方法。
 
@@ -63,7 +63,7 @@ AI 集群架构演进、万卡集群方案、性能建模与优化，GPU/NPU 精
 | 3      | [万卡 AI 集群](./01AICluster/03SuperPod/)  | 围绕万卡 AI 集群从存算网络协同、快速交付与紧张工期等挑战   |
 | 4      | [集群性能分析](./01AICluster/03Analysis/)  | 集群性能指标分析、建模与常见问题定位方法解析   |
 
-### **[02. 通信与存储](./02StorComm/)**
+### :checkered_flag: **[02. 通信与存储](./02StorComm/)**
 
 通信与存储篇：AI 集群组网技术、高速互联方案、集合通信原理与优化、存储系统设计及大模型挑战。
 
@@ -75,7 +75,7 @@ AI 集群架构演进、万卡集群方案、性能建模与优化，GPU/NPU 精
 | 4      | [集合通信库](./02StorComm/04CommLibrary/)   | 集合通信库技术解析：MPI、NCCL 与 HCCL 架构及算法原理  |
 | 5      | [集群存储之路](./02StorComm/05StorforAI/) | 数据存储、CheckPoint 梯度检查点等存储与大模型结合的相关技术  |
 
-### **[03. 集群容器与云原生](./03DockCloud/)**
+### :checkered_flag: **[03. 集群容器与云原生](./03DockCloud/)**
 
 AI 集群云原生篇：容器技术、K8S 编排、AI 云平台与任务调度，提升集群资源管理与应用部署效率。
 
@@ -86,7 +86,7 @@ AI 集群云原生篇：容器技术、K8S 编排、AI 云平台与任务调度�
 | 3      | [深入 K8S](./03DockCloud/03DiveintoK8s/) |  K8S 核心机制深度解析：编排、存储、网络、调度与监控实践 |
 | 4      | [AI 云平台](./03DockCloud/04CloudforAI/) |  AI 云平台演进与云原生架构解析，涵盖持续交付与智能化运维实践  |
 
-### **[04. 分布式训练](./04Train/)**
+### :checkered_flag: **[04. 分布式训练](./04Train/)**
 
 大模型训练全解析：并行策略、加速算法、微调与评估，覆盖训练到优化的完整流程。
 
@@ -99,7 +99,7 @@ AI 集群云原生篇：容器技术、K8S 编排、AI 云平台与任务调度�
 | 5      | [大模型微调 SFT](./04Train/05FineTune/) |  大模型微调算法原理、变体优化与多模态实践  |
 | 6      | [大模型验证评估](./04Train/06VerifValid/) | 大模型评估、基准测试与统一框架解析   |
 
-### **[05. 分布式推理](./05Infer/)**
+### :checkered_flag: **[05. 分布式推理](./05Infer/)**
 
 大模型推理全解析：加速技术、架构优化、长序列处理与压缩方案，覆盖推理全流程与实战实践。
 
@@ -114,7 +114,7 @@ AI 集群云原生篇：容器技术、K8S 编排、AI 云平台与任务调度�
 | 7      | [推理框架架构](./05Infer/07Framework) | 主流推理框架 vLLM、SGLang 等核心技术与部署实践 |
 | 8      | [DeepSeek 开源](./05Infer/08DeepSeek) | DeepSeek 推理 FlashMLA、DeepEP 与高效算子加速解析 |
 
-### **[06. 大模型算法与数据](./06AlgoData/)**
+### :checkered_flag: **[06. 大模型算法与数据](./06AlgoData/)**
 
 大模型算法与数据全览：Transformer 架构、MoE 创新、多模态模型与数据工程全流程实践。
 
@@ -128,7 +128,7 @@ AI 集群云原生篇：容器技术、K8S 编排、AI 云平台与任务调度�
 | 6      | [语音大模型](./06AlgoData/06AudioGenerat) | 语音多模态识别、合成与端到端模型演进及推理应用  |
 | 7      | [数据工程](./06AlgoData/07DataEngineer) | 数据工程、Prompt Engine 等相关技术 |
 
-Transformer 架构的详细内容：
+#### :triangular_flag_on_post:	Transformer 架构详细内容
 
 | 大纲 | 小节 | 链接 |
 |:--- |:---- |:-------------------- |
@@ -148,7 +148,7 @@ Transformer 架构的详细内容：
 | Transformer 实践 :computer: | 06 手把手实现核心机制 Embedding 词嵌入 | [Markdown](./06AlgoData/01Basic/Practice06Embedding.md), [Jupyter](./01Basic/Practice06Embedding.ipynb) |
 | Transformer 实践 :computer: | 07 深入注意力机制 MHA、MQA、GQA、MLA | [Markdown](./06AlgoData/01Basic/Practice07Attention.md), [Jupyter](./01Basic/Practice07Attention.ipynb) |
 
-MOE 架构原理的详细内容：
+#### :triangular_flag_on_post:	MOE 架构原理详细内容
 
 | 大纲 | 小节 | 链接 |
 |:--- |:---- |:-------------------- |
@@ -171,7 +171,7 @@ MOE 架构原理的详细内容：
 | MOE 实践 :computer: | 03 MoE 从原理到分布式实现 | [Markdown](./06AlgoData/02MoE/Practice03IntrtaMOE.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice03IntrtaMOE.ipynb) |
 | MOE 实践 :computer: | 04 MoE 分布式性能分析 | [Markdown](./06AlgoData/02MoE/Practice04MOEAnalysize.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice04MOEAnalysize.ipynb) |
 
-### **[07. 大模型应用](./07Application/)**
+### :checkered_flag: **[07. 大模型应用](./07Application/)**
 
 大模型应用篇：AI Agent 技术、RAG 检索增强生成与 GraphRAG，推动智能体与知识增强应用落地。
 
