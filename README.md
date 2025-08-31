@@ -4,7 +4,7 @@
 
 文字课程内容正在一节节补充更新，尽可能抽空继续更新正在 :octocat: [AIInfra](https://github.com/Infrasys-AI/AIInfra)，希望您多多鼓励和参与进来！！！
 
-文字课程开源在 :hamburger: [AIInfra](https://infrasys-ai.github.io/aiinfra-docs)，系列视频托管[B 站 ZOMI 酱](https://space.bilibili.com/517221395)和 :yt: [油管 ZOMI6222](https://www.youtube.com/@zomi6222/videos)，PPT 开源在 :octocat: [AIInfra](https://github.com/Infrasys-AI/AIInfra)，欢迎取用！！！
+文字课程开源在 :hamburger: [AIInfra](https://infrasys-ai.github.io/aiinfra-docs)，系列视频托管[B 站 ZOMI 酱](https://space.bilibili.com/517221395)和 :yt: [油管 ZOMI6222](https://www.youtube.com/@zomi6222/videos)，PPT 开源在 :octocat: [AIInfra](https://github.com/Infrasys-AI/AIInfra)，欢迎引用！
 
 ## 课程背景
 
@@ -199,6 +199,6 @@ AI 集群云原生篇：容器技术、K8S 编排、AI 云平台与任务调度�
 >
 > 非常希望您也参与到这个开源课程中，B 站给 ZOMI 留言哦！
 >
-> 欢迎大家使用的过程中发现 bug 或者勘误直接提交代码 PR 到开源社区哦！
+> 欢迎发现 bug 或者勘误直接提交代码 PR 到社区哦！
 >
 > 请大家尊重开源和 ZOMI 的努力，引用 PPT 的内容请规范转载标明出处哦！
