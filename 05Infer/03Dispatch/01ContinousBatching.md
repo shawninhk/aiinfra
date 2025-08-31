@@ -96,7 +96,7 @@ Batching和批处理统一指代，不要一会用中文，一会用英文
 
 因此需要在用户请求和推理引擎之间创建一个中间过程，在这个中间过程中，我们对所有的请求是可以控制的。因此，**用户不会直接将请求发送到推理引擎后端，而是发送到一个 API 服务器（LLM-Server），在API服务器层面可以对队列部分进行设计来实现一些优先级划分，更优的Batching策略等**。
 
-## Continous Batching：神之一笔但扔在不断改进
+## Continous Batching
 
 !!!!!!
 介绍下面的内容
@@ -126,7 +126,7 @@ Batching和批处理统一指代，不要一会用中文，一会用英文
 
 而Self-Attention的本质是“序列级”的。它的核心就是在序列内部的Token之间建立关系。要计算一个Token的输出，必须将它与同一序列中所有其他Token的Key进行点积运算，然后通过Softmax进行归一化。这意味着，序列中的任何一个Token的计算都依赖于整个序列。**因此每个请求的 mask、KV cache 和 token 位置可能不同，导致其张量形状不一致，无法直接合并处理。**
 
-### Continous Batching 提升效率本质
+### Continous Batching 加速本质
 
 Continous Batching混合了Prefill和Decode阶段进行Batching，其优势在于：**用一种任务填补另一种任务的资源空闲时间，在调度阶段人为混合了这两种计算阶段的流水线！**
 
