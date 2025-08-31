@@ -13,3 +13,4 @@ _build/
 06Foundation/01Introduce/.DS_Store
 06Foundation/02AICluster/.DS_Store
 build_books/create_dir.py
+prompt.txt

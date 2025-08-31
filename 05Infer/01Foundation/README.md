@@ -1,4 +1,4 @@
-<!--Copyright ©  适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
+<!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
 # 大模型推理基本概念
 
