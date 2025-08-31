@@ -33,6 +33,8 @@ Transformer 是一种基于 自注意力机制（Self-Attention）的深度学�
 首先导入所需的 PyTorch 和数学库：PyTorch 提供张量操作和神经网络模块，math 库用于计算缩放因子等数学操作，这是实现后续模块的基础依赖。
 
 ```python
+:linenos:
+
 import torch
 import torch.nn as nn
 import math
@@ -41,6 +43,8 @@ import math
 与论文一致使用固定的正余弦位置编码方式。注意编码维度必须为偶数——这是因为编码需将维度平分为两部分，分别填充正弦（sin）和余弦（cos）值，确保每个位置的编码在不同维度上有差异化的频率特征，从而精准区分序列中不同位置的 token。
 
 ```python
+:linenos:
+
 def sinusoidal_pos_encoding(seq_len: int, d_model: int) -> torch.Tensor:
     if d_model % 2 != 0:
         raise ValueError("d_model 必须为偶数")
@@ -74,6 +78,8 @@ def sinusoidal_pos_encoding(seq_len: int, d_model: int) -> torch.Tensor:
 注意力机制的核心逻辑是：计算 `q` 与所有 `k` 的匹配程度（打分），通过 softmax 将打分转化为注意力权重（权重和为 1，代表每个位置的重要性占比），最后用权重对 `v` 加权求和，得到融合了全局上下文的新表示。
 
 ```python
+:linenos:
+
 def scaled_dot_product_attention(q, k, v):
 
     # 计算注意力打分矩阵：q 与 k 的转置点积（捕捉 q 与每个 k 的匹配度），然后除以 sqrt(d_k) 进行缩放
@@ -104,6 +110,8 @@ def scaled_dot_product_attention(q, k, v):
 - PyTorch 的广播机制会自动将 `pe` 扩展为 `(batch_size, seq_len, d_model)`，确保两者维度匹配后逐元素相加。
 
 ```python
+:linenos:
+
 class MiniTransformerEncoder(nn.Module):
     def __init__(self, vocab_size, d_model):
         super().__init__()
@@ -149,6 +157,8 @@ class MiniTransformerEncoder(nn.Module):
 为了测试模型输出是否符合预期，我们用一个假输入 `[3, 1, 7]`（代表序列长度为 3 的 token 索引）来运行前向传播。这里 batch_size=1（单条样本），模型会输出每个 token 的上下文特征向量，我们通过打印输出验证模型功能是否正常。
 
 ```python
+:linenos:
+
 # 初始化模型：词汇表大小 50（假设包含 50 个不同 token），模型维度 d_model=16（小维度便于测试）
 model = MiniTransformerEncoder(vocab_size=50, d_model=16)
 # 假输入：shape 为[1, 3] → (batch_size=1, seq_len=3)
