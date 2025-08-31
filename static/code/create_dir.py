@@ -157,7 +157,7 @@ def getallfile(path):
 				new_path = dir_paths+"/"+new_dir_name
 				os.makedirs(new_path, exist_ok=True)
 				shutil.copy(fp, new_path)
-				# 修改image目录
+				# 修改 image 目录
 				change_imagepath_markdown(new_path+"/"+os.path.basename(fp))
 
 # target_dir1 = '/home/< 主机用户名 >/< 目录 >/< 从网络拉取的总文件夹名称 >/01AICluster'

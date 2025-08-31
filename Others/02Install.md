@@ -243,3 +243,7 @@ title: AIInfra & AIInfra
 Thanks you!!!
 ```
 -->
+
+## 附录
+
+使用主题链接：https://daobook.github.io/sphinx-book-theme

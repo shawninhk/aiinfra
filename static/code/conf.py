@@ -121,7 +121,9 @@ html_theme_options = {
     # "use_repository_button": True,
     "use_download_button": True,
     "use_sidenotes": True,
-    "show_toc_level": 3,
+    "toc_title": "目录",           # 目录标题
+    "toc_numbered": True,          # 关键：启用序号
+    "show_toc_level": 2,          # 显示层级深度
     "logo": {
         "image_dark": "_static/logo-wide.svg",
         # "text": html_title,  # Uncomment to try text with logo
