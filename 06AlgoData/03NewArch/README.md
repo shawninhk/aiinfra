@@ -8,12 +8,14 @@
 
 > 建议优先下载 PDF 版本，PPT 版本会因为字体缺失等原因导致版本很丑哦~
 
-
-| 大纲 | 小节 | 链接 |
-|:--- |:---- |:-------------------- |
-| 创新架构 | 0  | [PPT](), [视频]() |
-|:sparkling_heart:|:star2:|:sparkling_heart:|
-| 创新架构实践 :computer: | 01  | [Markdown](), [Jupyter]() |
+| 大纲 | 小节 | 链接 | 状态 |
+|:--- |:---- |:-------------------- |:---- |
+| 创新架构 | 01 打破 Transformer 架构垄断 | [PPT](./01NewArch.pdf), [视频](https://www.bilibili.com/video/BV12EtRe4Ech/) | :white_check_mark: |
+| 创新架构 | 02 Linear Transformer 线性层 | [PPT](./02LinearAtt.pdf), [视频](https://www.bilibili.com/video/BV1V7s9etEmQ) | :white_check_mark: |
+|:sparkling_heart:|:star2:|:sparkling_heart:| |
+| 代码实践 :computer: | 01 基于 RWKV 的 RNN 范式革新 | [Markdown](./Practice01RWKV.md), [Jupyter](./notebook/Practice01RWKV.ipynb) | :white_check_mark: |
+| 代码实践 :computer: | 02 Mamba 状态空间模型 | [Markdown](./Practice02Mamba.md), [Jupyter](./notebook/Practice02Mamba.ipynb) | :white_check_mark: |
+| 代码实践 :computer: | 03 RetNet：混合训练实战 | [Markdown](./Practice03RetNet.md), [Jupyter](./notebook/Practice03RetNet.ipynb) | :white_check_mark: |
 
 ## 备注
 

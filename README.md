@@ -58,24 +58,24 @@
 
 AI 集群架构演进、万卡集群方案、性能建模与优化，GPU/NPU 精度差异及定位方法。
 
-| 编号  | 名称       | 具体内容      |
-|:---:|:--- |:--- |
-| 1      | [计算集群之路](./01AICluster/01Roadmap/) |  高性能计算集群发展与万卡 AI 集群建设及机房基础设施挑战  |
-| 2      | [L0/L1 AI 集群基建](./01AICluster/02L0L1Base/)   | 服务器节点的基础知识、散热技术的发展与实践       |
-| 3      | [万卡 AI 集群](./01AICluster/03SuperPod/)  | 围绕万卡 AI 集群从存算网络协同、快速交付与紧张工期等挑战   |
-| 4      | [集群性能分析](./01AICluster/03Analysis/)  | 集群性能指标分析、建模与常见问题定位方法解析   |
+| 编号  | 名称       | 具体内容      | 状态 |
+|:---:|:--- |:--- |:--- |
+| 1      | [计算集群之路](./01AICluster/01Roadmap/) |  高性能计算集群发展与万卡 AI 集群建设及机房基础设施挑战  | :white_check_mark: |
+| 2      | [L0/L1 AI 集群基建](./01AICluster/02L0L1Base/)   | 服务器节点的基础知识、散热技术的发展与实践       | :white_check_mark: |
+| 3      | [万卡 AI 集群](./01AICluster/03SuperPod/)  | 围绕万卡 AI 集群从存算网络协同、快速交付与紧张工期等挑战   | :white_check_mark: |
+| 4      | [集群性能分析](./01AICluster/03Analysis/)  | 集群性能指标分析、建模与常见问题定位方法解析   | :o: |
 
 ### :checkered_flag: **[02. 通信与存储](./02StorComm/)**
 
 通信与存储篇：AI 集群组网技术、高速互联方案、集合通信原理与优化、存储系统设计及大模型挑战。
 
-| 编号  | 名称       | 具体内容      |
-|:---:|:--- |:--- |
-| 1      | [集群组网之路](./02StorComm/01Roadmap/) | AI 集群组网架构设计与高速互联技术解析  |
-| 2      | [网络通信进阶](./02StorComm/02NetworkComm/) | 网络通信技术进阶：高速互联、拓扑算法与拥塞控制解析  |
-| 3      | [集合通信原理](./02StorComm/03CollectComm/) | 通信域、通信算法、集合通信原语  |
-| 4      | [集合通信库](./02StorComm/04CommLibrary/)   | 集合通信库技术解析：MPI、NCCL 与 HCCL 架构及算法原理  |
-| 5      | [集群存储之路](./02StorComm/05StorforAI/) | 数据存储、CheckPoint 梯度检查点等存储与大模型结合的相关技术  |
+| 编号  | 名称       | 具体内容      | 状态 |
+|:---:|:--- |:--- |:--- |
+| 1      | [集群组网之路](./02StorComm/01Roadmap/) | AI 集群组网架构设计与高速互联技术解析  | :white_check_mark: |
+| 2      | [网络通信进阶](./02StorComm/02NetworkComm/) | 网络通信技术进阶：高速互联、拓扑算法与拥塞控制解析  | :o: |
+| 3      | [集合通信原理](./02StorComm/03CollectComm/) | 通信域、通信算法、集合通信原语  | :white_check_mark: |
+| 4      | [集合通信库](./02StorComm/04CommLibrary/)   | 集合通信库技术解析：MPI、NCCL 与 HCCL 架构及算法原理  | :white_check_mark: |
+| 5      | [集群存储之路](./02StorComm/05StorforAI/) | 数据存储、CheckPoint 梯度检查点等存储与大模型结合的相关技术  | :white_check_mark: |
 
 ### :checkered_flag: **[03. 集群容器与云原生](./03DockCloud/)**
 
@@ -120,58 +120,58 @@ AI 集群云原生篇：容器技术、K8S 编排、AI 云平台与任务调度�
 
 大模型算法与数据全览：Transformer 架构、MoE 创新、多模态模型与数据工程全流程实践。
 
-| 编号  | 名称       | 具体内容      |
-|:---:|:--- |:--- |
-| 1      | [Transformer 架构](./06AlgoData/01Basic/) | Transformer 架构原理深度介绍 |
-| 2      | [MoE 架构](./06AlgoData/02MoE/) | MoE(Mixture of Experts) 混合专家模型架构原理与细节实现 |
-| 3      | [创新架构](./06AlgoData/03NewArch) | SSM、MMABA、RWKV、Linear Transformer、JPEA 等新大模型结构 |
-| 4      | [图文生成与理解](./06AlgoData/04ImageTextGenerat) | 多模态对齐、生成、理解及统一多模态架构解析  |
-| 5      | [视频大模型](./06AlgoData/05VideoGenerat) | 视频多模态理解与生成方法演进及 Flow Matching 应用 |
-| 6      | [语音大模型](./06AlgoData/06AudioGenerat) | 语音多模态识别、合成与端到端模型演进及推理应用  |
-| 7      | [数据工程](./06AlgoData/07DataEngineer) | 数据工程、Prompt Engine 等相关技术 |
+| 编号  | 名称       | 具体内容      | 状态 |
+|:---:|:--- |:--- |:--- |
+| 1      | [Transformer 架构](./06AlgoData/01Basic/) | Transformer 架构原理深度介绍 | :white_check_mark: |
+| 2      | [MoE 架构](./06AlgoData/02MoE/) | MoE(Mixture of Experts) 混合专家模型架构原理与细节实现 | :white_check_mark: |
+| 3      | [创新架构](./06AlgoData/03NewArch) | SSM、MMABA、RWKV、Linear Transformer、JPEA 等新大模型结构 | :o: |
+| 4      | [图文生成与理解](./06AlgoData/04ImageTextGenerat) | 多模态对齐、生成、理解及统一多模态架构解析  | :o: |
+| 5      | [视频大模型](./06AlgoData/05VideoGenerat) | 视频多模态理解与生成方法演进及 Flow Matching 应用 | :o: |
+| 6      | [语音大模型](./06AlgoData/06AudioGenerat) | 语音多模态识别、合成与端到端模型演进及推理应用  | :o: |
+| 7      | [数据工程](./06AlgoData/07DataEngineer) | 数据工程、Prompt Engine 等相关技术 | :o: |
 
 #### :triangular_flag_on_post:	Transformer 架构详细内容
 
-| 大纲 | 小节 | 链接 |
-|:--- |:---- |:-------------------- |
-| Transformer 架构 | 01 Transformer 基础结构 | [PPT](./06AlgoData/01Basic/01Transformer.pdf), [视频](https://www.bilibili.com/video/BV1rt421476q/), [文章](./01Basic/01Transformer.md) |
-| Transformer 架构 | 02 大模型 Tokenizer 算法 | [PPT](./06AlgoData/01Basic/02Tokenizer.pdf), [视频](https://www.bilibili.com/video/BV16pTJz9EV4), [文章](./01Basic/02Tokenizer.md) |
-| Transformer 架构 | 03 大模型 Embedding 算法 | [PPT](./06AlgoData/01Basic/03Embeding.pdf), [视频](https://www.bilibili.com/video/BV1SSTgzLEzf), [文章](./01Basic/03Embeding.md) |
-| Transformer 架构 | 04 Attention 注意力机制 | [PPT](./06AlgoData/01Basic/04Attention.pdf), [视频](https://www.bilibili.com/video/BV11AMHzuEet), [文章](./01Basic/04Attention.md) |
-| Transformer 架构 | 05 Attention 变种算法 | [PPT](./06AlgoData/01Basic/05GQAMLA.pdf), [视频](https://www.bilibili.com/video/BV1GzMUz8Eav), [文章](./01Basic/05GQAMLA.md) |
-| Transformer 架构 | 06 Transformer 长序列架构 | [PPT](./06AlgoData/01Basic/06LongSeq.pdf), [视频](https://www.bilibili.com/video/BV16PN6z6ELg), [文章](./01Basic/06LongSeq.md) |
-| Transformer 架构 | 07 大模型参数设置 | [PPT](./06AlgoData/01Basic/07Parameter.pdf), [视频](https://www.bilibili.com/video/BV1nTNkzjE3J), [文章](./01Basic/07Parameter.md) |
-|:sparkling_heart:|:star2:|:sparkling_heart:|
-| Transformer 实践 :computer: | 01 搭建迷你 Transformer | [Markdown](./06AlgoData/01Basic/Practice01MiniTranformer.md), [Jupyter](./01Basic/Practice01MiniTranformer.ipynb) |
-| Transformer 实践 :computer: | 02 从零实现 Transformer 训练 | [Markdown](./06AlgoData/01Basic/Practice02TransformerTrain.md), [Jupyter](./01Basic/Practice02TransformerTrain.ipynb) |
-| Transformer 实践 :computer: | 03 实战 Transformer 机器翻译 | [Markdown](./06AlgoData/01Basic/Practice03MachineTrans.md), [Jupyter](./01Basic/Practice03MachineTrans.ipynb) |
-| Transformer 实践 :computer: | 04 手把手实现核心机制 Sinusoidal 编码 | [Markdown](./06AlgoData/01Basic/Practice04Sinusoidal.md), [Jupyter](./01Basic/Practice04Sinusoidal.ipynb) |
-| Transformer 实践 :computer: | 05 手把手实现核心机制 BPE 分词算法 | [Markdown](./06AlgoData/01Basic/Practice05BPE.md), [Jupyter](.01Basic/Practice05BPE.ipynb) |
-| Transformer 实践 :computer: | 06 手把手实现核心机制 Embedding 词嵌入 | [Markdown](./06AlgoData/01Basic/Practice06Embedding.md), [Jupyter](./01Basic/Practice06Embedding.ipynb) |
-| Transformer 实践 :computer: | 07 深入注意力机制 MHA、MQA、GQA、MLA | [Markdown](./06AlgoData/01Basic/Practice07Attention.md), [Jupyter](./01Basic/Practice07Attention.ipynb) |
+| 大纲 | 小节 | 链接 | 状态 |
+|:--- |:---- |:-------------------- |:---- |
+| Transformer 架构 | 01 Transformer 基础结构 | [PPT](./06AlgoData/01Basic/01Transformer.pdf), [视频](https://www.bilibili.com/video/BV1rt421476q/), [文章](./01Basic/01Transformer.md) | :white_check_mark: |
+| Transformer 架构 | 02 大模型 Tokenizer 算法 | [PPT](./06AlgoData/01Basic/02Tokenizer.pdf), [视频](https://www.bilibili.com/video/BV16pTJz9EV4), [文章](./01Basic/02Tokenizer.md) | :white_check_mark: |
+| Transformer 架构 | 03 大模型 Embedding 算法 | [PPT](./06AlgoData/01Basic/03Embeding.pdf), [视频](https://www.bilibili.com/video/BV1SSTgzLEzf), [文章](./01Basic/03Embeding.md) | :white_check_mark: |
+| Transformer 架构 | 04 Attention 注意力机制 | [PPT](./06AlgoData/01Basic/04Attention.pdf), [视频](https://www.bilibili.com/video/BV11AMHzuEet), [文章](./01Basic/04Attention.md) | :white_check_mark: |
+| Transformer 架构 | 05 Attention 变种算法 | [PPT](./06AlgoData/01Basic/05GQAMLA.pdf), [视频](https://www.bilibili.com/video/BV1GzMUz8Eav), [文章](./01Basic/05GQAMLA.md) | :white_check_mark: |
+| Transformer 架构 | 06 Transformer 长序列架构 | [PPT](./06AlgoData/01Basic/06LongSeq.pdf), [视频](https://www.bilibili.com/video/BV16PN6z6ELg), [文章](./01Basic/06LongSeq.md) | :white_check_mark: |
+| Transformer 架构 | 07 大模型参数设置 | [PPT](./06AlgoData/01Basic/07Parameter.pdf), [视频](https://www.bilibili.com/video/BV1nTNkzjE3J), [文章](./01Basic/07Parameter.md) | :white_check_mark: |
+|:sparkling_heart:|:star2:|:sparkling_heart:| |
+| Transformer 实践 :computer: | 01 搭建迷你 Transformer | [Markdown](./06AlgoData/01Basic/Practice01MiniTranformer.md), [Jupyter](./01Basic/Practice01MiniTranformer.ipynb) | :white_check_mark: |
+| Transformer 实践 :computer: | 02 从零实现 Transformer 训练 | [Markdown](./06AlgoData/01Basic/Practice02TransformerTrain.md), [Jupyter](./01Basic/Practice02TransformerTrain.ipynb) | :white_check_mark: |
+| Transformer 实践 :computer: | 03 实战 Transformer 机器翻译 | [Markdown](./06AlgoData/01Basic/Practice03MachineTrans.md), [Jupyter](./01Basic/Practice03MachineTrans.ipynb) | :white_check_mark: |
+| Transformer 实践 :computer: | 04 手把手实现核心机制 Sinusoidal 编码 | [Markdown](./06AlgoData/01Basic/Practice04Sinusoidal.md), [Jupyter](./01Basic/Practice04Sinusoidal.ipynb) | :white_check_mark: |
+| Transformer 实践 :computer: | 05 手把手实现核心机制 BPE 分词算法 | [Markdown](./06AlgoData/01Basic/Practice05BPE.md), [Jupyter](.01Basic/Practice05BPE.ipynb) | :white_check_mark: |
+| Transformer 实践 :computer: | 06 手把手实现核心机制 Embedding 词嵌入 | [Markdown](./06AlgoData/01Basic/Practice06Embedding.md), [Jupyter](./01Basic/Practice06Embedding.ipynb) | :white_check_mark: |
+| Transformer 实践 :computer: | 07 深入注意力机制 MHA、MQA、GQA、MLA | [Markdown](./06AlgoData/01Basic/Practice07Attention.md), [Jupyter](./01Basic/Practice07Attention.ipynb) | :white_check_mark: |
 
-#### :triangular_flag_on_post:	MOE 架构原理详细内容
+#### :triangular_flag_on_post: MOE 架构原理详细内容
 
-| 大纲 | 小节 | 链接 |
-|:--- |:---- |:-------------------- |
-| MOE 基本介绍 | 01 MOE 架构剖析  | [PPT](./06AlgoData/02MoE/01MOEIntroducion.pdf), [视频](https://www.bilibili.com/video/BV17PNtekE3Y/), [文章](./06AlgoData/02MoE/01MOEIntroducion.md) |
-| MOE 前世今生 | 02 MOE 前世今生  | [PPT](./06AlgoData/02MoE/02MOEHistory.pdf), [视频](https://www.bilibili.com/video/BV1y7wZeeE96/), [文章](./06AlgoData/02MoE/02MOEHistory.md) |
-| MOE 核心论文 | 03 MOE 奠基论文  | [PPT](./06AlgoData/02MoE/03MOECreate.pdf), [视频](https://www.bilibili.com/video/BV1MiAYeuETj/), [文章](./06AlgoData/02MoE/03MOECreate.md) |
-| MOE 核心论文 | 04 MOE 初遇 RNN  | [PPT](./06AlgoData/02MoE/04MOERNN.pdf), [视频](https://www.bilibili.com/video/BV1RYAjeKE3o/), [文章](./06AlgoData/02MoE/04MOERNN.md) |
-| MOE 核心论文 | 05 GSard 解读  | [PPT](./06AlgoData/02MoE/05MOEGshard.pdf), [视频](https://www.bilibili.com/video/BV1r8ApeaEyW/), [文章](./06AlgoData/02MoE/05MOEGshard.md) |
-| MOE 核心论文 | 06 Switch Trans 解读  | [PPT](./06AlgoData/02MoE/06MOESwitch.pdf), [视频](https://www.bilibili.com/video/BV1UsPceJEEQ/), [文章](./06AlgoData/02MoE/06MOESwitch.md) |
-| MOE 核心论文 | 07 GLaM & ST-MOE 解读  | [PPT](./06AlgoData/02MoE/07MOEGLaM_STMOE.pdf), [视频](https://www.bilibili.com/video/BV1L59qYqEVw/), [文章](./06AlgoData/02MoE/07GLaM_STMOE.md) |
-| MOE 核心论文 | 08 DeepSeek MOE 解读  | [PPT](./06AlgoData/02MoE/08DeepSeekMoE.pdf), [视频](https://www.bilibili.com/video/BV1tE9HYUEdz/), [文章](./06AlgoData/02MoE/08DeepSeekMoE.md) |
-| MOE 架构原理 | 09 MOE 模型可视化  | [PPT](./06AlgoData/02MoE/09MoECore.pdf), [视频](https://www.bilibili.com/video/BV1Gj9ZYdE4N/), [文章](./06AlgoData/02MoE/09MoECore.md) |
-| 大模型遇 MOE | 10 MoE 参数与专家  | [PPT](./06AlgoData/02MoE/10MOELLM.pdf), [视频](https://www.bilibili.com/video/BV1UERNYqEwU/), [文章](./06AlgoData/02MoE/10MOELLM.md) |
-| 手撕 MOE 代码 | 11 单机单卡 MoE  | [PPT](./06AlgoData/02MoE/11MOECode.pdf), [视频](https://www.bilibili.com/video/BV1UTRYYUE5o) |
-| 手撕 MOE 代码 | 12 单机多卡 MoE  | [PPT](./06AlgoData/02MoE/11MOECode.pdf), [视频](https://www.bilibili.com/video/BV1JaR5YSEMN) |
-| 视觉 MoE | 13 视觉 MoE 模型  | [PPT](./06AlgoData/02MoE/12MOEFuture.pdf), [视频](https://www.bilibili.com/video/BV1JNQVYBEq7), [文章](./06AlgoData/02MoE/12MOEFuture.md) |
-|:sparkling_heart:|:star2:|:sparkling_heart:|
-| MOE 实践 :computer: | 01 基于 Huggingface 实现 MOE 推理任务 | [Markdown](./06AlgoData/02MoE/Practice01MOEInfer.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice01MOEInfer.ipynb) |
-| MOE 实践 :computer: | 02 从零开始手撕 MoE | [Markdown](./06AlgoData/02MoE/Practice02SignalMOE.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice02SignalMOE.ipynb) |
-| MOE 实践 :computer: | 03 MoE 从原理到分布式实现 | [Markdown](./06AlgoData/02MoE/Practice03IntrtaMOE.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice03IntrtaMOE.ipynb) |
-| MOE 实践 :computer: | 04 MoE 分布式性能分析 | [Markdown](./06AlgoData/02MoE/Practice04MOEAnalysize.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice04MOEAnalysize.ipynb) |
+| 大纲 | 小节 | 链接 | 状态 |
+|:--- |:---- |:-------------------- |:---- |
+| MOE 基本介绍 | 01 MOE 架构剖析  | [PPT](./06AlgoData/02MoE/01MOEIntroducion.pdf), [视频](https://www.bilibili.com/video/BV17PNtekE3Y/), [文章](./06AlgoData/02MoE/01MOEIntroducion.md) | :white_check_mark: |
+| MOE 前世今生 | 02 MOE 前世今生  | [PPT](./06AlgoData/02MoE/02MOEHistory.pdf), [视频](https://www.bilibili.com/video/BV1y7wZeeE96/), [文章](./06AlgoData/02MoE/02MOEHistory.md) | :white_check_mark: |
+| MOE 核心论文 | 03 MOE 奠基论文  | [PPT](./06AlgoData/02MoE/03MOECreate.pdf), [视频](https://www.bilibili.com/video/BV1MiAYeuETj/), [文章](./06AlgoData/02MoE/03MOECreate.md) | :white_check_mark: |
+| MOE 核心论文 | 04 MOE 初遇 RNN  | [PPT](./06AlgoData/02MoE/04MOERNN.pdf), [视频](https://www.bilibili.com/video/BV1RYAjeKE3o/), [文章](./06AlgoData/02MoE/04MOERNN.md) | :white_check_mark: |
+| MOE 核心论文 | 05 GSard 解读  | [PPT](./06AlgoData/02MoE/05MOEGshard.pdf), [视频](https://www.bilibili.com/video/BV1r8ApeaEyW/), [文章](./06AlgoData/02MoE/05MOEGshard.md) | :white_check_mark: |
+| MOE 核心论文 | 06 Switch Trans 解读  | [PPT](./06AlgoData/02MoE/06MOESwitch.pdf), [视频](https://www.bilibili.com/video/BV1UsPceJEEQ/), [文章](./06AlgoData/02MoE/06MOESwitch.md) | :white_check_mark: |
+| MOE 核心论文 | 07 GLaM & ST-MOE 解读  | [PPT](./06AlgoData/02MoE/07MOEGLaM_STMOE.pdf), [视频](https://www.bilibili.com/video/BV1L59qYqEVw/), [文章](./06AlgoData/02MoE/07GLaM_STMOE.md) | :white_check_mark: |
+| MOE 核心论文 | 08 DeepSeek MOE 解读  | [PPT](./06AlgoData/02MoE/08DeepSeekMoE.pdf), [视频](https://www.bilibili.com/video/BV1tE9HYUEdz/), [文章](./06AlgoData/02MoE/08DeepSeekMoE.md) | :white_check_mark: |
+| MOE 架构原理 | 09 MOE 模型可视化  | [PPT](./06AlgoData/02MoE/09MoECore.pdf), [视频](https://www.bilibili.com/video/BV1Gj9ZYdE4N/), [文章](./06AlgoData/02MoE/09MoECore.md) | :white_check_mark: |
+| 大模型遇 MOE | 10 MoE 参数与专家  | [PPT](./06AlgoData/02MoE/10MOELLM.pdf), [视频](https://www.bilibili.com/video/BV1UERNYqEwU/), [文章](./06AlgoData/02MoE/10MOELLM.md) | :white_check_mark: |
+| 手撕 MOE 代码 | 11 单机单卡 MoE  | [PPT](./06AlgoData/02MoE/11MOECode.pdf), [视频](https://www.bilibili.com/video/BV1UTRYYUE5o) | :white_check_mark: |
+| 手撕 MOE 代码 | 12 单机多卡 MoE  | [PPT](./06AlgoData/02MoE/11MOECode.pdf), [视频](https://www.bilibili.com/video/BV1JaR5YSEMN) | :white_check_mark: |
+| 视觉 MoE | 13 视觉 MoE 模型  | [PPT](./06AlgoData/02MoE/12MOEFuture.pdf), [视频](https://www.bilibili.com/video/BV1JNQVYBEq7), [文章](./06AlgoData/02MoE/12MOEFuture.md) | :white_check_mark: |
+|:sparkling_heart:|:star2:|:sparkling_heart:| |
+| MOE 实践 :computer: | 01 基于 Huggingface 实现 MOE 推理任务 | [Markdown](./06AlgoData/02MoE/Practice01MOEInfer.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice01MOEInfer.ipynb) | :white_check_mark: |
+| MOE 实践 :computer: | 02 从零开始手撕 MoE | [Markdown](./06AlgoData/02MoE/Practice02SignalMOE.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice02SignalMOE.ipynb) | :white_check_mark: |
+| MOE 实践 :computer: | 03 MoE 从原理到分布式实现 | [Markdown](./06AlgoData/02MoE/Practice03IntrtaMOE.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice03IntrtaMOE.ipynb) | :white_check_mark: |
+| MOE 实践 :computer: | 04 MoE 分布式性能分析 | [Markdown](./06AlgoData/02MoE/Practice04MOEAnalysize.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice04MOEAnalysize.ipynb) | :white_check_mark: |
 
 ### :checkered_flag: **[07. 大模型应用](./07Application/)**
 
