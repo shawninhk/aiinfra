@@ -14,3 +14,5 @@ _build/
 06Foundation/02AICluster/.DS_Store
 build_books/create_dir.py
 prompt.txt
+06AlgoData/01Basic/code/tokenizer.json
+06AlgoData/01Basic/code/vocab.json
