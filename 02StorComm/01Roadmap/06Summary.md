@@ -1,6 +1,6 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# 05.计算集群当代与未来发展
+# 06.万卡集群组网思考
 
 Author by: 
 

@@ -1,6 +1,6 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# 拆解 Transformer-Decoder
+# CODE:拆解 Transformer-Decoder
 
 近年来，大型语言模型（LLMs）的发展令人瞩目，而它们中的绝大多数，例如著名的 GPT 系列，都构建于一种优雅而强大的架构之上——Transformer-Decoder。
 
@@ -287,7 +287,7 @@ estimate_activation_memory(args, batch_size=4, seq_len=1024)
 
 这个计算清楚地表明，序列长度 $S$ 对显存的压力是二次方的，这就是为什么在训练时我们很难使用非常长的序列。
 
-### **4.2 KV Cache
+### 4.2 KV Cache
 
 在推理阶段，模型是一个一个地生成 token 的。例如，我们输入 "Hello"，模型生成 "world"，然后我们将 "Hello world" 作为新的输入，模型再生成 "\!"。
 
@@ -324,7 +324,7 @@ print(f"当序列长度为 {max_len} 时，KV Cache 将占用: {kv_cache_mem / 1
 
 这个结果解释了为什么即使在推理时，长上下文窗口也会消耗大量显存。每一层、每一个 token 的 K 和 V 状态都需要被精确地“记忆”下来。
 
-### 5. 总结与思考
+## 5. 总结与思考
 
 通过这次深入的剖析，我们不再将 Transformer-Decoder 视为一个神秘的黑箱。我们亲手用公式和代码量化了它的核心特性：
 

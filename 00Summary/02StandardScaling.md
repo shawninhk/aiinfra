@@ -1,6 +1,6 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# 大模型 Scaling Law
+# 02.大模型 Scaling Law
 
 - Author by：侯宇博
 
