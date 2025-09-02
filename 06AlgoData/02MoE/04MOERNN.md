@@ -1,6 +1,6 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# MOE 初遇 RNN(DONE)
+# 04.MOE 初遇 RNN(DONE)
 
 解读 by: 张晓天
 

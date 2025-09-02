@@ -1,6 +1,6 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# 手把手实现核心机制 Embedding 词嵌入(DONE)
+# CODE06:实现 Embedding 词嵌入(DONE)
 
 Author by：ZOMI
 

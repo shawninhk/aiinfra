@@ -1,6 +1,6 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# 手把手实现核心机制 BPE 分词算法(DONE)
+# CODE05:实现 BPE 分词(DONE)
 
 author by: ZOMI
 
