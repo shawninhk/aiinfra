@@ -1,4 +1,6 @@
-# 多 Token 推理与生成(DONE)
+<!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
+
+# 04.计算优化：MTP 算法(DONE)
 
 - Author by: 管弘毅
 

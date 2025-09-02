@@ -1,6 +1,6 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# 序列优化：Ring Attention 算法
+# 06.序列优化：Ring Attention
 
 - Author by: 管弘毅
 
