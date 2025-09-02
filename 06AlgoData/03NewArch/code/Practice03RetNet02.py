@@ -294,7 +294,7 @@ class DummyTextDataset(Dataset):
         input_ids = torch.randint(0, self.vocab_size, (self.seq_len,))
         # 目标是输入的偏移（简单语言建模任务）
         targets = torch.roll(input_ids, shifts=-1, dims=0)
-        targets[-1] = 0  # 最后一个位置的目标设为0
+        targets[-1] = 0  # 最后一个位置的目标设为 0
         return input_ids, targets
 
 class RetrievalDataset(Dataset):
@@ -309,7 +309,7 @@ class RetrievalDataset(Dataset):
     
     def __getitem__(self, idx):
         query = torch.randint(0, self.vocab_size, (self.query_len,))
-        # 生成3个文档，其中一个与查询相关（前半部分相似）
+        # 生成 3 个文档，其中一个与查询相关（前半部分相似）
         doc1 = torch.cat([query[:self.query_len//2], 
                          torch.randint(0, self.vocab_size, (self.doc_len - self.query_len//2,))])
         doc2 = torch.randint(0, self.vocab_size, (self.doc_len,))
@@ -360,7 +360,7 @@ def train_model(model, dataloader, epochs=3, mode='parallel'):
             total_tokens += input_ids.numel()
             elapsed_time = time.time() - start_time
             
-            if batch_idx % 10 == 0:  # 为了演示，每10个batch打印一次
+            if batch_idx % 10 == 0:  # 为了演示，每 10 个 batch 打印一次
                 tokens_per_sec = total_tokens / elapsed_time
                 print(f"Epoch {epoch+1}, Batch {batch_idx}, Loss: {loss.item():.4f}, "
                       f"Tokens/sec: {tokens_per_sec:.2f}")
@@ -490,14 +490,14 @@ def main():
     throughputs = {}
     
     for mode in modes:
-        print(f"\n测试 {mode} 模式...")
+        print(f"\n 测试 {mode} 模式...")
         # 为每个模式创建新模型以确保公平比较
         model = setup_retnet_model(vocab_size, d_model, n_layers, head_size)
         throughput = train_model(model, train_dataloader, epochs=1, mode=mode)
         throughputs[mode] = throughput
     
     # 测试递归模式（推理）
-    print(f"\n测试递归模式（推理）...")
+    print(f"\n 测试递归模式（推理）...")
     model = setup_retnet_model(vocab_size, d_model, n_layers, head_size)
     model.to(device)
     model.eval()
@@ -514,7 +514,7 @@ def main():
     print(f"递归模式推理吞吐量: {infer_throughput:.2f} tokens/sec")
     
     # 评估检索准确率（不同上下文长度）
-    print("\n评估检索准确率...")
+    print("\n 评估检索准确率...")
     accuracies = {}
     context_lengths = [512, 1024, 2048]
     
@@ -532,11 +532,11 @@ def main():
         accuracies[f'context_{cl}'] = acc
     
     # 梯度可视化
-    print("\n生成梯度可视化...")
+    print("\n 生成梯度可视化...")
     visualize_gradients(model, input_sample)
     
     # 绘制实验结果
-    print("\n绘制实验结果...")
+    print("\n 绘制实验结果...")
     
     # 绘制吞吐量对比
     plt.figure(figsize=(8, 5))
@@ -568,7 +568,7 @@ def main():
     for mode, tp in throughputs.items():
         print(f"  {mode}: {tp:.2f}")
     
-    print("\n检索准确率:")
+    print("\n 检索准确率:")
     for ctx, acc in accuracies.items():
         print(f"  {ctx}: {acc:.4f}")
 
