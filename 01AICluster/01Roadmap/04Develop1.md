@@ -1,8 +1,10 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# 计算集群初期历史回顾
+# 04.计算集群初期历史回顾
 
 Author by: 
+
+> 这个内容还没有，非常希望您参与到这个开源项目中，B 站给 ZOMI 留言哦！
 
 ## 本节视频
 
