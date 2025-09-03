@@ -1,5 +1,6 @@
-# Continuous Batching 与 Selective Batching 实现
+<!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
+# Continuous Batching 与 Selective Batching 实现
 
 ## 1 环境准备
 
@@ -27,8 +28,6 @@ class Request:
 
 Continuous Batching 算法来源于《vLLM: Easy, Fast, and Cheap LLM Serving with PagedAttention》(2023)
 
-### 2.1 算法原理
-
 传统静态批处理（Static Batching）要求所有请求同时进入模型，等待最慢请求完成后再处理下一批，导致 GPU 利用率低下。Continuous Batching 允许动态插入新请求，在每个 token 生成步骤（Decoding Step）重组 Batching，显著提升吞吐量。
 
 核心思想是将序列生成分解为迭代步骤，每个步骤动态合并未完成的序列与新请求，公式表示为：
@@ -36,8 +35,6 @@ Continuous Batching 算法来源于《vLLM: Easy, Fast, and Cheap LLM Serving wi
 $$B_t = \{s \in B_{t-1} | \text{not completed}\} \cup \text{new requests}$$
 
 其中 $B_t$ 为第 $t$ 步的 Batching，$s$ 为单个序列。
-
-### 2.2 具体实现
 
 维护一个请求队列，接收新请求。每个解码步骤从队列中提取请求，与未完成请求组成新 Batching。最后处理完当前步骤后，移除已完成请求，循环上述过程
 
@@ -104,14 +101,10 @@ class ContinuousBatchingEngine:
 
 Selective Batching 算法来源于《ORCA: A Distributed Serving System for Transformer-Based Generative Models》(2023)，论文中表 1 显示，相比静态批处理，Selective Batching 在吞吐量上提升 2.3 倍，延迟降低 40%。
 
-### 3.1 算法原理
-
 针对 Transformer 不同层的计算特性（Attention 层对序列长度敏感，FFN 层对 Batching 大小敏感），采用差异化批处理策略：
 
 - Attention 层：按序列长度分组，减少 Padding 带来的计算浪费
 - FFN 层：合并所有序列，利用大规模并行计算优势
-
-### 3.2 具体实现
 
 首先将 Batching 中的序列按长度分组（Attention 层优化），然后对每组分别计算 Attention（减少 Padding），最后合并所有序列计算 FFN（利用并行性）。
 
@@ -163,10 +156,6 @@ class SelectiveBatchingEngine(ContinuousBatchingEngine):
 ```
 
 ## 4. 实验结果分析
-
-模拟多请求场景，对比两种批处理策略的行为差异。
-
-### 4.1 实验设置
 
 我们模拟了 4 个不同的推理请求，它们的输入长度和最大生成长度各不相同：
 
