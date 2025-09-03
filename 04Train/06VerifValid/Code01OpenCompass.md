@@ -35,7 +35,7 @@ tokenizer = AutoTokenizer.from_pretrained(
 )
 model = AutoModel.from_pretrained(
     model_path,
-    device_map="auto",        # 自动分配多GPU负载
+    device_map="auto",        # 自动分配多 GPU 负载
     trust_remote_code=True
 )
 ```
@@ -54,7 +54,7 @@ model = AutoModel.from_pretrained(
 
 **任务性能指标**：
 
-- 准确率/F1值：用于分类任务评估
+- 准确率/F1 值：用于分类任务评估
 - Recall@k、MRR：用于检索任务评估
 
 **生成质量指标**：

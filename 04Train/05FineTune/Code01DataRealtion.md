@@ -1,10 +1,10 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# CODE 01: Qwen3-4B模型微调
+# CODE 01: Qwen3-4B 模型微调
 
 大型语言模型（LLM）的微调技术是将预训练模型适配到特定任务的关键环节。面对不同的数据特性和资源约束，选择合适的微调方法至关重要。
 
-本文将使用**Qwen3-4B**模型作为基础模型，对比全参数微调、LoRA（Low-Rank Adaptation）、Prompt Tuning和指令微调四种主流技术，分析它们在**效果、效率和数据需求**方面的差异，并探索**数据集类型**（通用/领域/小样本）与微调技术的适配关系。
+本文将使用**Qwen3-4B**模型作为基础模型，对比全参数微调、LoRA（Low-Rank Adaptation）、Prompt Tuning 和指令微调四种主流技术，分析它们在**效果、效率和数据需求**方面的差异，并探索**数据集类型**（通用/领域/小样本）与微调技术的适配关系。
 
 ## 2. 实验设置
 
@@ -26,20 +26,20 @@ import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"使用设备: {device}")
 
-# 加载Qwen3-4B模型和tokenizer
-model_name = "Qwen/Qwen3-4B-Instruct"  # 使用Qwen3-4B指令微调版本
+# 加载 Qwen3-4B 模型和 tokenizer
+model_name = "Qwen/Qwen3-4B-Instruct"  # 使用 Qwen3-4B 指令微调版本
 max_seq_length = 2048  # 最大序列长度
-load_in_4bit = True    # 使用4bit量化减少显存占用
+load_in_4bit = True    # 使用 4bit 量化减少显存占用
 
-# 使用Unsloth优化加载模型
+# 使用 Unsloth 优化加载模型
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name=model_name,
     max_seq_length=max_seq_length,
     load_in_4bit=load_in_4bit,
-    trust_remote_code=True  # Qwen模型需要此参数
+    trust_remote_code=True  # Qwen 模型需要此参数
 )
 
-# 添加pad_token以便于批处理
+# 添加 pad_token 以便于批处理
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
 
@@ -63,8 +63,8 @@ instruction_dataset = [
     },
     {
         "instruction": "生成产品描述",
-        "input": "智能手机，品牌：Apple，型号：iPhone 15，特点：A17芯片、4800万像素相机",
-        "output": "Apple iPhone 15搭载强大的A17芯片和4800万像素高清相机，提供卓越性能和拍摄体验。",
+        "input": "智能手机，品牌：Apple，型号：iPhone 15，特点：A17 芯片、4800 万像素相机",
+        "output": "Apple iPhone 15 搭载强大的 A17 芯片和 4800 万像素高清相机，提供卓越性能和拍摄体验。",
         "system": "你是一个产品描述生成器",
         "history": []
     },
@@ -77,7 +77,7 @@ instruction_dataset = [
     }
 ]
 
-# 将示例数据集保存为JSON文件
+# 将示例数据集保存为 JSON 文件
 import json
 with open("instruction_dataset.json", "w", encoding="utf-8") as f:
     json.dump(instruction_dataset, f, ensure_ascii=False, indent=2)
@@ -119,7 +119,7 @@ def preprocess_instruction_data(examples):
         output_text = str(examples["output"][i])
         system_text = str(examples["system"][i]) if "system" in examples and examples["system"][i] else ""
         
-        # 构建符合Qwen3格式的输入
+        # 构建符合 Qwen3 格式的输入
         if system_text:
             text = f"<|im_start|>system\n{system_text}<|im_end|>\n"
         else:
@@ -169,7 +169,7 @@ train_dataset = split_dataset["train"]
 eval_dataset = split_dataset["test"]
 
 print(f"训练集大小: {len(train_dataset)}")
-print(f验证集大小: {len(eval_dataset)}")
+print(f 验证集大小: {len(eval_dataset)}")
 ```
 
 ## 3. 全参数微调
@@ -178,7 +178,7 @@ print(f验证集大小: {len(eval_dataset)}")
 
 θ_min = argmin_θ (1/N) * Σ_{i=1}^N L(f_θ(x_i), y_i)
 
-其中f_θ表示参数化模型，L为损失函数，N为样本数量。
+其中 f_θ表示参数化模型，L 为损失函数，N 为样本数量。
 
 这种方法的主要优势是能够充分利用所有模型参数进行任务适配，但缺点是**计算成本高**，对于大模型来说需要大量的显存和计算资源。
 
@@ -199,7 +199,7 @@ training_args = TrainingArguments(
     fp16=True,  # 使用混合精度训练节省显存
 )
 
-# 创建Trainer实例
+# 创建 Trainer 实例
 trainer = Trainer(
     model=model,
     args=training_args,
@@ -214,22 +214,22 @@ trainer = Trainer(
 print("全参数微调完成")
 ```
 
-全参数微调的主要优点是能够**充分利用模型的全部能力**，通常在数据充足的情况下能达到最佳性能。然而，它的计算成本非常高——对于Qwen3-4B这样的模型，需要大量的GPU显存和计算时间。
+全参数微调的主要优点是能够**充分利用模型的全部能力**，通常在数据充足的情况下能达到最佳性能。然而，它的计算成本非常高——对于 Qwen3-4B 这样的模型，需要大量的 GPU 显存和计算时间。
 
 此外，全参数微调还容易导致**灾难性遗忘**，即模型在适应新任务时丢失了预训练中获得的一般知识。
 
 ## 4. LoRA 微调
 
-LoRA是一种**参数高效微调**（PEFT）技术，其核心思想是通过**低秩分解**来限制可训练参数的数量。具体而言，LoRA将权重更新矩阵ΔW分解为两个低秩矩阵的乘积：
+LoRA 是一种**参数高效微调**（PEFT）技术，其核心思想是通过**低秩分解**来限制可训练参数的数量。具体而言，LoRA 将权重更新矩阵ΔW 分解为两个低秩矩阵的乘积：
 
 W + ΔW = W + BA
 
-其中W是预训练权重矩阵，A ∈ R^{r×d}和B ∈ R^{d×r}是低秩矩阵，r是秩（r << d）。
+其中 W 是预训练权重矩阵，A ∈ R^{r×d}和 B ∈ R^{d×r}是低秩矩阵，r 是秩（r << d）。
 
 这种分解的数学基础是**奇异值分解**（SVD）定理，该定理表明任何矩阵都可以被分解为奇异值和奇异向量的乘积，而低秩近似则保留了矩阵中最重要的信息。
 
 ```python
-# 定义LoRA配置
+# 定义 LoRA 配置
 lora_config = LoraConfig(
     r=16,  # 秩
     lora_alpha=32,
@@ -239,7 +239,7 @@ lora_config = LoraConfig(
     task_type=TaskType.CAUSAL_LM
 )
 
-# 创建LoRA模型
+# 创建 LoRA 模型
 lora_model = get_peft_model(model, lora_config)
 lora_model.print_trainable_parameters()
 
@@ -247,16 +247,16 @@ lora_model.print_trainable_parameters()
 training_args = TrainingArguments(
     output_dir="./lora_results",
     num_train_epochs=3,
-    per_device_train_batch_size=4,  # LoRA可以使用更大的批大小
+    per_device_train_batch_size=4,  # LoRA 可以使用更大的批大小
     per_device_eval_batch_size=4,
     evaluation_strategy="epoch",
-    learning_rate=2e-4,  # LoRA可以使用更大的学习率
+    learning_rate=2e-4,  # LoRA 可以使用更大的学习率
     weight_decay=0.01,
     report_to="none",
     fp16=True,
 )
 
-# 创建Trainer
+# 创建 Trainer
 lora_trainer = Trainer(
     model=lora_model,
     args=training_args,
@@ -268,48 +268,48 @@ lora_trainer = Trainer(
 # 开始训练（注释掉实际训练代码以便演示）
 # lora_trainer.train()
 
-print("LoRA微调完成")
+print("LoRA 微调完成")
 ```
 
-LoRA的主要优势在于：
-1.  **参数效率**：只需要训练极少量参数（通常小于原模型参数的1%）
-2.  **内存友好**：大幅降低显存需求，使得在消费级GPU上微调大模型成为可能
+LoRA 的主要优势在于：
+1.  **参数效率**：只需要训练极少量参数（通常小于原模型参数的 1%）
+2.  **内存友好**：大幅降低显存需求，使得在消费级 GPU 上微调大模型成为可能
 3.  **模块化**：可以为不同任务训练多个适配器，然后灵活切换
 
-实验表明，LoRA能够保持原始模型大部分性能，同时显著减少训练时间和计算资源需求。
+实验表明，LoRA 能够保持原始模型大部分性能，同时显著减少训练时间和计算资源需求。
 
 ## 5. Prompt 微调
 
-Prompt Tuning是一种**轻量级微调方法**，它在输入层插入**可训练的虚拟令牌**（virtual tokens），而保持预训练模型的参数不变。这些虚拟令牌作为连续提示，引导模型更好地执行特定任务。
+Prompt Tuning 是一种**轻量级微调方法**，它在输入层插入**可训练的虚拟令牌**（virtual tokens），而保持预训练模型的参数不变。这些虚拟令牌作为连续提示，引导模型更好地执行特定任务。
 
-形式上，Prompt Tuning将原始输入x转换为模板化提示x'，通过构造映射函数P: X → X'来实现。
+形式上，Prompt Tuning 将原始输入 x 转换为模板化提示 x'，通过构造映射函数 P: X → X'来实现。
 
 ```python
-# 定义Prompt Tuning配置
+# 定义 Prompt Tuning 配置
 prompt_config = PromptTuningConfig(
     task_type=TaskType.CAUSAL_LM,
     num_virtual_tokens=20,  # 虚拟令牌数量
     tokenizer_name=model_name
 )
 
-# 创建Prompt Tuning模型
+# 创建 Prompt Tuning 模型
 prompt_model = get_peft_model(model, prompt_config)
 prompt_model.print_trainable_parameters()
 
 # 设置训练参数
 training_args = TrainingArguments(
     output_dir="./prompt_tuning_results",
-    num_train_epochs=5,  # Prompt Tuning通常需要更多训练轮次
+    num_train_epochs=5,  # Prompt Tuning 通常需要更多训练轮次
     per_device_train_batch_size=4,
     per_device_eval_batch_size=4,
     evaluation_strategy="epoch",
-    learning_rate=3e-3,  # Prompt Tuning通常需要更高学习率
+    learning_rate=3e-3,  # Prompt Tuning 通常需要更高学习率
     weight_decay=0.01,
     report_to="none",
     fp16=True,
 )
 
-# 创建Trainer
+# 创建 Trainer
 prompt_trainer = Trainer(
     model=prompt_model,
     args=training_args,
@@ -321,15 +321,15 @@ prompt_trainer = Trainer(
 # 开始训练（注释掉实际训练代码以便演示）
 # prompt_trainer.train()
 
-print("Prompt Tuning完成")
+print("Prompt Tuning 完成")
 ```
 
-Prompt Tuning的优势在于：
+Prompt Tuning 的优势在于：
 1.  **极高的参数效率**：只需要训练极少量的参数（仅虚拟令牌对应的参数）
 2.  **避免灾难性遗忘**：由于原始模型参数被冻结，预训练知识得到保留
 3.  **多任务学习**：可以为不同任务学习不同的提示，然后共享同一基础模型
 
-Prompt Tuning特别适合**少样本学习**场景，但在复杂任务上可能性能不如其他方法。
+Prompt Tuning 特别适合**少样本学习**场景，但在复杂任务上可能性能不如其他方法。
 
 ## 6. 指令微调
 
@@ -341,7 +341,7 @@ Prompt Tuning特别适合**少样本学习**场景，但在复杂任务上可能
 # 指令微调需要特定的数据格式
 # 这里我们使用前面创建的指令数据集
 
-# 使用LoRA进行指令微调（指令微调通常与参数高效方法结合）
+# 使用 LoRA 进行指令微调（指令微调通常与参数高效方法结合）
 instruct_lora_config = LoraConfig(
     r=16,
     lora_alpha=32,
@@ -367,7 +367,7 @@ training_args = TrainingArguments(
     fp16=True,
 )
 
-# 创建Trainer
+# 创建 Trainer
 instruct_trainer = Trainer(
     model=instruct_model,
     args=training_args,
@@ -386,7 +386,7 @@ print("指令微调完成")
 
 1.  **任务特异性**：能够使模型更好地适应特定任务格式和指令
 2.  **数据效率**：通常比全参数微调需要更少的数据
-3.  **可组合性**：可以与LoRA等参数高效方法结合使用
+3.  **可组合性**：可以与 LoRA 等参数高效方法结合使用
 
 然而，指令微调**依赖高质量标注数据**，如果指令-回答对质量不高，可能会限制模型性能。
 
@@ -457,9 +457,9 @@ print("效率评估完成")
 
 具体来说：
 
-1.  **数据量少，数据相似度高**：适合Prompt Tuning或LoRA，只需要修改最后几层或添加少量参数。
+1.  **数据量少，数据相似度高**：适合 Prompt Tuning 或 LoRA，只需要修改最后几层或添加少量参数。
 
-2.  **数据量少，数据相似度低**：适合LoRA或Adapter方法，可以冻结预训练模型的初始层，只训练较高层。
+2.  **数据量少，数据相似度低**：适合 LoRA 或 Adapter 方法，可以冻结预训练模型的初始层，只训练较高层。
 
 3.  **数据量大，数据相似度低**：考虑全参数微调或领域自适应预训练（DAPT），但由于数据差异大，可能需要更多训练时间。
 
@@ -469,7 +469,7 @@ print("效率评估完成")
 
 在实际应用中，选择微调技术时需要综合考虑数据特性（数量、质量、与预训练数据的相似度）、计算资源约束、任务要求和部署环境等因素。对于大多数实际应用场景，**LoRA**提供了最佳的权衡，而**Prompt Tuning**则在极端资源约束或数据稀缺环境下更具优势。
 
-未来的研究方向可能包括这些技术的组合使用（如LoRA+Prompt Tuning）、自适应微调策略（根据数据特性动态选择微调方法）以及更高效的参数高效微调技术。
+未来的研究方向可能包括这些技术的组合使用（如 LoRA+Prompt Tuning）、自适应微调策略（根据数据特性动态选择微调方法）以及更高效的参数高效微调技术。
 
 ## 参考文献
 

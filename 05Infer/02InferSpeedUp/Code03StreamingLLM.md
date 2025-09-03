@@ -20,16 +20,16 @@ import torch.nn as nn
 
 def demonstrate_attention_sinks():
     """展示注意力汇聚现象的简单示例"""
-    # 模拟注意力分数：初始token得分较高，后续token得分均匀但较低
+    # 模拟注意力分数：初始 token 得分较高，后续 token 得分均匀但较低
     attention_scores = torch.tensor([5.0, 2.0, 2.0, 2.0, 2.0, 2.0])
     
-    # 应用softmax
+    # 应用 softmax
     softmax = nn.Softmax(dim=0)
     attention_weights = softmax(attention_scores)
     
     print("原始注意力分数:", attention_scores)
-    print("Softmax后的权重:", attention_weights)
-    print("初始token获得的注意力比例:", f"{attention_weights[0].item() * 100:.2f}%")
+    print("Softmax 后的权重:", attention_weights)
+    print("初始 token 获得的注意力比例:", f"{attention_weights[0].item() * 100:.2f}%")
 
 # 运行演示
 demonstrate_attention_sinks()
@@ -37,8 +37,8 @@ demonstrate_attention_sinks()
 
 ```
 原始注意力分数: tensor([5., 2., 2., 2., 2., 2.])
-Softmax后的权重: tensor([0.9535, 0.0116, 0.0116, 0.0116, 0.0116, 0.0116])
-初始token获得的注意力比例: 95.35%
+Softmax 后的权重: tensor([0.9535, 0.0116, 0.0116, 0.0116, 0.0116, 0.0116])
+初始 token 获得的注意力比例: 95.35%
 ```
 
 即使初始 token 的原始得分仅比其他 token 高 3，经过 Softmax 归一化后，其注意力权重占比高达 95.35%，远超过其他 token 的总和。在实际的大语言模型中，这种现象更加明显，初始 token 往往能获得超过 50% 的注意力权重，这也是"注意力汇聚点"存在的数学基础。
@@ -49,28 +49,28 @@ Softmax后的权重: tensor([0.9535, 0.0116, 0.0116, 0.0116, 0.0116, 0.0116])
 
 ```python
 class SimpleStreamingCache:
-    """简化的StreamingLLM缓存管理"""
+    """简化的 StreamingLLM 缓存管理"""
     def __init__(self, sink_size=4, window_size=512):
         self.sink_size = sink_size  # 注意力汇聚点数量
         self.window_size = window_size  # 滑动窗口大小
         self.key_cache = []  # 键缓存
         self.value_cache = []  # 值缓存
-        self.token_positions = []  # token位置信息
+        self.token_positions = []  # token 位置信息
     
     def update(self, new_keys, new_values):
-        """更新缓存：保留注意力汇聚点和最近token"""
+        """更新缓存：保留注意力汇聚点和最近 token"""
         # 添加新键值对
         self.key_cache.extend(new_keys)
         self.value_cache.extend(new_values)
         self.token_positions.extend(range(len(self.token_positions), 
                                          len(self.token_positions) + len(new_keys)))
         
-        # 计算需要保留的token数量
+        # 计算需要保留的 token 数量
         total_keep = self.sink_size + self.window_size
         
-        # 如果超过限制，移除中间的token，保留汇聚点和最近token
+        # 如果超过限制，移除中间的 token，保留汇聚点和最近 token
         if len(self.key_cache) > total_keep:
-            # 保留前sink_size个token和最后window_size个token
+            # 保留前 sink_size 个 token 和最后 window_size 个 token
             keep_indices = list(range(self.sink_size)) + list(range(
                 len(self.key_cache) - self.window_size, len(self.key_cache)))
             
@@ -100,7 +100,7 @@ def simple_attention(query, key_cache, value_cache):
         score = sum(q * k_val for q, k_val in zip(query, k))  # 数值向量点积
         scores.append(score)
     
-    # 应用softmax获取注意力权重
+    # 应用 softmax 获取注意力权重
     scores_tensor = torch.tensor(scores)
     attention_weights = torch.softmax(scores_tensor, dim=0)
     
@@ -112,52 +112,52 @@ def simple_attention(query, key_cache, value_cache):
     
     return output, attention_weights
 
-# 演示StreamingLLM的工作流程
+# 演示 StreamingLLM 的工作流程
 def demonstrate_streaming_llm():
-    """演示StreamingLLM的简化工作流程（修改：生成数值型键值对，替换原字符串）"""
+    """演示 StreamingLLM 的简化工作流程（修改：生成数值型键值对，替换原字符串）"""
     cache = SimpleStreamingCache(sink_size=2, window_size=4)
     
-    # 模拟处理10个token的过程
-    print("开始模拟StreamingLLM处理文本序列...")
+    # 模拟处理 10 个 token 的过程
+    print("开始模拟 StreamingLLM 处理文本序列...")
     for i in range(10):
-        # 模拟新token的键值对（修改：使用4维随机数值向量，替代原字符串）
+        # 模拟新 token 的键值对（修改：使用 4 维随机数值向量，替代原字符串）
         new_key = [[random.random() for _ in range(4)]]
         new_value = [[random.random() for _ in range(4)]]
         
         # 更新缓存
         cache.update(new_key, new_value)
         
-        # 模拟注意力计算（使用最后一个token作为查询）
+        # 模拟注意力计算（使用最后一个 token 作为查询）
         query = [random.random() for _ in range(4)]
         output, weights = simple_attention(query, cache.key_cache, cache.value_cache)
         
-        print(f"处理Token {i}: 缓存大小={len(cache.key_cache)}, "
+        print(f"处理 Token {i}: 缓存大小={len(cache.key_cache)}, "
               f"注意力权重最大值={max(weights):.3f}")
     
-    print("\n最终缓存包含的token原始位置:", cache.token_positions)
-    print("注意：缓存大小保持稳定（汇聚点2 + 窗口4 = 6），不会无限增长")
+    print("\n 最终缓存包含的 token 原始位置:", cache.token_positions)
+    print("注意：缓存大小保持稳定（汇聚点 2 + 窗口 4 = 6），不会无限增长")
 
-# 需导入random库（补充：原代码未导入，此处添加以支持随机数值生成）
+# 需导入 random 库（补充：原代码未导入，此处添加以支持随机数值生成）
 import random
 # 运行演示
 demonstrate_streaming_llm()
 ```
 
 ```
-开始模拟StreamingLLM处理文本序列...
-处理Token 0: 缓存大小=1, 注意力权重最大值=1.000
-处理Token 1: 缓存大小=2, 注意力权重最大值=0.882
-处理Token 2: 缓存大小=3, 注意力权重最大值=0.671
-处理Token 3: 缓存大小=4, 注意力权重最大值=0.568
-处理Token 4: 缓存大小=5, 注意力权重最大值=0.502
-处理Token 5: 缓存大小=6, 注意力权重最大值=0.451
-处理Token 6: 缓存大小=6, 注意力权重最大值=0.428
-处理Token 7: 缓存大小=6, 注意力权重最大值=0.409
-处理Token 8: 缓存大小=6, 注意力权重最大值=0.394
-处理Token 9: 缓存大小=6, 注意力权重最大值=0.385
+开始模拟 StreamingLLM 处理文本序列...
+处理 Token 0: 缓存大小=1, 注意力权重最大值=1.000
+处理 Token 1: 缓存大小=2, 注意力权重最大值=0.882
+处理 Token 2: 缓存大小=3, 注意力权重最大值=0.671
+处理 Token 3: 缓存大小=4, 注意力权重最大值=0.568
+处理 Token 4: 缓存大小=5, 注意力权重最大值=0.502
+处理 Token 5: 缓存大小=6, 注意力权重最大值=0.451
+处理 Token 6: 缓存大小=6, 注意力权重最大值=0.428
+处理 Token 7: 缓存大小=6, 注意力权重最大值=0.409
+处理 Token 8: 缓存大小=6, 注意力权重最大值=0.394
+处理 Token 9: 缓存大小=6, 注意力权重最大值=0.385
 
-最终缓存包含的token原始位置: [0, 1, 5, 6, 7, 8, 9]
-注意：缓存大小保持稳定（汇聚点2 + 窗口4 = 6），不会无限增长
+最终缓存包含的 token 原始位置: [0, 1, 5, 6, 7, 8, 9]
+注意：缓存大小保持稳定（汇聚点 2 + 窗口 4 = 6），不会无限增长
 ```
 
 1. **数值向量替代字符串**：原代码使用字符串（如"key_0"）作为键值，无法进行注意力点积计算；修改为 4 维随机数值向量，符合 Transformer 中键值对的数值本质，确保注意力分数计算可执行。
@@ -170,16 +170,16 @@ demonstrate_streaming_llm()
 
 ```python
 class PositionAdapter:
-    """处理StreamingLLM中的位置信息"""
+    """处理 StreamingLLM 中的位置信息"""
     def __init__(self):
         self.original_to_current = {}  # 原始位置到当前缓存位置的映射
     
     def update_mapping(self, current_positions):
-        """更新位置映射关系（current_positions为缓存中Token的原始位置列表）"""
+        """更新位置映射关系（current_positions 为缓存中 Token 的原始位置列表）"""
         self.original_to_current = {orig: curr for curr, orig in enumerate(current_positions)}
     
     def get_relative_positions(self):
-        """获取相对位置信息（解决中间Token丢弃导致的位置断裂问题）"""
+        """获取相对位置信息（解决中间 Token 丢弃导致的位置断裂问题）"""
         if not self.original_to_current:
             return []
         
@@ -189,15 +189,15 @@ class PositionAdapter:
 
 # 演示位置适配器的工作方式
 def demonstrate_position_adapter():
-    """演示StreamingLLM中的位置处理"""
+    """演示 StreamingLLM 中的位置处理"""
     adapter = PositionAdapter()
     
-    # 模拟缓存中的位置变化（原始位置为[0, 1, 2, 3, 8, 9, 10, 11]，中间4-7被丢弃）
+    # 模拟缓存中的位置变化（原始位置为[0, 1, 2, 3, 8, 9, 10, 11]，中间 4-7 被丢弃）
     current_cache_positions = [0, 1, 2, 3, 8, 9, 10, 11]
     adapter.update_mapping(current_cache_positions)
     
     relative_pos = adapter.get_relative_positions()
-    print("原始位置（缓存中保留的Token）:", current_cache_positions)
+    print("原始位置（缓存中保留的 Token）:", current_cache_positions)
     print("相对位置（重新编码后）:", relative_pos)
     print("原始位置→当前缓存位置的映射:", adapter.original_to_current)
 
@@ -206,7 +206,7 @@ demonstrate_position_adapter()
 ```
 
 ```
-原始位置（缓存中保留的Token）: [0, 1, 2, 3, 8, 9, 10, 11]
+原始位置（缓存中保留的 Token）: [0, 1, 2, 3, 8, 9, 10, 11]
 相对位置（重新编码后）: [0, 1, 2, 3, 4, 5, 6, 7]
 原始位置→当前缓存位置的映射: {0: 0, 1: 1, 2: 2, 3: 3, 8: 4, 9: 5, 10: 6, 11: 7}
 ```
@@ -222,23 +222,23 @@ demonstrate_position_adapter()
 
 ```python
 def complete_streaming_demo():
-    """完整的StreamingLLM简化演示（整合所有修改：数值向量、位置适配、缓存管理）"""
+    """完整的 StreamingLLM 简化演示（整合所有修改：数值向量、位置适配、缓存管理）"""
     # 初始化参数
-    sink_size = 4  # 4个注意力汇聚点
-    window_size = 8  # 8个Token的滑动窗口
-    token_dim = 4  # Token的向量维度（与注意力计算一致）
+    sink_size = 4  # 4 个注意力汇聚点
+    window_size = 8  # 8 个 Token 的滑动窗口
+    token_dim = 4  # Token 的向量维度（与注意力计算一致）
     
     # 初始化组件
     cache = SimpleStreamingCache(sink_size, window_size)
     pos_adapter = PositionAdapter()
     
-    print("开始StreamingLLM完整演示...")
-    print(f"配置: 注意力汇聚点={sink_size}, 滑动窗口大小={window_size}, Token向量维度={token_dim}")
+    print("开始 StreamingLLM 完整演示...")
+    print(f"配置: 注意力汇聚点={sink_size}, 滑动窗口大小={window_size}, Token 向量维度={token_dim}")
     print("-" * 50)
     
-    # 模拟处理20个token（远超初始缓存容量4+8=12）
+    # 模拟处理 20 个 token（远超初始缓存容量 4+8=12）
     for token_idx in range(20):
-        # 生成新token的键值对（数值向量）
+        # 生成新 token 的键值对（数值向量）
         new_key = [[random.random() for _ in range(token_dim)]]
         new_value = [[random.random() for _ in range(token_dim)]]
         
@@ -246,52 +246,52 @@ def complete_streaming_demo():
         cache.update(new_key, new_value)
         pos_adapter.update_mapping(cache.token_positions)
         
-        # 每5个token显示一次状态（便于观察缓存变化）
+        # 每 5 个 token 显示一次状态（便于观察缓存变化）
         if (token_idx + 1) % 5 == 0:
             keys, values = cache.get_cache()
             rel_pos = pos_adapter.get_relative_positions()
             
-            print(f"已处理Token总数: {token_idx + 1}")
+            print(f"已处理 Token 总数: {token_idx + 1}")
             print(f"当前缓存大小: {len(keys)}（目标容量：{sink_size + window_size}）")
-            print(f"缓存中Token的原始位置: {cache.token_positions}")
+            print(f"缓存中 Token 的原始位置: {cache.token_positions}")
             print(f"重新编码后的相对位置: {rel_pos}")
             print("-" * 30)
     
-    print("演示完成！StreamingLLM成功处理了20个Token（远超初始缓存容量）")
+    print("演示完成！StreamingLLM 成功处理了 20 个 Token（远超初始缓存容量）")
     print(f"最终缓存大小: {len(cache.key_cache)}（稳定在目标容量）")
-    print(f"最终缓存中的Token原始位置: {cache.token_positions}")
+    print(f"最终缓存中的 Token 原始位置: {cache.token_positions}")
 
 # 运行完整演示
 complete_streaming_demo()
 ```
 
 ```
-开始StreamingLLM完整演示...
-配置: 注意力汇聚点=4, 滑动窗口大小=8, Token向量维度=4
+开始 StreamingLLM 完整演示...
+配置: 注意力汇聚点=4, 滑动窗口大小=8, Token 向量维度=4
 --------------------------------------------------
-已处理Token总数: 5
+已处理 Token 总数: 5
 当前缓存大小: 5（目标容量：12）
-缓存中Token的原始位置: [0, 1, 2, 3, 4]
+缓存中 Token 的原始位置: [0, 1, 2, 3, 4]
 重新编码后的相对位置: [0, 1, 2, 3, 4]
 ------------------------------
-已处理Token总数: 10
+已处理 Token 总数: 10
 当前缓存大小: 10（目标容量：12）
-缓存中Token的原始位置: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+缓存中 Token 的原始位置: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 重新编码后的相对位置: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 ------------------------------
-已处理Token总数: 15
+已处理 Token 总数: 15
 当前缓存大小: 12（目标容量：12）
-缓存中Token的原始位置: [0, 1, 2, 3, 7, 8, 9, 10, 11, 12, 13, 14]
+缓存中 Token 的原始位置: [0, 1, 2, 3, 7, 8, 9, 10, 11, 12, 13, 14]
 重新编码后的相对位置: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 ------------------------------
-已处理Token总数: 20
+已处理 Token 总数: 20
 当前缓存大小: 12（目标容量：12）
-缓存中Token的原始位置: [0, 1, 2, 3, 12, 13, 14, 15, 16, 17, 18, 19]
+缓存中 Token 的原始位置: [0, 1, 2, 3, 12, 13, 14, 15, 16, 17, 18, 19]
 重新编码后的相对位置: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 ------------------------------
-演示完成！StreamingLLM成功处理了20个Token（远超初始缓存容量）
+演示完成！StreamingLLM 成功处理了 20 个 Token（远超初始缓存容量）
 最终缓存大小: 12（稳定在目标容量）
-最终缓存中的Token原始位置: [0, 1, 2, 3, 12, 13, 14, 15, 16, 17, 18, 19]
+最终缓存中的 Token 原始位置: [0, 1, 2, 3, 12, 13, 14, 15, 16, 17, 18, 19]
 ```
 
 这个完整演示整合了 StreamingLLM 的三大核心组件，验证了其端到端工作能力：

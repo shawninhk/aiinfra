@@ -8,9 +8,9 @@
 
 在深度学习训练过程中，内存消耗是一个关键限制因素。当我们训练大型神经网络时，前向传播过程中产生的中间激活值需要被保存，以便在反向传播时计算梯度。这些中间激活值占用了大量的显存，尤其是在处理长序列或大批次数据时。
 
-具体来说，对于一个有L层的神经网络，前向传播需要存储L个中间激活值。反向传播则需要这些激活值来计算梯度，导致内存使用量与网络深度成线性增长关系。这使得训练深层网络时经常遇到内存不足的问题。
+具体来说，对于一个有 L 层的神经网络，前向传播需要存储 L 个中间激活值。反向传播则需要这些激活值来计算梯度，导致内存使用量与网络深度成线性增长关系。这使得训练深层网络时经常遇到内存不足的问题。
 
-从数学角度看，标准反向传播算法需要保存所有中间激活值，其内存复杂度为O(L)，其中L是网络层数。当网络深度增加时，这种线性增长的内存需求成为训练深度模型的主要瓶颈。
+从数学角度看，标准反向传播算法需要保存所有中间激活值，其内存复杂度为 O(L)，其中 L 是网络层数。当网络深度增加时，这种线性增长的内存需求成为训练深度模型的主要瓶颈。
 
 ```python
 import torch
@@ -32,7 +32,7 @@ if torch.cuda.is_available():
 
 在前向传播过程中，我们只保存部分关键层的激活值（检查点），其他层的激活值则在反向传播需要时重新计算。这样虽然增加了计算量，但显著减少了内存使用。
 
-数学上，设网络有L层，如果我们每√L层设置一个检查点，则内存使用量从O(L)降低到O(√L)，而计算量大约增加一倍（每个前向传播计算两次）。这种权衡可以用以下公式表示：
+数学上，设网络有 L 层，如果我们每√L 层设置一个检查点，则内存使用量从 O(L)降低到 O(√L)，而计算量大约增加一倍（每个前向传播计算两次）。这种权衡可以用以下公式表示：
 
 内存节省率 ≈ 1 - (√L)/L
 计算增加率 ≈ (2√L)/L
@@ -57,8 +57,8 @@ class DeepMLP(nn.Module):
     
     def forward(self, x, use_checkpoint=False):
         if use_checkpoint:
-            # 使用PyTorch内置的检查点功能
-            # checkpoint_sequential会自动将网络分成多个段，并在需要时重新计算
+            # 使用 PyTorch 内置的检查点功能
+            # checkpoint_sequential 会自动将网络分成多个段，并在需要时重新计算
             return checkpoint_sequential(self.layers, 3, x)
         else:
             # 标准前向传播 - 保存所有中间激活值
@@ -69,7 +69,7 @@ class DeepMLP(nn.Module):
 
 ## 3. 检查点调度算法实现
 
-PyTorch的`checkpoint_sequential`函数实现了检查点调度算法。它将网络分成多个段（segments），在前向传播时只保存每个段的输出，而不是所有中间结果。在反向传播时，它会重新计算每个段内的中间激活值。
+PyTorch 的`checkpoint_sequential`函数实现了检查点调度算法。它将网络分成多个段（segments），在前向传播时只保存每个段的输出，而不是所有中间结果。在反向传播时，它会重新计算每个段内的中间激活值。
 
 为了更好地理解这一过程，我们可以手动实现一个简化版本的检查点策略：
 
@@ -119,7 +119,7 @@ print(f"使用设备: {device}")
 
 # 创建模型和示例数据
 model = DeepMLP(num_layers=20, hidden_size=1024).to(device)
-input_data = torch.randn(32, 1024).to(device)  # 批次大小32，输入维度1024
+input_data = torch.randn(32, 1024).to(device)  # 批次大小 32，输入维度 1024
 target = torch.randint(0, 10, (32,)).to(device)
 
 # 定义损失函数和优化器
@@ -158,7 +158,7 @@ standard_memory_peak = forward_mem_alloc
 ### 4.2 梯度检查点训练
 
 ```python
-# 清空GPU缓存以获得准确测量
+# 清空 GPU 缓存以获得准确测量
 if torch.cuda.is_available():
     torch.cuda.empty_cache()
 
@@ -181,7 +181,7 @@ loss.backward()
 optimizer.step()
 
 end_mem_alloc, end_mem_reserved = get_memory_usage()
-print(f"反向传播后内存 - 已分配: {end_mem_alloc:.2极速f} MB, 保留: {end_mem_reserved:.2f} MB")
+print(f"反向传播后内存 - 已分配: {end_mem_alloc:.2 极速 f} MB, 保留: {end_mem_reserved:.2f} MB")
 
 checkpoint_memory_peak = forward_mem_alloc
 ```
@@ -218,15 +218,15 @@ for _ in range(5):
     optimizer.step()
 checkpoint_duration = time.time() - start_time
 
-print(f"标准训练时间 (5次迭代): {standard_duration:.4f} 秒")
-print(f"检查点训练时间 (5次迭代): {checkpoint_duration:.4f} 秒")
+print(f"标准训练时间 (5 次迭代): {standard_duration:.4f} 秒")
+print(f"检查点训练时间 (5 次迭代): {checkpoint_duration:.4f} 秒")
 time_increase = checkpoint_duration - standard_duration
 time_increase_percent = (time_increase / standard_duration) * 100
 print(f"时间增加: {time_increase:.4f} 秒 ({time_increase_percent:.1f}%)")
 
 # 计算内存-计算权衡比
 tradeoff_ratio = memory_reduction / time_increase
-print(f"内存-计算权衡比: {tradeoff_ratio:.2f} MB/秒 (每增加1秒训练时间节省的内存)")
+print(f"内存-计算权衡比: {tradeoff_ratio:.2f} MB/秒 (每增加 1 秒训练时间节省的内存)")
 ```
 
 ### 4.4 结果可视化
@@ -252,7 +252,7 @@ for bar, value in zip(bars, memory_data):
 time_data = [standard_duration, checkpoint_duration]
 bars = ax2.bar(labels, time_data, color=colors)
 ax2.set_ylabel('训练时间 (秒)', fontsize=12)
-ax2.set_title('训练时间对比 (5次迭代)', fontsize=14)
+ax2.set_title('训练时间对比 (5 次迭代)', fontsize=14)
 
 # 在柱状图上添加数值标签
 for bar, value in zip(bars, time_data):

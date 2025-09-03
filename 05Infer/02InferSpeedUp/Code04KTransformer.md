@@ -36,7 +36,7 @@ class SimpleExpert(nn.Module):
         super().__init__()
         self.fc1 = nn.Linear(input_dim, hidden_dim)
         self.fc2 = nn.Linear(hidden_dim, output_dim)
-        self.activation = nn.GELU()  # 使用GELU激活函数，常见于Transformer模型
+        self.activation = nn.GELU()  # 使用 GELU 激活函数，常见于 Transformer 模型
 
     def forward(self, x):
         return self.fc2(self.activation(self.fc1(x)))
@@ -47,7 +47,7 @@ class SimpleExpert(nn.Module):
 ```python
 class SimpleMoELayer(nn.Module):
     """
-    简化的MoE层。
+    简化的 MoE 层。
     包含一个门控网络（Router）和多个专家网络（Experts）。
     门控网络决定每个输入由哪些专家处理。
     """
@@ -71,11 +71,11 @@ class SimpleMoELayer(nn.Module):
         batch_size, seq_len, _ = x.shape
         x_flat = x.view(-1, self.input_dim)  # 展平以便处理
 
-        # 计算门控权重，使用softmax进行归一化
+        # 计算门控权重，使用 softmax 进行归一化
         gate_logits = self.gate(x_flat)  # (batch_size * seq_len, num_experts)
         gate_scores = F.softmax(gate_logits, dim=-1)  # (batch_size * seq_len, num_experts)
 
-        # 选择top-k专家（这里k=1或2是常见的，为了简化，我们取top-1）
+        # 选择 top-k 专家（这里 k=1 或 2 是常见的，为了简化，我们取 top-1）
         top_k_weights, top_k_indices = gate_scores.topk(1, dim=-1)  # 获取每个输入最可能被哪个专家处理
         top_k_weights = top_k_weights.squeeze(-1)  # (batch_size * seq_len)
         top_k_indices = top_k_indices.squeeze(-1)  # (batch_size * seq_len)
@@ -121,8 +121,8 @@ KTransformers 的关键在于利用 MoE 模型的**稀疏激活**特性。在前
 ```python
 class DeviceAwareMoELayer(nn.Module):
     """
-    感知设备的MoE层（简化版KTransformers核心思想）。
-    这个层会主动将未被选中的专家保持在CPU内存中，仅在需要时移动到GPU。
+    感知设备的 MoE 层（简化版 KTransformers 核心思想）。
+    这个层会主动将未被选中的专家保持在 CPU 内存中，仅在需要时移动到 GPU。
     """
     def __init__(self, input_dim, output_dim, hidden_dim, num_experts, gpu_device='cuda:0'):
         super().__init__()
@@ -133,15 +133,15 @@ class DeviceAwareMoELayer(nn.Module):
         self.gpu_device = torch.device(gpu_device)
         self.cpu_device = torch.device('cpu')
 
-        # 门控网络（始终在GPU上，初始化时已固定设备，避免后续重复移动）
+        # 门控网络（始终在 GPU 上，初始化时已固定设备，避免后续重复移动）
         self.gate = nn.Linear(input_dim, num_experts).to(self.gpu_device)
 
-        # 专家网络列表 - 初始化时全部放在CPU上
+        # 专家网络列表 - 初始化时全部放在 CPU 上
         self.experts = nn.ModuleList([
             SimpleExpert(input_dim, hidden_dim, output_dim).to(self.cpu_device) for _ in range(num_experts)
         ])
 
-        # 记录哪些专家当前在GPU上（初始时都没有）
+        # 记录哪些专家当前在 GPU 上（初始时都没有）
         self.experts_on_gpu = [False] * num_experts
 
     def _move_expert_to_device(self, expert_idx, device):
@@ -150,7 +150,7 @@ class DeviceAwareMoELayer(nn.Module):
         self.experts_on_gpu[expert_idx] = (device == self.gpu_device)
 
     def forward(self, x):
-        # 输入x假设已经在GPU上
+        # 输入 x 假设已经在 GPU 上
         batch_size, seq_len, _ = x.shape
         x_flat = x.view(-1, self.input_dim)
 
@@ -161,16 +161,16 @@ class DeviceAwareMoELayer(nn.Module):
         top_k_weights = top_k_weights.squeeze(-1)
         top_k_indices = top_k_indices.squeeze(-1)
 
-        # 找出本轮前向传播中唯一需要被激活的专家ID
+        # 找出本轮前向传播中唯一需要被激活的专家 ID
         experts_needed = torch.unique(top_k_indices).tolist()
 
-        # 2. 设备管理：将需要的专家移动到GPU，将不需要的专家移回CPU
+        # 2. 设备管理：将需要的专家移动到 GPU，将不需要的专家移回 CPU
         for expert_idx in range(self.num_experts):
             if expert_idx in experts_needed and not self.experts_on_gpu[expert_idx]:
-                # 这个专家被需要但目前不在GPU -> 移动到GPU
+                # 这个专家被需要但目前不在 GPU -> 移动到 GPU
                 self._move_expert_to_device(expert_idx, self.gpu_device)
             elif expert_idx not in experts_needed and self.experts_on_gpu[expert_idx]:
-                # 这个专家不需要但目前占着GPU显存 -> 移动回CPU以释放显存
+                # 这个专家不需要但目前占着 GPU 显存 -> 移动回 CPU 以释放显存
                 self._move_expert_to_device(expert_idx, self.cpu_device)
 
         # 3. 计算输出（只计算被激活的专家）
@@ -180,7 +180,7 @@ class DeviceAwareMoELayer(nn.Module):
             expert_mask = (top_k_indices == expert_idx)
             if expert_mask.any():
                 expert_input = x_flat[expert_mask]
-                # 调用当前专家（已提前移动到GPU）计算输出
+                # 调用当前专家（已提前移动到 GPU）计算输出
                 expert_output = self.experts[expert_idx](expert_input)
                 output_flat[expert_mask] += expert_output * top_k_weights[expert_mask].unsqueeze(1)
 
@@ -198,7 +198,7 @@ class DeviceAwareMoELayer(nn.Module):
 
 如果某个专家不被需要但却在 GPU 上，则将其 **卸载回 CPU**。这一步是**释放显存**的关键，模拟了 KTransformers 的显存优化。最后，只遍历并计算那些被门控网络选中的专家。由于我们已经提前将这些专家移到了 GPU，计算是高效的。
 
-这种机制的有效性完全依赖于 MoE 的**稀疏性**。虽然模型总参数量可能巨大（例如，100个专家 * 10B参数/专家 = 1T参数），但处理单个输入或一个小批量时，只有极少部分专家被激活（例如2个）。
+这种机制的有效性完全依赖于 MoE 的**稀疏性**。虽然模型总参数量可能巨大（例如，100 个专家 * 10B 参数/专家 = 1T 参数），但处理单个输入或一个小批量时，只有极少部分专家被激活（例如 2 个）。
 
 因此，GPU 显存中只需要同时保存**所有被激活的专家的参数**，而不是全部专家的参数，从而实现了在有限显存内运行超大模型。
 
@@ -211,9 +211,9 @@ import torch
 
 def test_memory_usage():
     """
-    测试并对比标准MoE层和设备感知MoE层的显存使用情况
+    测试并对比标准 MoE 层和设备感知 MoE 层的显存使用情况
     """
-    # 检查GPU是否可用
+    # 检查 GPU 是否可用
     if not torch.cuda.is_available():
         print("WARNING: CUDA is not available. This test will run on CPU and cannot verify memory optimization.")
         device = torch.device('cpu')
@@ -233,10 +233,10 @@ def test_memory_usage():
     dummy_input = torch.randn(batch_size, seq_len, input_dim).to(device)
     print(f"Input shape: {dummy_input.shape}")
 
-    # 测试1: 标准的MoE层（所有专家始终在GPU上）
+    # 测试 1: 标准的 MoE 层（所有专家始终在 GPU 上）
     print("\n" + "="*50)
     print("Testing Standard SimpleMoELayer (all experts on GPU)")
-    torch.cuda.empty_cache()  # 清空GPU缓存
+    torch.cuda.empty_cache()  # 清空 GPU 缓存
     mem_before = torch.cuda.memory_allocated(device) / 1024**2  # MB
 
     standard_moe = SimpleMoELayer(input_dim, output_dim, hidden_dim, num_experts).to(device)
@@ -252,15 +252,15 @@ def test_memory_usage():
     print(f"GPU Memory - After forward pass: {mem_after_forward - mem_after_model_load:.2f} MB (Activations & Buffers)")
     print(f"GPU Memory - Total after forward: {mem_after_forward:.2f} MB")
 
-    # 测试2: 设备感知的MoE层（专家动态在CPU和GPU间移动）
+    # 测试 2: 设备感知的 MoE 层（专家动态在 CPU 和 GPU 间移动）
     print("\n" + "="*50)
     print("Testing DeviceAwareMoELayer (experts dynamically moved)")
     torch.cuda.empty_cache()
     mem_before_da = torch.cuda.memory_allocated(device) / 1024**2  # MB
 
-    # DeviceAwareMoELayer初始化时已管理专家设备，门控网络固定在GPU
+    # DeviceAwareMoELayer 初始化时已管理专家设备，门控网络固定在 GPU
     device_aware_moe = DeviceAwareMoELayer(input_dim, output_dim, hidden_dim, num_experts, gpu_device=device)
-    # 刚初始化后，只有门控网络在GPU上，专家都在CPU
+    # 刚初始化后，只有门控网络在 GPU 上，专家都在 CPU
     mem_after_model_load_da = torch.cuda.memory_allocated(device) / 1024**2  # MB
 
     # 进行一次前向传播

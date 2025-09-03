@@ -4,7 +4,7 @@
 
 大语言模型推理面临的一个关键挑战是自回归解码过程的串行特性。每个 token 的生成都依赖于前面所有 token，导致推理速度受限。投机采样作为一种有效的推理加速技术，可以在不改变模型输出质量的前提下显著提升推理速度。这类似于写作时先快速列出大纲再仔细润色的过程，而非一边写一边反复斟酌每个词句。
 
-本文将通过 Python 实现投机采样技术，使用 Qwen3 系列中的 **Qwen3-0.6B** 作为草稿模型，**Qwen3-4B** 作为目标模型。我们将修正核心代码错误（如硬编码概率、Tokenizer混用等），确保算法符合数学原理与工程实践，最终验证这一无损推理加速技术的有效性。
+本文将通过 Python 实现投机采样技术，使用 Qwen3 系列中的 **Qwen3-0.6B** 作为草稿模型，**Qwen3-4B** 作为目标模型。我们将修正核心代码错误（如硬编码概率、Tokenizer 混用等），确保算法符合数学原理与工程实践，最终验证这一无损推理加速技术的有效性。
 
 ## 1. 投机采样原理
 
@@ -45,10 +45,10 @@ import time
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"使用设备: {device}")
 if device == "cuda":
-    print(f"GPU型号: {torch.cuda.get_device_name(0)}")
+    print(f"GPU 型号: {torch.cuda.get_device_name(0)}")
     print(f"剩余显存: {torch.cuda.mem_get_info()[0]/1024**3:.2f} GB")
 
-# 使用目标模型的Tokenizer
+# 使用目标模型的 Tokenizer
 tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-4B", trust_remote_code=True)
 if tokenizer.pad_token_id is None:
     tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -74,9 +74,9 @@ draft_model.eval()
 print("模型加载完成！")
 ```
 
-首先检测并选择可用的CUDA设备，打印设备信息帮助调试。使用目标模型的Tokenizer确保编码一致性，避免草稿模型和目标模型使用不同Tokenizer导致的token不匹配问题。
+首先检测并选择可用的 CUDA 设备，打印设备信息帮助调试。使用目标模型的 Tokenizer 确保编码一致性，避免草稿模型和目标模型使用不同 Tokenizer 导致的 token 不匹配问题。
 
-加载目标模型时使用半精度浮点数减少显存占用，通过`device_map="auto"`让Hugging Face库自动分配模型层到可用设备。调用`model.eval()`切换到推理模式，禁用Dropout等训练专用层，确保推理结果稳定。半精度加载使Qwen3-4B显存占用降至8-10GB，Qwen3-0.6B降至1-2GB，适合消费级GPU运行。
+加载目标模型时使用半精度浮点数减少显存占用，通过`device_map="auto"`让 Hugging Face 库自动分配模型层到可用设备。调用`model.eval()`切换到推理模式，禁用 Dropout 等训练专用层，确保推理结果稳定。半精度加载使 Qwen3-4B 显存占用降至 8-10GB，Qwen3-0.6B 降至 1-2GB，适合消费级 GPU 运行。
 
 ## 3. 投机采样核心算法
 
@@ -101,13 +101,13 @@ def generate_draft_tokens(generated_tokens, draft_model, tokenizer, max_candidat
     return candidate_tokens
 ```
 
-这段代码实现了草稿模型的候选生成功能。通过`unsqueeze(0)`将一维token序列转换为二维batch格式，满足模型输入要求。设置`do_sample=True`启用采样而非贪婪解码，增加生成多样性。
+这段代码实现了草稿模型的候选生成功能。通过`unsqueeze(0)`将一维 token 序列转换为二维 batch 格式，满足模型输入要求。设置`do_sample=True`启用采样而非贪婪解码，增加生成多样性。
 
-温度参数`temperature=0.7`平衡生成多样性与准确性，这是经过实验验证的Qwen系列最优值。`torch.no_grad()`上下文管理器禁用梯度计算，大幅减少显存占用和计算开销。
+温度参数`temperature=0.7`平衡生成多样性与准确性，这是经过实验验证的 Qwen 系列最优值。`torch.no_grad()`上下文管理器禁用梯度计算，大幅减少显存占用和计算开销。
 
-最后通过切片操作`[generated_tokens.shape[0]:]`提取新生成的候选token，避免包含已生成的token序列。
+最后通过切片操作`[generated_tokens.shape[0]:]`提取新生成的候选 token，避免包含已生成的 token 序列。
 
-2. 目标模型验证候选token
+2. 目标模型验证候选 token
 
 ```python
 def verify_candidates(generated_tokens, candidate_tokens, target_model, draft_model, tokenizer):
@@ -152,11 +152,11 @@ def verify_candidates(generated_tokens, candidate_tokens, target_model, draft_mo
     return accepted_tokens, accepted_mask
 ```
 
-这是投机采样的核心验证逻辑。首先将已生成token和候选token拼接为完整序列，一次性计算所有位置的logits，减少模型调用次数。通过`target_logits[:, :-1, :]`获取每个位置预测下一个token的概率分布，因为最后一个token没有对应的下一个token预测。
+这是投机采样的核心验证逻辑。首先将已生成 token 和候选 token 拼接为完整序列，一次性计算所有位置的 logits，减少模型调用次数。通过`target_logits[:, :-1, :]`获取每个位置预测下一个 token 的概率分布，因为最后一个 token 没有对应的下一个 token 预测。
 
-计算目标模型概率p(x)和草稿模型概率q(x)时，特别注意索引计算：`prob_idx = generated_tokens.shape[0] + i - 1`确保正确获取当前候选token对应的概率位置。添加`torch.max(q, 1e-8)`防止除零错误，这是工程实践中必要的保护措施。
+计算目标模型概率 p(x)和草稿模型概率 q(x)时，特别注意索引计算：`prob_idx = generated_tokens.shape[0] + i - 1`确保正确获取当前候选 token 对应的概率位置。添加`torch.max(q, 1e-8)`防止除零错误，这是工程实践中必要的保护措施。
 
-随机采样决定是否接受候选token时，严格遵循接受准则公式，确保输出分布与目标模型一致。一旦有token被拒绝，立即中断后续验证，这是投机采样的关键规则。
+随机采样决定是否接受候选 token 时，严格遵循接受准则公式，确保输出分布与目标模型一致。一旦有 token 被拒绝，立即中断后续验证，这是投机采样的关键规则。
 
 ## 4. 完整投机采样实现
 
@@ -205,10 +205,10 @@ def speculative_sampling(prompt, target_model, draft_model, tokenizer, max_new_t
 
     print("="*50)
     print("投机采样统计结果：")
-    print(f"总候选token数: {total_candidate_tokens}")
-    print(f"总接受token数: {total_accepted_tokens}")
+    print(f"总候选 token 数: {total_candidate_tokens}")
+    print(f"总接受 token 数: {total_accepted_tokens}")
     print(f"接受率: {acceptance_rate:.2%}")
-    print(f"生成新token数: {num_new_tokens}")
+    print(f"生成新 token 数: {num_new_tokens}")
     print(f"推理时间: {infer_time:.2f} 秒")
     print(f"生成速度: {token_per_second:.2f} token/秒")
     print("="*50)
@@ -216,9 +216,9 @@ def speculative_sampling(prompt, target_model, draft_model, tokenizer, max_new_t
     return generated_text
 ```
 
-这段代码实现了完整的投机采样流程。首先将输入提示编码为token序列，初始化生成状态。主循环中持续生成和验证候选token，直到达到指定长度。关键优化是跟踪`num_new_tokens`而非总token数，确保准确控制生成长度。
+这段代码实现了完整的投机采样流程。首先将输入提示编码为 token 序列，初始化生成状态。主循环中持续生成和验证候选 token，直到达到指定长度。关键优化是跟踪`num_new_tokens`而非总 token 数，确保准确控制生成长度。
 
-当候选token被部分接受时，调用目标模型生成一个正确token，同时统计这个token为"1:1接受"。最后计算并输出关键性能指标：接受率反映草稿模型预测准确性，token/秒直接量化加速效果。这些指标对于评估投机采样实际效果至关重要。
+当候选 token 被部分接受时，调用目标模型生成一个正确 token，同时统计这个 token 为"1:1 接受"。最后计算并输出关键性能指标：接受率反映草稿模型预测准确性，token/秒直接量化加速效果。这些指标对于评估投机采样实际效果至关重要。
 
 ## 5. 标准自回归解码实验
 
@@ -247,7 +247,7 @@ def standard_decoding(prompt, model, tokenizer, max_new_tokens=50):
 
     print("="*50)
     print("标准自回归解码统计结果：")
-    print(f"生成新token数: {num_new_tokens}")
+    print(f"生成新 token 数: {num_new_tokens}")
     print(f"推理时间: {infer_time:.2f} 秒")
     print(f"生成速度: {token_per_second:.2f} token/秒")
     print("="*50)
@@ -255,7 +255,7 @@ def standard_decoding(prompt, model, tokenizer, max_new_tokens=50):
     return generated_text
 ```
 
-这段代码实现了标准自回归解码作为对比基准。使用相同的温度参数和采样设置确保对比公平性。通过`model.generate`接口实现token的逐个生成，这是大多数语言模型的标准推理方式。计算生成速度时同样考虑实际生成的新token数量而非总长度，确保指标可比性。
+这段代码实现了标准自回归解码作为对比基准。使用相同的温度参数和采样设置确保对比公平性。通过`model.generate`接口实现 token 的逐个生成，这是大多数语言模型的标准推理方式。计算生成速度时同样考虑实际生成的新 token 数量而非总长度，确保指标可比性。
 
 实验执行与结果
 
@@ -271,15 +271,15 @@ print(spec_result)
 输入提示: 人工智能的未来发展趋势是
 ==================================================
 投机采样统计结果：
-总候选token数: 48
-总接受token数: 32
+总候选 token 数: 48
+总接受 token 数: 32
 接受率: 66.67%
-生成新token数: 50
+生成新 token 数: 50
 推理时间: 1.82 秒
 生成速度: 27.47 token/秒
 ==================================================
 投机采样生成文本：
-人工智能的未来发展趋势是多维度融合与深度渗透。从技术层面看，大语言模型将与计算机视觉、机器人技术进一步结合，形成"感知-理解-行动"的闭环能力，例如在工业场景中实现无人化质检与动态调度；从应用层面，AI将更深入教育、医疗等民生领域，通过个性化学习路径规划、疾病早期筛查等服务提升社会效率；同时，AI伦理与安全技术也将同步发展，例如联邦学习、可解释AI的普及将平衡技术创新与数据隐私保护，推动人工智能向负责任的方向演进。
+人工智能的未来发展趋势是多维度融合与深度渗透。从技术层面看，大语言模型将与计算机视觉、机器人技术进一步结合，形成"感知-理解-行动"的闭环能力，例如在工业场景中实现无人化质检与动态调度；从应用层面，AI 将更深入教育、医疗等民生领域，通过个性化学习路径规划、疾病早期筛查等服务提升社会效率；同时，AI 伦理与安全技术也将同步发展，例如联邦学习、可解释 AI 的普及将平衡技术创新与数据隐私保护，推动人工智能向负责任的方向演进。
 ```
 
 ## 6. 标准自回归解码执行
@@ -295,15 +295,15 @@ print(std_result)
 ```
 ==================================================
 标准自回归解码统计结果：
-生成新token数: 50
+生成新 token 数: 50
 推理时间: 4.95 秒
 生成速度: 10.10 token/秒
 ==================================================
 标准自回归解码生成文本：
-人工智能的未来发展趋势是多维度融合与深度渗透。从技术层面看，大语言模型将与计算机视觉、机器人技术进一步结合，形成"感知-理解-行动"的闭环能力，例如在工业场景中实现无人化质检与动态调度；从应用层面，AI将更深入教育、医疗等民生领域，通过个性化学习路径规划、疾病早期筛查等服务提升社会效率；同时，AI伦理与安全技术也将同步发展，例如联邦学习、可解释AI的普及将平衡技术创新与数据隐私保护，推动人工智能向负责任的方向演进。
+人工智能的未来发展趋势是多维度融合与深度渗透。从技术层面看，大语言模型将与计算机视觉、机器人技术进一步结合，形成"感知-理解-行动"的闭环能力，例如在工业场景中实现无人化质检与动态调度；从应用层面，AI 将更深入教育、医疗等民生领域，通过个性化学习路径规划、疾病早期筛查等服务提升社会效率；同时，AI 伦理与安全技术也将同步发展，例如联邦学习、可解释 AI 的普及将平衡技术创新与数据隐私保护，推动人工智能向负责任的方向演进。
 ```
 
-实验结果显示投机采样速度达到27.47 token/秒，是标准解码10.10 token/秒的2.7倍，符合理论预期。两者生成的文本完全一致，证明投机采样在保持目标模型输出分布的前提下实现了加速。66.67%的接受率处于最优区间，平衡了候选数量与接受率的关系。草稿模型成功预测了大部分token，目标模型只需验证和修正少量错误预测，这是加速的关键。
+实验结果显示投机采样速度达到 27.47 token/秒，是标准解码 10.10 token/秒的 2.7 倍，符合理论预期。两者生成的文本完全一致，证明投机采样在保持目标模型输出分布的前提下实现了加速。66.67%的接受率处于最优区间，平衡了候选数量与接受率的关系。草稿模型成功预测了大部分 token，目标模型只需验证和修正少量错误预测，这是加速的关键。
 
 ## 7. 性能分析与优化
 
@@ -312,7 +312,7 @@ print(std_result)
 ```python
 def analyze_candidate_lengths(prompt, target_model, draft_model, tokenizer, max_candidates=10, num_trials=5):
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids[0].to(device)
-    print("候选token数量 vs 平均接受率（5次试验）")
+    print("候选 token 数量 vs 平均接受率（5 次试验）")
     print("-"*40)
 
     for num_cand in range(1, max_candidates + 1):
@@ -338,7 +338,7 @@ analyze_candidate_lengths(prompt, target_model, draft_model, tokenizer, max_cand
 ```
 
 ```
-候选token数量 vs 平均接受率（5次试验）
+候选 token 数量 vs 平均接受率（5 次试验）
 ----------------------------------------
 候选数  1 | 平均接受率: 88.00% (22/25)
 候选数  2 | 平均接受率: 76.00% (38/50)
@@ -351,12 +351,12 @@ analyze_candidate_lengths(prompt, target_model, draft_model, tokenizer, max_cand
 ----------------------------------------
 ```
 
-实验表明候选数越多，接受率越低，因为草稿模型对远期 token 的预测准确性会下降。5个候选 token 在实验中表现出最佳的接受率（66%），实现了最高的加速比。
+实验表明候选数越多，接受率越低，因为草稿模型对远期 token 的预测准确性会下降。5 个候选 token 在实验中表现出最佳的接受率（66%），实现了最高的加速比。
 
-当候选数增加到8时，接受率降至46.25%，说明草稿模型难以准确预测较远位置的token。这种递减关系符合自回归生成的基本特性：预测准确性随距离增加而降低。
+当候选数增加到 8 时，接受率降至 46.25%，说明草稿模型难以准确预测较远位置的 token。这种递减关系符合自回归生成的基本特性：预测准确性随距离增加而降低。
 
 ## 8. 总结与思考
 
-通过修正概率硬编码、Tokenizer混用等核心错误，基于Qwen3-0.6B和Qwen3-4B的实践验证了投机采样的有效性：在保持生成质量不变的前提下，推理速度提升至标准解码的2.7倍，接受率稳定在66.67%。
+通过修正概率硬编码、Tokenizer 混用等核心错误，基于 Qwen3-0.6B 和 Qwen3-4B 的实践验证了投机采样的有效性：在保持生成质量不变的前提下，推理速度提升至标准解码的 2.7 倍，接受率稳定在 66.67%。
 
-5个候选token被证明是平衡速度与接受率的最佳选择。这种方法特别适合需要高质量生成的应用场景，如内容创作、代码生成和技术文档撰写。
+5 个候选 token 被证明是平衡速度与接受率的最佳选择。这种方法特别适合需要高质量生成的应用场景，如内容创作、代码生成和技术文档撰写。

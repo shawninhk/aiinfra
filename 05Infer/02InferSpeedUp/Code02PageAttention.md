@@ -49,9 +49,9 @@ import torch
 import math
 
 class Page:
-    """表示一个物理页面，存储固定数量token的键值对"""
+    """表示一个物理页面，存储固定数量 token 的键值对"""
     def __init__(self, page_size, num_heads, head_dim):
-        self.page_size = page_size  # 每个页面存储的token数量
+        self.page_size = page_size  # 每个页面存储的 token 数量
         self.num_heads = num_heads
         self.head_dim = head_dim
         # 初始化键值存储空间
@@ -70,14 +70,14 @@ class Page:
 class PageTable:
     """管理逻辑页面到物理页面的映射关系"""
     def __init__(self):
-        self.logical_to_physical = {}  # 映射表：逻辑页面ID → 物理页面ID
+        self.logical_to_physical = {}  # 映射表：逻辑页面 ID → 物理页面 ID
 
     def map_page(self, logical_page_id, physical_page_id):
         """建立逻辑页面到物理页面的映射"""
         self.logical_to_physical[logical_page_id] = physical_page_id
 
     def get_physical_page(self, logical_page_id):
-        """根据逻辑页面ID获取物理页面ID"""
+        """根据逻辑页面 ID 获取物理页面 ID"""
         return self.logical_to_physical.get(logical_page_id, -1)
 ```
 
@@ -125,7 +125,7 @@ class SequenceManager:
     """管理每个序列的页面映射和令牌存储"""
     def __init__(self, block_manager):
         self.block_manager = block_manager
-        self.sequences = {}  # 存储序列ID到页表的映射
+        self.sequences = {}  # 存储序列 ID 到页表的映射
 
     def create_sequence(self, seq_id):
         """创建新序列并初始化页表"""
@@ -134,9 +134,9 @@ class SequenceManager:
         return page_table
 
     def append_token(self, seq_id, token_pos, key, value):
-        """为序列添加token的键值对"""
+        """为序列添加 token 的键值对"""
         page_table = self.sequences[seq_id]
-        # 计算逻辑页面ID和页面内偏移量
+        # 计算逻辑页面 ID 和页面内偏移量
         logical_page_id = token_pos // self.block_manager.page_size
         page_offset = token_pos % self.block_manager.page_size
         
@@ -184,7 +184,7 @@ class PagedAttention:
             if physical_page_id == -1:
                 continue  # 跳过未分配的页面
             page = self.block_manager.pages[physical_page_id]
-            # 计算当前页面有效的token数量（最后一页可能不满）
+            # 计算当前页面有效的 token 数量（最后一页可能不满）
             start_idx = logical_page_id * self.block_manager.page_size
             valid_tokens = min(self.block_manager.page_size, seq_len - start_idx)
             # 提取有效键值
@@ -223,7 +223,7 @@ class PagedAttention:
 ```python
 # 实验设置和参数初始化
 num_pages = 100
-page_size = 8  # 每个页面存储8个token
+page_size = 8  # 每个页面存储 8 个 token
 num_heads = 4
 head_dim = 16
 batch_size = 1
@@ -238,21 +238,21 @@ seq_id = 0
 page_table = seq_manager.create_sequence(seq_id)
 seq_len = 0
 
-# 模拟生成20个token的过程
-print("开始模拟生成20个token的过程...")
+# 模拟生成 20 个 token 的过程
+print("开始模拟生成 20 个 token 的过程...")
 for token_pos in range(20):
-    # 生成随机键值（模拟Transformer层的输出）
+    # 生成随机键值（模拟 Transformer 层的输出）
     key = torch.randn(num_heads, head_dim)
     value = torch.randn(num_heads, head_dim)
-    # 存储到Cache
+    # 存储到 Cache
     seq_manager.append_token(seq_id, token_pos, key, value)
     seq_len += 1
     
-    # 每5个token计算一次注意力
+    # 每 5 个 token 计算一次注意力
     if (token_pos + 1) % 5 == 0:
         query = torch.randn(batch_size, num_heads, head_dim)
         output = paged_attn.compute_attention(query, page_table, seq_len)
-        print(f"已处理Token数量: {token_pos+1}, 注意力输出形状: {output.shape}")
+        print(f"已处理 Token 数量: {token_pos+1}, 注意力输出形状: {output.shape}")
         print(f"当前使用的物理页面数: {len([pid for pid in page_table.logical_to_physical.values() if pid != -1])}")
 ```
 

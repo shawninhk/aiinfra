@@ -61,7 +61,7 @@ def preprocess_function(examples):
     prompts = ["Instruction: " + q + "\nResponse: " for q in examples['instruction']]
     return {"text": prompts}
 
-# 选取子集以简化实验（500条样本）
+# 选取子集以简化实验（500 条样本）
 small_dataset = dataset.select(range(500)).map(preprocess_function, batched=True)
 ```
 
@@ -106,7 +106,7 @@ class DistillationLoss(nn.Module):
         self.ce_loss = nn.CrossEntropyLoss()
 
     def forward(self, student_logits, teacher_logits, labels):
-        # 计算蒸馏损失（KL散度）
+        # 计算蒸馏损失（KL 散度）
         soft_teacher = torch.softmax(teacher_logits / self.temperature, dim=-1)
         soft_student = torch.log_softmax(student_logits / self.temperature, dim=-1)
         kl_loss = self.kl_loss(soft_student, soft_teacher) * (self.temperature ** 2)
