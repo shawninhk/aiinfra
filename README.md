@@ -65,7 +65,7 @@ AI 集群架构演进、万卡集群方案、性能建模与优化，GPU/NPU 精
 | 3      | [万卡 AI 集群](./01AICluster/03SuperPod/)  | 围绕万卡 AI 集群从存算网络协同、快速交付与紧张工期等挑战   | :white_check_mark: |
 | 4      | [集群性能分析](./01AICluster/04Performance/)  | 集群性能指标分析、建模与常见问题定位方法解析   | :o: |
 
-#### :triangular_flag_on_post: [集群性能分析](./01AICluster/04Performance/)
+#### :triangular_flag_on_post: [1.4 集群性能分析](./01AICluster/04Performance/)
 
 | 大纲 | 小节 | 链接 | 状态 |
 |:--- |:---- |:-------------------- |:---- |
@@ -109,6 +109,34 @@ AI 集群云原生篇：容器技术、K8S 编排、AI 云平台与任务调度�
 | 4      | [后训练与强化学习](./04Train/04PostTrainRL/) |  后训练与强化学习算法对比、框架解析与工程实践  |
 | 5      | [大模型微调 SFT](./04Train/05FineTune/) |  大模型微调算法原理、变体优化与多模态实践  |
 | 6      | [大模型验证评估](./04Train/06VerifValid/) | 大模型评估、基准测试与统一框架解析   |
+
+#### :triangular_flag_on_post: [4.1 分布式并行基础](./04Train/01ParallelBegin/)
+
+| 大纲 | 小节 | 链接| 状态 |
+|:-- |:-- |:-- |:--: |
+| 分布式并行 | 01 分布式并行框架介绍  | [PPT](./04Train/01ParallelBegin/01Introduction.pdf), [视频](https://www.bilibili.com/video/BV1op421C7wp) | |
+| 分布式并行 | 02 DeepSpeed 介绍  | [PPT](./04Train/01ParallelBegin/02DeepSpeed.pdf), [视频](https://www.bilibili.com/video/BV1tH4y1J7bm) | |
+| 并行 实践 :computer: | CODE 01: 从零构建 PyTorch DDP | [Markdown](./04Train/01ParallelBegin/Code01DDP.md), [Jupyter](./04Train/01ParallelBegin/Code01DDP.ipynb), [文章](https://infrasys-ai.github.io/aiinfra-docs/04Train01ParallelBegin/Code01DDP.html) | :white_check_mark: |
+| 并行 实践 :computer: | CODE 02: PyTorch 实现模型并行 | [Markdown](./04Train/01ParallelBegin/Code02MP.md), [Jupyter](./04Train/01ParallelBegin/Code02MP.ipynb), [文章](https://infrasys-ai.github.io/aiinfra-docs/04Train01ParallelBegin/Code02MP.html) | :white_check_mark: |
+
+#### :triangular_flag_on_post: [4.2 大模型并行进阶](./04Train/02ParallelAdv/)
+
+| 大纲 | 小节 | 链接 | 状态 |
+|:-- |:-- |:-- |:--:|
+| 分布式并行 | 01 优化器并行 ZeRO1/2/3 原理  | [PPT](./04Train/02ParallelAdv/01DSZero.pdf), [视频](https://www.bilibili.com/video/BV1fb421t7KN) | |
+| 分布式并行 | 02 Megatron-LM 代码概览  | [PPT](./04Train/02ParallelAdv/02Megatron.pdf), [视频](https://www.bilibili.com/video/BV12J4m1K78y) | |
+| 分布式并行 | 03 大模型并行与 GPU 集群配置  | [PPT](./04Train/02ParallelAdv/03MGConfig.pdf), [视频](https://www.bilibili.com/video/BV1NH4y1g7w4) | |
+| 分布式并行 | 04 Megatron-LM TP 原理  | [PPT](./04Train/02ParallelAdv/04MGTPPrinc.pdf), [视频](https://www.bilibili.com/video/BV1yw4m1S71Y) | |
+| 分布式并行 | 05 Megatron-LM TP 代码解析  | [PPT](./04Train/02ParallelAdv/05MGTPCode.pdf), [视频](https://www.bilibili.com/video/BV1cy411Y7B9) | |
+| 分布式并行 | 06 Megatron-LM SP 代码解析  | [PPT](./04Train/02ParallelAdv/06MGSPPrinc.pdf), [视频](https://www.bilibili.com/video/BV1EM4m1r7tm) | |
+| 分布式并行 | 07 Megatron-LM PP 基本原理  | [PPT](./04Train/02ParallelAdv/07MGPPPrinc.pdf), [视频](https://www.bilibili.com/video/BV18f42197Sx) | |
+| 分布式并行 | 08 流水并行 1F1B/1F1B Interleaved 原理  | [PPT](./04Train/02ParallelAdv/08MGPPCode.pdf), [视频](https://www.bilibili.com/video/BV1aD421g7yZ) | |
+| 分布式并行 | 09 Megatron-LM 流水并行 PP 代码解析  | [PPT](./04Train/02ParallelAdv/08MGPPCode.pdf), [视频](https://www.bilibili.com/video/BV1hs421g7vN) | |
+|:sparkling_heart:|:star2:|:sparkling_heart:| |
+| 并行 实践 :computer: | CODE 01: ZeRO 显存优化实践 | [Markdown](./04Train/02ParallelAdv/Code01ZeRO.md), [Jupyter](./04Train/02ParallelAdv/Code01ZeRO.ipynb), [文章](https://infrasys-ai.github.io/aiinfra-docs/04Train02ParallelAdv/Code01ZeRO.html) | :white_check_mark: |
+| 并行 实践 :computer: | CODE 02: Megatron 张量并行复现 | [Markdown](./04Train/02ParallelAdv/Code02Megatron.md), [Jupyter](./04Train/02ParallelAdv/Code02Megatron.ipynb), [文章](https://infrasys-ai.github.io/aiinfra-docs/04Train02ParallelAdv/Code02Megatron.html) | :white_check_mark: |
+| 并行 实践 :computer: | CODE 03: Pipeline 并行实践 | [Markdown](./04Train/02ParallelAdv/Code03Pipeline.md), [Jupyter](./04Train/02ParallelAdv/Code03Pipeline.ipynb), [文章](https://infrasys-ai.github.io/aiinfra-docs/04Train02ParallelAdv/Code03Pipeline.html) | :white_check_mark: |
+| 并行 实践 :computer: | CODE 04: 专家并行大规模训练 | [Markdown](./04Train/02ParallelAdv/Code04Expert.md), [Jupyter](./04Train/02ParallelAdv/Code04Expert.ipynb), [文章](https://infrasys-ai.github.io/aiinfra-docs/04Train02ParallelAdv/Code04Expert.html) | :white_check_mark: |
 
 ### :checkered_flag: **[05. 分布式推理](./05Infer/)**
 
