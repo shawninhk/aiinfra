@@ -63,7 +63,16 @@ AI 集群架构演进、万卡集群方案、性能建模与优化，GPU/NPU 精
 | 1      | [计算集群之路](./01AICluster/01Roadmap/) |  高性能计算集群发展与万卡 AI 集群建设及机房基础设施挑战  | :white_check_mark: |
 | 2      | [L0/L1 AI 集群基建](./01AICluster/02L0L1Base/)   | 服务器节点的基础知识、散热技术的发展与实践       | :white_check_mark: |
 | 3      | [万卡 AI 集群](./01AICluster/03SuperPod/)  | 围绕万卡 AI 集群从存算网络协同、快速交付与紧张工期等挑战   | :white_check_mark: |
-| 4      | [集群性能分析](./01AICluster/03Analysis/)  | 集群性能指标分析、建模与常见问题定位方法解析   | :o: |
+| 4      | [集群性能分析](./01AICluster/04Performance/)  | 集群性能指标分析、建模与常见问题定位方法解析   | :o: |
+
+#### :triangular_flag_on_post: [集群性能分析](./01AICluster/04Performance/)
+
+| 大纲 | 小节 | 链接 | 状态 |
+|:--- |:---- |:-------------------- |:---- |
+|:sparkling_heart:|:star2:|:sparkling_heart:| |
+| 性能 实践 :computer: | CODE 01: 拆解 Transformer-Decoder | [Markdown](./01AICluster/04Performance/CODE01Modeling.md), [Jupyter](./01AICluster/04Performance/CODE01Modeling.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/01AICluster04Performance/CODE01Modeling.html) | :white_check_mark: |
+| 性能 实践 :computer: | CODE 02: MOE 参数量和计算量 | [Markdown](./01AICluster/04Performance/CODE02MOE.md), [Jupyter](./01AICluster/04Performance/CODE02MOE.ipynb), [文章](https://infrasys-ai.github.io/aiinfra-docs/01AICluster04Performance/CODE02MOE.html) | :white_check_mark: |
+| 性能 实践 :computer: | CODE 03: MFU 模型利用率评估 | [Markdown](./01AICluster/04Performance/CODE03MFU.md), [Jupyter](./01AICluster/04Performance/CODE03MFU.ipynb), [文章](https://infrasys-ai.github.io/aiinfra-docs/01AICluster04Performance/CODE03MFU.html) | :white_check_mark: |
 
 ### :checkered_flag: **[02. 通信与存储](./02StorComm/)**
 
