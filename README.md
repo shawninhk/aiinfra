@@ -33,17 +33,7 @@
 
 ## 课程细节
 
-## 课程设立目的
-
-本课程主要为本科生高年级、硕博研究生、AI 大模型系统从业者设计，帮助大家：
-
-1. 完整了解 AI 的计算机系统架构，并通过实际问题和案例，来了解 AI 完整生命周期下的系统设计。
-
-2. 介绍前沿系统架构和 AI 相结合的研究工作，了解主流框架、平台和工具来了解 AI 大模型系统。
-
-## 课程部分
-
-### :checkered_flag: **[00. 大模型系统概述](./00Summary/)** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+### :neckbeard::neckbeard::neckbeard::neckbeard::neckbeard::neckbeard::neckbeard::neckbeard: **[00. 大模型系统概述](./00Summary/)**
 
 大模型系统概述、Scaling Law 解读、训练推理流程、系统区别及未来趋势。
 
@@ -54,7 +44,7 @@
 | 3      | [与 AI 系统区别](./00Summary/03Different) | AI 系统与大模型系统的通用性、资源与软件栈差异  |
 | 3      | [大模型系统发展](./00Summary/04Develop) | 大模型系统未来趋势：技术演进、场景应用与算力生态升级  |
 
-### :checkered_flag: **[01. AI 计算集群](./01AICluster/)** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+### :neckbeard::neckbeard::neckbeard::neckbeard::neckbeard::neckbeard::neckbeard::neckbeard: **[01. AI 计算集群](./01AICluster/)** 
 
 AI 集群架构演进、万卡集群方案、性能建模与优化，GPU/NPU 精度差异及定位方法。
 
