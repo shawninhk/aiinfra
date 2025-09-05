@@ -7,13 +7,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"使用设备: {device}")
 
 class SimplifiedRetNet(nn.Module):
-    """简化版RetNet实现，保留核心机制"""
+    """简化版 RetNet 实现，保留核心机制"""
     def __init__(self, d_model=128, head_size=64, gamma=0.9):
         super().__init__()
         self.d_model = d_model
         self.head_size = head_size
         
-        # Q, K, V投影
+        # Q, K, V 投影
         self.q_proj = nn.Linear(d_model, head_size, bias=False)
         self.k_proj = nn.Linear(d_model, head_size, bias=False)
         self.v_proj = nn.Linear(d_model, head_size, bias=False)
@@ -33,7 +33,7 @@ class SimplifiedRetNet(nn.Module):
         """并行模式 - 训练时使用"""
         batch_size, seq_len, _ = x.shape
         
-        # 计算Q, K, V
+        # 计算 Q, K, V
         Q = self.q_proj(x)  # [batch, seq_len, head_size]
         K = self.k_proj(x)
         V = self.v_proj(x)
@@ -61,7 +61,7 @@ class SimplifiedRetNet(nn.Module):
         """递归模式 - 推理时使用"""
         batch_size, seq_len, _ = x.shape
         
-        # 计算Q, K, V
+        # 计算 Q, K, V
         Q = self.q_proj(x)  # [batch, seq_len, head_size]
         K = self.k_proj(x)
         V = self.v_proj(x)
@@ -94,7 +94,7 @@ class SimplifiedRetNet(nn.Module):
         """分块模式 - 长序列处理"""
         batch_size, seq_len, _ = x.shape
         
-        # 计算Q, K, V
+        # 计算 Q, K, V
         Q = self.q_proj(x)
         K = self.k_proj(x)
         V = self.v_proj(x)
@@ -107,7 +107,7 @@ class SimplifiedRetNet(nn.Module):
             start = i * chunk_size
             end = min(start + chunk_size, seq_len)
             
-            # 当前块的Q, K, V
+            # 当前块的 Q, K, V
             Q_chunk = Q[:, start:end]
             K_chunk = K[:, start:end]
             V_chunk = V[:, start:end]
@@ -196,7 +196,7 @@ def main():
         diff_recurrent = torch.mean(torch.abs(out_parallel - out_recurrent))
         diff_chunk = torch.mean(torch.abs(out_parallel - out_chunk))
         
-        print(f"\n并行模式与递归模式的平均差异: {diff_recurrent:.6f}")
+        print(f"\n 并行模式与递归模式的平均差异: {diff_recurrent:.6f}")
         print(f"并行模式与分块模式的平均差异: {diff_chunk:.6f}")
         print("注: 微小差异是由于数值计算误差，三种模式在理论上是等价的")
 
