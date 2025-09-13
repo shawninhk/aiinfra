@@ -56,7 +56,7 @@ $$
 L(C_{\text{min}}) \approx \left( \frac{C_c}{C_{\text{min}}} \right)^{\alpha_C}
 $$
 
-其中，$\alpha_C \approx 0.050，C_c=2.3*10^8$ 。
+其中， $\alpha_C \approx 0.050，C_c=2.3*10^8$ 。
 
 计算量 $C \approx 6NBS$ 。其中 $B$ 表示 batch size， $S$ 表示训练步长。 $L(C_{\text{min}})$ 的图与其他两个图的不同在于，其是由多个曲线的最低点相连得出的。
 
@@ -84,7 +84,7 @@ $$
 
 ![模型参数与数据](images/01ScalingLaw03.png)
 
-类似的，下图展示了在固定模型规模后，模型性能随数据集大小变化的关系。可以看到，在 $N$ 为393.2K时，训练数据超过 $10^8$ 后，性能就不再有显著提升。而在 $N$ 为708M时，训练数据超过 $10^10$ 后，性能依然在持续提升。
+类似的，下图展示了在固定模型规模后，模型性能随数据集大小变化的关系。可以看到，在 $N$ 为393.2K时，训练数据超过 $10^8$ 后，性能就不再有显著提升。而在 $N$ 为708M时，训练数据超过 $10^{10}$ 后，性能依然在持续提升。
 
 ![模型参数与数据](images/01ScalingLaw05.png)
 
@@ -98,13 +98,7 @@ $$
 
 ![样本效率](images/01ScalingLaw02.png)
 
-### 2.4 后续扩展影响
-
-后续论文[Training Compute-Optimal Large Language Models](https://arxiv.org/abs/2203.15556)进一步扩充了模型和数据规模，提出了对最优资源分配策略的修正。其核心发现是，对于给定的计算预算，模型参数和数据集应以大致相等的比例缩放，即 $N_{opt} \propto C^{0.5}, D_{opt} \propto C^{0.5}$ ，而非 Kaplan et al. 建议的侧重模型参数。
-
-![作者使用三种不同方法的预测最优模型大小，发现当时的大模型训练严重不足。这也导致 2021 年大家复现 GPT3 都没有做出特别好的效果。](images/01ScalingLaw06.png)
-
-### 2.5 其他因素
+### 2.4 其他因素
 
 Kaplan et al.还讨论了其他可能影响模型性能的因素，包括：学习率、模型结构、上下文长度和数据分布偏移，发现这些因素的影响有限。
 
@@ -143,7 +137,23 @@ Kaplan et al.发现模型在域外数据上的性能相比于训练集会出现�
 
 ## 3. Chinchilla 定律
 
-!!!!!!!!大模型的定律，计算最优缩放定律，跟 sclaing law 一样很重要，《Training Compute-Optimal Large Language Models》
+后续论文[Training Compute-Optimal Large Language Models](https://arxiv.org/abs/2203.15556)进一步扩充了模型和数据规模，提出了对最优资源分配策略的修正。其核心发现是，对于给定的计算预算，模型参数和数据集应以大致相等的比例缩放，即 $N_{opt} \propto C^{0.5}, D_{opt} \propto C^{0.5}$ ，而非 Kaplan et al. 建议的侧重模型参数。
+
+如图所示，作者采用了三种不同方法来研究在固定的 FLOPs 预算下，应该如何权衡模型大小和训练标记数，并得出一个关键结论：当时的大型模型普遍存在训练不足的问题。这一发现也解释了为何在 2021 年，许多研究者在尝试复现 GPT-3 时未能取得理想的成果。
+为了验证这一结论，作者用更多的训练数据训练了一个参数量更小的模型 Chinchilla (70B)。尽管 Chinchilla 的模型规模远小于 Gopher (280B)、GPT-3 (175B)、Jurassic-1 (178B) 和 Megatron-Turing NLG (530B) 等模型，但实验结果表明，它在众多下游任务中的表现反而更胜一筹。
+
+![叠加预测](images/01ScalingLaw06.png)
+![叠加预测](images/01ScalingLaw13.png)
+
+### 3.1 固定模型大小，改变训练token数量
+
+在第一种方法中，作者改变了一系列模型（参数量从 7000 万到超过 100 亿）的训练步数。
+
+![叠加预测](images/01ScalingLaw14.png)
+
+### 3.2 IsoFLOP 配置
+
+### 3.3 拟合参数化损失函数
 
 ## 4. Emergence Law 涌现定律
 
