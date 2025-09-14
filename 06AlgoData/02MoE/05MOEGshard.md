@@ -1,6 +1,6 @@
-<!--Copyright © ZOMI 适用于[License](https://github.com/chenzomi12/AIInfra)版权许可-->
+<!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# GShard MOE 解读
+# 05.GShard MOE 解读
 
 Author by: 张晓天
 
@@ -83,6 +83,7 @@ GShard是一项里程碑式的工作，它不仅在算法层面创新地提出�
 1. **技术路线**：它奠定了现代MoE Transformer的基础架构和设计范式，后续的如Switch Transformer（采用更极端的Top-1路由）、GLaM等模型均直接受其启发。
 2. **工程范式**：它证明了通过精巧的系统设计与算法协同优化，可以突破硬件的绝对限制，开启了一个“规模远超内存”的模型训练新纪元。
 3. GShard清晰地指出：未来的AI发展不仅是算法的革新，更是算法与系统工程**深度协同设计（Co-Design）** 的胜利。
+
 
 ## 本节视频
 

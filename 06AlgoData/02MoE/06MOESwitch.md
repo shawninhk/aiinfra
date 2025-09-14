@@ -1,6 +1,6 @@
-<!--Copyright © ZOMI 适用于[License](https://github.com/chenzomi12/AIInfra)版权许可-->
+<!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# Switch Transformer 解读
+# 06.Switch Transformer 解读
 
 Author by: 张晓天
 
@@ -111,6 +111,7 @@ Switch Transformer是MoE发展史上的一个决定性瞬间。它在T5（encode
 * **工程层面**：在训练稳定性、精度、蒸馏等方面的一系列实践技巧。
 
 Switch Transformer直接启发了后续一系列重要工作，为GPT-3.5、GPT-4等超大模型的技术路径埋下了伏笔。
+
 
 ## 本节视频
 
