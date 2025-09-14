@@ -8,7 +8,7 @@ abstract：先前介绍的 Gpipe 存在硬件利用率低，动态内存压力�
 
 回顾一下 Gpipe 流水并行存在动态峰值内存大的问题，如图所示：若输入 batch 被划分为 n 个 micro-batch，则对于任意 device，需要缓存 n 份前向激活值（图中 n=8）.
 
-![Gpipeline 原理](images/10pipeline01.png)
+![Gpipeline 原理](./images/10pipeline01.png)
 
 PipeDream 流水线并行采取了**1FIB**的策略，很好的规避了硬件内存有限的问题。
 
@@ -26,7 +26,7 @@ bubble ration=\frac{t_{bubble}}{t_{ideal}}=\frac{p-1}{m}
 \end{equation}
 $$
 
-![PipeDream 原理](images/10pipeline02.png)
+![PipeDream 原理](./images/10pipeline02.png)
 
 ## Virtual pipeline 基本原理
 
@@ -34,13 +34,13 @@ $$
 
 VPP 的核心在于，让一个物理层面的 device 虚拟成为 v 个 devices，device 从计算 1 个或连续 layer 段到计算 v 个不相邻的 layer，如图所示：GPU1 之前只负责 layer1 或 layer1+layer2 层的计算，经过虚拟化流水线后，负责 layer0 和 layer5 层的计算，使得 layer1 层计算完成后无需等待 layer2 的计算，可以直接进入 GPU2 进行计算，从而减少等待空泡时间，此处 v 被称为虚拟流水线阶段（virtual pipeline stage）。
 
-![原理](images/10pipeline03.png)
+![原理](./images/10pipeline03.png)
 
 假设模型总层数为 16，张量并行大小 tp=1，流水线并行大小 pp=4，虚拟流水线并行大小 v=2，则模型将被划分为 4 * 2 = 8 个阶段，每个阶段包含 16 / 8 = 2 个层。前向的顺序为 GPU 1 -> GPU 2 -> GPU 3 -> GPU 4 -> GPU 1 -> GPU 2 -> GPU 3 -> GPU 4。
 
 在设备数量不变的情况下，分出更多的流水线阶段，这样可以让流水线中每个 stage 更小，因而下个 stage 的等待时间更短，气泡更小。需要注意的是，m 需要是 p 的整数倍。
 
-![VirtualPP 原理](images/10pipeline04.png)
+![VirtualPP 原理](./images/10pipeline04.png)
 
 𝑚 为 micro-batch，𝑝为 pipeline stages，v 为 virtual pipeline stage,完成 v 个 layer 段中一个的前向、后向时间分别为 $t_f/v$ 和 $t_b/v$,流水线气泡的耗时 $t_{pd}^{int}$:
 
@@ -68,19 +68,19 @@ $$
 
 PipeDream-2BW 是一种面向超大模型的异步流水线并行方法：它将模型切分为多个阶段并复制多路流水线，在 1F1B 调度下通过“双缓冲”权重更新和梯度合并技术，大幅降低显存占用与通信开销；内置的自动化 Planner 根据设备内存和互联拓扑搜索最优阶段划分与复制宽度，并可选激活重计算；在多卡集群上训练大规模 Transformer 模型时，相较于传统流水线并行，吞吐量可提升数倍，同时保留与数据并行一致的权重更新语义。
 
-![PipeDream-2BW 原理](images/10pipeline05.png)
+![PipeDream-2BW 原理](./images/10pipeline05.png)
 
 ### ZB-V schedule
 
 ZB-V schedule 是一种面向流水线并行的内存高效零气泡调度策略：它将 p 个阶段划分为 2p 个模型块，并给每个 worker 分配两个模型块，按照从首到尾再返回首的 V 型顺序进行分配，以确保每个微批次的前向和对权重的后向都在同一 worker 上执行，从而利用后向权重计算填充流水线空隙；在与 1F1B 相同的显存约束下，可在正向、后向输入与权重后向计算时间相等时实现近零气泡；同时，该调度保持各 worker 峰值激活内存均衡，兼顾吞吐与显存效率。
 
-![ZB-V schedule 原理](images/10pipeline06.png)
+![ZB-V schedule 原理](./images/10pipeline06.png)
 
 ### Hanayo wave-like pipeline
 
 Hanayo 是一种波浪式流水线并行策略：它将模型划分为 S 个阶段并将小批次分成 W 个波（wave），以波浪形的顺序在各阶段交错执行前向和后向计算，能够将流水线气泡比例降低至原来的 1/(2W) 且无需复制模型，从而保持与主流方法一致的权重和激活内存占用；同时，其轻量级运行时引擎将调度逻辑与执行和通信优化解耦，支持在多卡集群上灵活部署；在对 GPT 和 BERT 类模型、最多 32 块 GPU 的测试中，Hanayo 相较最先进方案实现了最高 30.4%的吞吐量提升
 
-![Hanayo wave-like 原理](images/10pipeline07.png)
+![Hanayo wave-like 原理](./images/10pipeline07.png)
 
 ## 分布式框架里的 PP 实现
 
@@ -143,7 +143,7 @@ def setup_model_and_optimizer(
 
 get_model 通过 get_args 函数拿到启动脚本设置的超参，参数设置如图所示：
 
-![args 超参设置](images/10pipeline08.png)
+![args 超参设置](./images/10pipeline08.png)
 
 ```
 Megatron-LM/megatron/training/training.py/def get_model
@@ -347,7 +347,7 @@ def get_forward_backward_func():
 执行 Forward 计算，选择 forward_backward_pipelining_without_interleaving 模式
 (以 Pipeline 1F1B 为例，即 PipeDream) 先关闭梯度更新，等所有的 microbatch 执行完毕才更新梯度。过程如图所示：
 
-![args 超参设置](images/10pipeline10.png)
+![args 超参设置](./images/10pipeline10.png)
 
 部分代码展示：
 
@@ -379,7 +379,7 @@ def forward_backward_pipelining_without_interleaving(
 - NPU0 完成前向计算，如图所示：
 
 NPU0 在 stage0 阶段没有其它的 Stage 激活输入，因此忽略 recv_forward()函数，forward_step 调用 forward_step_func 真正调用模型执行：
-![NPU0 完成 FI](images/10pipeline12.png)
+![NPU0 完成 FI](./images/10pipeline12.png)
 
 ```python
 Megatron-LM/megatron/core/pipeline_parallel/schedules.py
@@ -430,7 +430,7 @@ Megatron-LM/megatron/core/pipeline_parallel/schedules.py
 
 - NPU0 前向传递激活，如图所示：
 
-![NPU0 传递激活](images/10pipeline13.png)
+![NPU0 传递激活](./images/10pipeline13.png)
 
 NPU0 上输出 Stage0 output_tensor 后 send_forward 发送给下一个 Stage，通过 P2P_communication.send_forward 发送 output_tensor，通过 torch.distributed.P2POp 异步 send output_tensor，最后调用 torch.cuda.synchronize() 执行同步
 
@@ -473,7 +473,7 @@ Megatron-LM/megatron/core/pipeline_parallel/p2p_communication.py
 
 NPU0 继续执行 forward_step,Stage0 前向计算得到第二个 output_tensor,利用 sedn_forward_recv_backward 函数发送 output_tensor 等待 backward，进入 1F1B 状态，通过 send_backward_recv_backward 底层试下通过 P2PPp 异步，send output_tesnor，且异步 recv tensor_recv_next，最后调用 synchronize()等待 recv backward，NPU0 进入等待状态。
 
-![NPU0 计算 F2](images/10pipeline17.png)
+![NPU0 计算 F2](./images/10pipeline17.png)
 
 ```python
 Megatron-LM/megatron/core/pipeline_parallel/schedules.py
@@ -516,11 +516,11 @@ def forward_backward_pipelining_without_interleaving(...):
 
 num_warmup_microbatches=0，进入 1F1B 状态，num_microbatches_remaining=3，recv_forward 调用 P2POp 异步 recv，NPU1 最后调用 synchronize() 执行同步等待 NPU0 Stage0 输出，从而保证 NPU0 to NPU1 的执行顺序。
 
-![NPU1 计算](images/10pipeline14.png)
+![NPU1 计算](./images/10pipeline14.png)
 
 NPU1 recv_forward 等待 NPU0 Stage0 发送 intput_tensor 后 NPU1 forward_step 设置 iNPUt_tensor，实现 NPU0&NPU1 交换输入输出 NPU1 进入 1F1B 循环，forward_step_func 调用 GPTModel 执行前向计算。NPU1 上 TransformerBlock 执行第一个 Stage，Pre_process=False，即不会把 iNPUt_embeddings 作为 ransformer 的输入，使用 NPU0 Stage0 输入的 iNPUt_tensor 作为输入执行得到 output tensor。
 
-![NPU1 计算](images/10pipeline15.png)
+![NPU1 计算](./images/10pipeline15.png)
 
 ```python
 Megatron-LM/megatron/core/transformer/transformer_block.py
@@ -554,7 +554,7 @@ class TransformerBlock(MegatronModule):
 
 示例中 NPU1 Stage1 是最后一层 Staege，因此 post_process=True,执行 is_pipeline_last_stage 计算 GPT 模型的 output_tensor 和 loss。
 
-![NPU1 计算](images/10pipeline16.png)
+![NPU1 计算](./images/10pipeline16.png)
 
 ```python
 Megatron-LM/megatron/core/transformer/transformer_block.py
@@ -602,7 +602,7 @@ def forward_step(...)
 执行完 forward_step 后执行 backward_step 得到 iNPUt_tensor_grad，并
 进入 1F1B 状态，执行 send_backward_recc_forward->_communication->异步发送 iNPUt_tensor_grad 给 NPU0 并等待 NPU0 发送下一个 MB forward 结果。
 
-![NPU1 反向计算](images/10pipeline18.png)
+![NPU1 反向计算](./images/10pipeline18.png)
 
 ```python
 Megatron-LM/megatron/core/pipeline_parallel/schedules.py
@@ -655,7 +655,7 @@ def send_backward_recv_forward(input_tensor_grads, tensor_shapes, config, is_fir
 
 NPU0 Srage0 等待 send_backward_recv_forward 被唤醒后获得 NPU1 Staege1 发送的 output_tensor_grad，NPU0 Stage0 执行 backward_step 输出 intput_tensor_grad，NPU0 计入 1F1B 状态，NPU0 num_warmup_mbs=1, num_mbs_remaining=2，进入 1F1B 循环，执行 forward_step 执行 Starge1 前向计算得到 output_tensor(Forward 3)，执行 send_forward_recv_backward 发送 output_tensor 等待 backward，异步 recv tensor_recv_next，调用 synnchronize()同步等待 backward，NPU0 进入等待状态。
 
-![NPU0 反向传输](images/10pipeline19.png)
+![NPU0 反向传输](./images/10pipeline19.png)
 
 ```python
 Megatron-LM/megatron/core/pipeline_parallel/schedules.py
@@ -718,25 +718,25 @@ Megatron-LM/megatron/core/pipeline_parallel/p2p_communication.py
 
 同理，NPU1 Stage1 上执行 send_backward_recv_forward 同步等待收到 NPU0
 Stge0 发送 iNPUt_tensor（Forward 2）,NPU1 Stage1 将 iNPUt_tensor（Forward 2）作为 TransformerBlock 执行 forward_step,得到输出 output_tensor。
-![NPU1 反向传输](images/10pipeline19.png)
+![NPU1 反向传输](./images/10pipeline19.png)
 
 - NPU0 执行 Stage0
 
 NPU0 等待 send_forward_recv_backward 执行 NPU1 输出 output_grad(B2)，执行 backward_step 输出 iNPUt_tensor_grad（B2），NPU0 num_warmup_mbs=1, num_mbs_remaing=2, i=2，退出 1F1B，进入 cooldown backwrd pass enable_grad_sync 打开模型梯度更新，recv_backward 等待 NPU1 发送最后一个 mbs 的 backward（B3），NPU0 准备更新模型的梯度和参数。
 
-![NPU1 反向传输](images/10pipeline20.png)
+![NPU1 反向传输](./images/10pipeline20.png)
 
 - NPU1 执行 Stage1
 
 NPU1 Stage1 执行 send_backward_recv_forward 同步等待 iNPUt(F3),NPU1 num_warmup_mbs=0，num_mbs_remaining=3，进入 1F1B 循环,将 NPU0 Stage0 发送 iNPUt(F3)作为 TransformerBlock 的 iNPUt 计算前向,forward_step()输出 output (F3)执行 backward_step()得到 iNPUt_tensor_grad(B3),send_backward()异步发送 iNPUt_tesnor_grad(B3)给 NPU0。
 
-![NPU1 反向传输](images/10pipeline21.png)
+![NPU1 反向传输](./images/10pipeline21.png)
 
 - NPU0 执行 Stage0 后，执行完完整的 iteration
 
 NPU0 等待 cooldown backward 的 recv_backward()获得 NPU1 输出(B3)，执行 backward_step()输出 iNPUt_tensor_grad(B3)，forward_backward_func()返回 LOSS，enable_grad_sync()累加更新模型梯度，finalize_model_grads_func()更新模型参数。
 
-![NPU1 反向传输](images/10pipeline22.png)
+![NPU1 反向传输](./images/10pipeline22.png)
 
 ```python
 Megatron-LM/megatron/core/pipeline_parallel/schedules.py

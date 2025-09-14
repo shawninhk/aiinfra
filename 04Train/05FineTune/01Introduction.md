@@ -42,7 +42,7 @@ ULMFiT 首次系统性地展示了一套完整的语言模型微调方法，证�
 
 紧随其后的 BERT，则凭借其创新的 Transformer 架构和深刻的双向预训练任务（Masked Language Model），将这一范式的潜力发挥到了极致。BERT 的巨大成功，及其简洁明了的应用流程，使其迅速被广为采纳。“预训练-微调”自此不再仅仅是一种可行的技术思路，而是成为了开发高性能 NLP 模型的首选路径和黄金标准。
 
-![](images/01Introduction02.jpg)
+![](./images/01Introduction02.jpg)
 
 这一新范式将模型开发清晰地划分为两个阶段：
 

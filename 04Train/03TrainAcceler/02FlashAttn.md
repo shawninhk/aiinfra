@@ -16,13 +16,13 @@ $$
 输入为 $Q,K,V \in \mathbb{R}^{N \times d}$ , 其中 $N$ 表示序列长度，$d$ 表示注意力头的维度。虽然这个公式在数学表达上十分简洁，但在实际 GPU 训练过程中会引发显著的内存访问效率问题。这主要是由于标准 Attention 的计算过程中，内存访问模式与 GPU 存储架构之间存在冲突。
 
 现代 GPU 采用分层存储体系，主要包含共享内存（SRAM）和全局内存（HBM）两级存储，不同存储的显存大小和访问带宽存在数量级差异。以 A100-40GB 为例，内存分级图如下所示：
-![GPU 显存分级](images/02FlashAttn_02.png)
+![GPU 显存分级](./images/02FlashAttn_02.png)
 
 * HBM：global memory，即显存，访问速度相对较慢，但容量较大，通常用于存储模型参数和中间计算结果。共 40GB，带宽 1.5TB/s
 * SRAM：shared memory，GPU 的片上高速缓存，容量较小但访问速度极快，GPU 在进行计算时通常需要将数据从 HBM 拷贝到 SRAM 中。共 20MB，带宽 19TB/s
 
 可以看到，HBM 的存储空间远大于 SRAM，同时访存带宽也远低于 SRAM 的带宽。因此，结合 GPU 内存分级存储架构，我们可以将标准 Attention 算法的实际执行过程抽象出如下流程：
-![标准 Attention](images/02FlashAttn_01.png)
+![标准 Attention](./images/02FlashAttn_01.png)
 
 * 计算注意力分数：首先从 HBM 中读取 $Q,K$，计算 $S=QK^\top \in \mathbb{R}^{N \times N} $ 并将结果 $S$ 写回 HBM，此时访存次数为 $O(Nd+N^2)$
 * 计算注意力权重：从 HBM 中读取 $S$,计算 $P=softmax(S) \in \mathbb{R}^{N \times N} $ ，并将 $P$ 写回 HBM, 访存次数为 $O(N^2)$
@@ -48,7 +48,7 @@ FA 的核心目标是尽量减少 HBM 中的频繁重复读写开销及中间结
 
 ### SoftMax Tiling
 我们先来看下 SoftMax Tiling， 在 Softmax 计算中，如果我们对 Q、K、V 进行分块（Block），在 SRAM 中完成相应块的计算，就可以减少存储 S、P 所需要的 HBM 的读写及显存占用。但是这种切分策略下，同一 sequence 可能会被分为多块，导致标准的 SoftMax 无法得到正确的结果。FA 通过分块 SoftMax 算法，确保了整个 Flash Attention 的正确性：
-![FA softmax tiling](images/02FlashAttn_03.png)
+![FA softmax tiling](./images/02FlashAttn_03.png)
 
 如图所示：我们将 Q 划分成 $T_r$ 个 Bolck，K、V 划分成 $T_c$ 个 Block，初始化 attention output O，并划分成 $T_r$ 个 Block。FA 计算主要通过两层循环实现：  
 外层循环：对于每一个 Block Key 和 Value，从 HBM 加载进 SRAM  
@@ -70,11 +70,11 @@ $$
 
 我们可以将其表示为：
 
-![FA safe softmax](images/02FlashAttn_04.png)
+![FA safe softmax](./images/02FlashAttn_04.png)
 
 在 safe softmax 的基础上，FA 通过引入了 $ m(x), \ell(x)$ 两个中间量实现了 SoftMax 分块算法，假设有向量 $x^{(1)}, x^{(2)} \in \mathbb{R}^{2B}$ ，拼接后的向量可以表示为 $x = [x^{(1)}, x^{(2)} ]\in \mathbb{R}^{2B}$ ， softmax 计算可以分解为:
 
-![FA softmax tiling](images/02FlashAttn_05.png)
+![FA softmax tiling](./images/02FlashAttn_05.png)
 
 根据公式，我们可以将完整的 softmax 计算分为 4 步：
 * 合并 “最大值”：我们通过中间变量 $ m(x)$ 维护最大值，完整向量 x 的最大值等于两个子块各自最大值的 “全局最大值”，通过不断更新 $ m(x)$ ，根据更新后的 $ m(x)$ 及上一步的计算结果 $ f(x^{(1)})$ 重新计算 $f(x), \ell(x)$，并不断迭代这个过程。假设存在 $x^{(3)}$, 我们就可以将 $x^{(1)}$ 和 $x^{(2)}$ 合并成一个序列，重复这个步骤。因此，分块后我们只需跟踪每个块的最大值，再取全局最大，就能替代完整向量的最大值，避免存储整个长向量。
@@ -89,10 +89,10 @@ $$
 * 完成 softmax 计算：既然 softmax 计算的分子和分母都能通过分块统计量合并得到，那么最终的 softmax 结果自然也和 “完整向量计算” 完全等价 —— 这就从数学上证明了 “分块计算 softmax” 的正确性。
 
 我们再来看一下 FA 整体 Forward 的计算过程（为了便于理解省略了 dropout 和 mask）, 假设 K，V 只分成两个 Block， S 表示 attention score，P 表示 softmax 后的 attention score，softmax tiling 发生在 S --> P：
-![FA safe softmax forward](images/02FlashAttn_06.png)
+![FA safe softmax forward](./images/02FlashAttn_06.png)
 
 如图所示，我们通过 Softmax tiling 替换掉完整 safe softmax 计算后，Attention 计算的整体流程可以表示为：
-![FA safe softmax forward compute](images/02FlashAttn_07.png)
+![FA safe softmax forward compute](./images/02FlashAttn_07.png)
 
 其中，$B_r$ 为 Q 的块大小，$B_c$ 为 K，V 的分块大小，对于不同大小的数据，我们仅需迭代这个计算过程就可以得到完成的 Attnetion 结果。  
 最后我们再来看下 FA 的访存次数，前文有提到，标准 attention 计算的访存次数为 $O(Nd+N^2)$。对于 FA 计算：
@@ -112,7 +112,7 @@ $$
 
 ### 性能分析与总结
 如图为官方论文中提供的性能数据，使用 FA 训练 GPT-2 相比于 Huggingface 实现可以加速 3 倍,相比于 Megatron-LM 实现可以加速 1.7 倍：
-![FA speedup](images/02FlashAttn_08.png)
+![FA speedup](./images/02FlashAttn_08.png)
 
 总体来看，FA V1 通过 softmax tiling 及 kernel fusion 突破了显存限制，减少了计算及访存的开销，并通过 recomputaing 降低了反向传播的显存需求，从而显著提升了 Transformer 模型的训练和推理效率。
 尽管 FA 取得了令人满意的效果，但由于其并未对不同的线程块（thread blocks）和线程束（wraps）进行最优分配，这导致了计算资源的低利用率以及不必要的共享内存读写操作，同时与其他基本操作（如矩阵乘法）相比，其效率仍有提升空间。

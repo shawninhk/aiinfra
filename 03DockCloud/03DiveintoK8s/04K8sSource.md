@@ -47,7 +47,7 @@ Kubernetes 调度系统的核心由两个独立协同的控制循环构成，共
 
 K8S 中主要通过 Predicates 和 Priorities 两个调度策略发生作用，K8S 中默认策略可分为四种。
 
-![抢占机制](images/04schedule.png)
+![抢占机制](./images/04schedule.png)
 ### GeneralPredicates
 该策略负责基础调度策略，比如 PodFitsResources 计算的是宿主机的 CPU 和内存资源是否足够，但是该调度器并没有适配 GPU 等硬件资源，统一用一种 Extended Resource、K-V 格式的扩展字段来描述。
 
@@ -107,7 +107,7 @@ preemptionPolicy: PreemptLowerPriority  # 抢占策略（可选，默认 Preempt
 
 调度器中维护着一个调度队列，高优先级的 Pod 优先出队。同时，当优先级高的 Pod 调度失败时，抢占机器开始发挥作用。调度器尝试从集群中删除低优先级的 Pod，从而使高优先级 Pod 可以被调度到该节点。
 
-![抢占机制](images/04depre.png)
+![抢占机制](./images/04depre.png)
 
 抢占细节如下：
 - 抢占候选选择：调度器选择优先级最低且资源释放后能满足需求的 Pod。

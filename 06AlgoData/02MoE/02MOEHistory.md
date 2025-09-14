@@ -8,7 +8,7 @@ Author by: 张晓天
 
 ## MoE 简史
 
-![Moe 前世今生](images/02MOEHistory_01.png)
+![Moe 前世今生](./images/02MOEHistory_01.png)
 
 1991 年 MoE 局部专家概念性想法被 "Adaptive Mixtures of Local Experts" 论文所提出，但 MoE 架构真正的理论基石是 1994 年的 "Hierarchical Mixtures of Experts and the EM Algorithm" 论文，它超越了 1991 年提出的概念性想法，将 MoE 建模为一个概率模型。
 
@@ -18,11 +18,11 @@ Author by: 张晓天
 
 2024 年的 “DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts Language Models” 论文采用 细粒度专家划分 和 共享专家机制，60 亿参数的 DeepSeekMoE 仅激活约 28 亿参数，计算量（74.4 TFLOPs）比同等规模的密集模型（如 Llama 2-7B）减少 60%，但性能相当甚至更优，成为开源 MoE 大模型的标杆之一。
 
-![Moe 前世今生](images/02MOEHistory_02.png)
+![Moe 前世今生](./images/02MOEHistory_02.png)
 
 进入 LLM 大模型时间，MoE 的发展更加迅猛，大大小小的基于 MoE 的模型被发布出来。例如，23 年 6 月 George Hotz 爆料 GPT4 是 8×220B MoE 模型，2023 年，Mistral AI 发布的 Mistral 8x7B 模型由 70 亿参数的小模型组合起来的 MoE 模型，直接在多个跑分上超过了多达 700 亿参数的 Llama 2。2025 年幻方量化(深度求索)，在国内首个开源 MoE 模型 DeepSeek-v3。
 
-![Moe 前世今生](images/02MOEHistory_03.png)
+![Moe 前世今生](./images/02MOEHistory_03.png)
 
 除了在 NLP 领域，计算机视觉（黄色），多模态（粉色），推荐系统（青色）等领域，MoE 也在被快速应用和发展。
 
@@ -110,7 +110,7 @@ MoE 的核心差异在于 **门控函数（Gating/Router）如何选择专家**�
 | **稀疏 MoE** | Top-K 专家   | $O(K)$     | 大规模语言模型（LLM）  |
 | **软 MoE**   | 专家特征混合 | $O(N)$     | 视觉任务、轻量化模型   |
 
-![Moe 前世今生](images/02MOEHistory_04.png)
+![Moe 前世今生](./images/02MOEHistory_04.png)
 
 稠密 MoE 的核心特征为**全专家激活**，对每个输入 token，门控网络生成所有专家的权重 $G(x) \in \mathbb{R}^N$。优势是保留所有专家信息，无需处理负载均衡问题，适合需要细粒度融合的任务（如多模态），但劣势是计算成本随专家数量线性增长 $O(N)$，难以扩展。稠密 MoE 模型广泛用在 EvoMoE、MoLE、LoRAMoE 和 DS-MoE 等研究。
 
@@ -120,7 +120,7 @@ MoE 的核心差异在于 **门控函数（Gating/Router）如何选择专家**�
 
 ### MoE 激活的参数
 
-![Moe 前世今生](images/02MOEHistory_05.png)
+![Moe 前世今生](./images/02MOEHistory_05.png)
 
 MoE 模型的参数量计算，不仅看总参数量，还看激活专家数量与总专家的数量对比。如 DeepSeek-MoE 中，其参数量由稠密部分和稀疏专家部分共同决定，需分层计算。如上表所示，其中 $d_{\text{model}} $ 代表隐藏层的大小，$d_{ffn}$ 是 FFN 中间层大小，$d_{expert}$  专家中间层大小, #L 代表层数，#H 表示注意头数量，$d_{head}$ 表示注意头大小。
 
@@ -142,7 +142,7 @@ $$
 
 当代大规模 MoE 系统（如 Google 的 GLaM 模型）仍遵循这一范式，但通过引入负载均衡损失（如 2017 年 Shazeer 提出的辅助损失项）解决了原始版本中专家利用率不均的缺陷。Hinton-Jordan MoE 的核心理念——**动态路由的模块化学习**，已成为突破单一模型 scaling law 的关键技术路径。
 
-![Moe 前世今生](images/02MOEHistory_06.png)
+![Moe 前世今生](./images/02MOEHistory_06.png)
 
 ## RNN 时代
 
@@ -152,7 +152,7 @@ $$
 
 传统 MoE 的问题是计算成本仍随专家数量线性增长，稀疏门控混合专家层保留前 k 个最大值并将其余置为-∞，这实现了每个样本仅激活 k 个专家(k≪N)，输入自适应的专家选择，通过 softmax 保持可微性的特点。这一工作不仅创造了当时最大规模神经网络记录(1370 亿参数)，更开创了条件计算(Conditional Computation)在大规模语言模型中的应用先河。
 
-![Moe 前世今生](images/02MOEHistory_07.png)
+![Moe 前世今生](./images/02MOEHistory_07.png)
 
 ## Transformer 时代
 
@@ -179,11 +179,11 @@ $$
 * $N$：专家总数
 * $\mu$：容量因子(通常 1.0-1.25)
 
-![Moe 前世今生](images/02MOEHistory_08.png)
+![Moe 前世今生](./images/02MOEHistory_08.png)
 
 在 2021 年 1 月，在 T5（encoder-decoder）基础上，简化 routing 策略，实现 1.6T 参数量 switch transformer。其主要做出两大关键简化：1. 单专家路由 k=1，极大降低通信开销；2. 专家容量自适应，动态调整容量因子μ。同时 Switch 提出**蒸馏到稠密**策略，通过训练大型 Switch Teacher，然后蒸馏到小型稠密 Student，实现模型压缩与加速。展示了 MoE 在大模型中的潜力。
 
-![Moe 前世今生](images/02MOEHistory_09.png)
+![Moe 前世今生](./images/02MOEHistory_09.png)
 
 2022 年 2 月，Google 发布 ST-MoE，基于 encoder-decoder 结构 MoE，最大 269B，32B 激活参数。解决 MoE 模型在训练和微调中的不稳定性问题，并提升其迁移学习能力。ST-MoE 通过引入梯度裁剪、噪声注入、路由器限制缓解 MoE 模型的训练不稳定性问题；优化微调策略，使 ST-MoE 提升迁移学习能力，更好地适应下游任务，减少过拟合；
 
@@ -226,7 +226,7 @@ class GLaMBlock(nn.Module):
 
 GLaM 的门控网络采用**软性 Top-2 选择**：每个输入 token 通过门控网络动态选择 2 个 Expert ，仅激活相关 Expert 进行计算。实现了条件计算，即模型根据输入动态调整计算路径，从而显著提高了计算效率。每个 MoE 层包含 64 个 Expert ，可以分布在多个计算设备上，实现跨设备扩展。
 
-![Moe 前世今生](images/02MOEHistory_10.png)
+![Moe 前世今生](./images/02MOEHistory_10.png)
 
 GLaM 展示 MoE 在 多任务学习 和 多语言处理 中优势，提升模型的泛化能力和效率。GLaM 稀疏激活和负载均衡机制被应用于 Mistral 8x7B，后续模型设计提供重要参考。
 
@@ -264,7 +264,7 @@ $$
 
 其中投影矩阵`${W_i}$ 在不同专家间共享，减少 40%KV 缓存。
 
-![Moe 前世今生](images/02MOEHistory_11.png)
+![Moe 前世今生](./images/02MOEHistory_11.png)
 
 对应的影响 you：
 
@@ -277,25 +277,25 @@ $$
 
 Mixtral 8x7B 采用**Decoder-Only Transformer**架构，关键创新在于将部分前馈网络（FFN）替换为**稀疏 MoE 层**。每层包含 8 个独立的专家网络（每个专家 7B 参数），但每个 Token 仅激活其中 2 个专家，总参数量 46.7B，实际激活参数 12.9B。
 
-![Moe 前世今生](images/02MOEHistory_12.png)
+![Moe 前世今生](./images/02MOEHistory_12.png)
 
 如上图所示，其有 8 个独立的专家网络。每个专家中包含 32 个 Transformer block。
 
-![Moe 前世今生](images/02MOEHistory_13.png)
+![Moe 前世今生](./images/02MOEHistory_13.png)
 
 每个 Transformer block 中 MoE 层与标准前馈层交替排列，Attention 机制参数跨专家共享。
 
 MMLU 包括 57 个主题多项选择题，涵盖领域广泛，如抽象代数、信仰、解剖学、天文学等。使用 MMLU（ Massive Multitask Language Understanding）基准测试进行实验。以 Mistral 8x7B 为例记录第 1 层、第 16 层和第 32 层 8 位 Expert 中每个 Expert 的激活情况。
 
-![Moe 前世今生](images/02MOEHistory_14.png)
+![Moe 前世今生](./images/02MOEHistory_14.png)
 
 从上图可以看出，尽管存在负载均衡机制，**自然任务分布**导致不可避免的不均衡。但最忙碌 Expert 仍可获得比最闲 Expert 多 40%\~60% Tokens。
 
-![Moe 前世今生](images/02MOEHistory_15.png)
+![Moe 前世今生](./images/02MOEHistory_15.png)
 
 数学/逻辑类任务产生最强不均衡，某些领域比其他领域更能激活部分 Expert， Expert 能针对领域学习。如图所示，32 层专家高度专业化激活。Expert 的负载分布倾向于在不同的主题范围内保持一致。但当所有样本都完全属于某个主题时，可能会出现很大概率的分布不平衡。
 
-![Moe 前世今生](images/02MOEHistory_16.png)
+![Moe 前世今生](./images/02MOEHistory_16.png)
 
 特定 Token 有自己的专家偏好。常见功能 Token 有**稳定专家偏好**（如":"偏好专家 5，“Who”偏好专家 7），语义丰富 Token 的专家选择**依赖上下文**。专家专业化形成**层级结构**，如语法层专家和语义层专家。
 

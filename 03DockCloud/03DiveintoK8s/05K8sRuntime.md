@@ -13,12 +13,12 @@
 - CRI shim：实现 CRI 接口的适配层（如 dockershim、containerd-shim），作为 gRPC 服务端负责将 CRI 请求的内容转为具体的容器运行时 API 并响应。
 - Container Runtime：实际执行容器操作的引擎（如 containerd、CRI-O）。
 
-![CRI 架构](images/05cri.png)
+![CRI 架构](./images/05cri.png)
 
 ## kubelet 与 CRI 交互原理
 整体架构如下图所示，当 k8s 创建一个 Pod 后，就会通过调度器选择一个具体的节点来运行。接着 kubelet 就会通过 SyncLoop 来执行具体的操作。
 
-![CRI 架构](images/05criinfra.png)
+![CRI 架构](./images/05criinfra.png)
 
 ### SyncLoop 是什么？
 SyncLoop 是 kubelet 的工作核心，主要负责 Pod 生命周期的核心控制循环，负责保障 Pod 实际状态与期望状态一致。其核心职责包括：
@@ -75,7 +75,7 @@ service ImageService {
 - 然后再调用 StartContainer 接口启动容器。
 - 最后调用 StopContainer 与 RemoveContainer 接口删除容器。
 
-![CRI 架构](images/05cri_cicle.png)
+![CRI 架构](./images/05cri_cicle.png)
 
 ### CRI streaming 接口
 流式接口不仅可以节省资源，还能保证连接的可靠性。当执行 kubectl exec 命令时，其执行过程如下：
@@ -83,7 +83,7 @@ service ImageService {
 - 第二步：API Server 将请求转发至目标 Pod 所在节点的 kubelet，建立与 kubelet 的 WebSocket 连接，用于实时数据传输。
 - 第三步：kubelet 接收请求后，通过 CRI 与容器运行时交互以执行命令。
 
-![CRI 架构](images/05cri_streaming.png)
+![CRI 架构](./images/05cri_streaming.png)
 
 ### 为何要设计 CRI shim 这一模块？
 最后再来探讨一个问题，为什么要设计 CRI shim 模块。早期 Kubernetes 最初直接依赖 Docker 的 API 管理容器，导致无法支持其他容器运行时（如 containerd、CRI-O）。还有一点原因就是用户的多样化需求，比如轻量级运行时等。

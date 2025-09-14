@@ -45,10 +45,10 @@ cAdvisor 由 Goole 开发的容器监控工具，默认集成在 kubelet 中，�
 #### 数据采集
 数据采集主要包括两个部分：machineInfo 和 containerInfo。
 machine 相关的数据主要读取机器的系统文件数据，然后由一个周期任务，更新本地 cache。具体读的文件数据见下图。
-![machine](images/06machine.png)
+![machine](./images/06machine.png)
 
 获取容器相关的数据，主要是监控 cgroupPath 目录下的变更，拿到该目录下的增删改查事件，然后更新 cache 中的数据。
-<!-- ![container](images/06container.png) -->
+<!-- ![container](./images/06container.png) -->
 
 #### 数据存储
 监控数据不仅能放在本地，还能存储到第三方存储介质中。支持 bigquery、es、influxdb、kafka、redis 等组件。
@@ -57,7 +57,7 @@ machine 相关的数据主要读取机器的系统文件数据，然后由一个
 - 1. 首先通过 memory 接口，将数据存在本地。
 - 2. 将新写入的监控数据根据时间戳，进行聚合处理。
 - 3. 调用各介质的 AddStats 方法，将数据存入第三方存储介质。
-![storage](images/06storage.png)
+![storage](./images/06storage.png)
 
 ### 监控工具 Prometheus
 Prometheus 是一个 CNCF 工具，是 Kubernetes 中主流的监控工具，原生的支持对 K8S 中各个组件进行监控。
@@ -83,7 +83,7 @@ Alertmanager：
 Grafana：
 - 可视化工具，通过 Prometheus 数据源创建仪表盘。
 
-![prometheus](images/06prometheus.png)
+![prometheus](./images/06prometheus.png)
 
 #### 指标类型
 - Counter：计数器，单调递增的累计值，比如请求个数等。

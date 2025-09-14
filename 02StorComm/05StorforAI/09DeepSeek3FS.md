@@ -1,4 +1,4 @@
-<!--Copyright © ZOMI 适用于[License](https://github.com/chenzomi12/AI Infra)版权许可-->
+<!--Copyright © ZOMI 适用于[License](https://github.com/chenzomi12/AIInfra)版权许可-->
 
 # DeepSeek 3FS 架构解析
 
@@ -22,7 +22,7 @@ DeepSeek 3FS 具有以下特点：
 !!!!!!!!!!!!!!!
 下面图片没有解释
 
-![DeepSeek 3FS 思维导图](images/08Deepseek3FS01.png)
+![DeepSeek 3FS 思维导图](./images/08Deepseek3FS01.png)
 
 ## 架构概览
 
@@ -52,7 +52,7 @@ DeepSeek 3FS 具有以下特点：
 - 每份数据 3 副本存储，采用的链式复制协议 CRAQ（Chain Replication with Apportioned Queries）提供 write-all-read-any 语义，对读更友好；
 - 系统将数据进行分块，尽可能打散到多个节点的 SSD 上进行数据和负载均摊。
 
-![DeepSeek 3FS 整体架构图](images/08Deepseek3FS02.png)
+![DeepSeek 3FS 整体架构图](./images/08Deepseek3FS02.png)
 
 ## 1. 集群管理
 
@@ -60,7 +60,7 @@ DeepSeek 3FS 具有以下特点：
 
 3FS 集群可以部署单个或多个管理服务节点 mgmtd。这些 mgmtd 中只有一个主节点，承接所有的集群管理响应诉求，其它均为备节点仅对外提供查询主的响应。其它角色节点都需要定期向主 mgmtd 汇报心跳保持在线状态才能提供服务。
 
-![集群管理架构图](images/08Deepseek3FS03.png)
+![集群管理架构图](./images/08Deepseek3FS03.png)
 
 ### 节点管理
 
@@ -89,7 +89,7 @@ DeepSeek 3FS 具有以下特点：
 
 mgmtd 的选主机制基于租约和 FoundationDB 读写事务实现。租约信息 LeaseInfo 记录在 FoundationDB 中，包括节点 ID、租约失效时间、软件版本信息。如果租约有效，节点 ID 记录的节点即是当前的主。每个 mgmtd 每 10s 执行一次 FoundationDB 读写事务进行租约检查，具体流程如下图所示。
 
-![选主机制](images/08Deepseek3FS04.png)
+![选主机制](./images/08Deepseek3FS04.png)
 
 - 通过周期性续租，读取 LeaseInfo 中的租约信息，判断当前是否有主节点；
 - 如果有主节点，检查主节点的租约是否有效；
@@ -107,7 +107,7 @@ mgmtd 的选主机制基于租约和 FoundationDB 读写事务实现。租约信
 
 ### 整体架构
 
-![客户端服务架构图](images/08Deepseek3FS05.png)
+![客户端服务架构图](./images/08Deepseek3FS05.png)
 
 3FS 提供了 FUSE 客户端 hf3fs_fuse 和原生客户端 USRBIO：
 
@@ -142,7 +142,7 @@ UFUSE 客户端基于 libfuse lowlevel api 实现，要求 libfuse 3.16.1 及以
 - 读写数据的 buffer 和 RDMA 打通，整个处理过程没有拷贝开销。
 - 只加速最关键的读写操作，其他操作复用 FUSE 现有逻辑，在效率和兼容性之间取得了很好的平衡。此点和 GPU Direct Storage 的设计思路有异曲同工之处。
 
-![USRBIO 客户端实例图](images/08Deepseek3FS06.png)
+![USRBIO 客户端实例图](./images/08Deepseek3FS06.png)
 
 !!!!!!!!!!!!!!!!
 用文字，不要大模型的列表方式，比较难理解
@@ -194,7 +194,7 @@ FFRecord 文件格式具有以下特点：
 
 以下是 FFRecord 文件格式的存储布局：
 
-![FFRecord 文件格式](images/08Deepseek3FS07.png)
+![FFRecord 文件格式](./images/08Deepseek3FS07.png)
 
 如图所示，在 FFRecord 文件格式中，每一条样本的数据会进行序列化按顺序写入，同时文件头部包含了每一条样本在文件中的偏移量和 crc32 校验和，方便做随机读取和数据校验。
 
@@ -204,7 +204,7 @@ FFRecord 文件格式具有以下特点：
 
 业界基于分布式高性能 KV 存储系统，构建大规模文件系统元数据组件已成共识，如 Google Colossus、Microsoft ADLS 等。3FS 元数据服务使用相同设计思路，底层基于支持事务的分布式 KV 存储系统，上层元数据代理负责对外提供 POSIX 语义接口。总体来说，支持了大部分 POSIX 接口，并提供通用元数据处理能力：inode、dentry 元数据管理，支持按目录继承 chain 策略、后台数据垃圾回收等特性。
 
-![元数据服务架构图](images/08Deepseek3FS14.png)
+![元数据服务架构图](./images/08Deepseek3FS14.png)
 
 3FS 选择使用 FoundationDB 作为底层的 KV 存储系统。FoundationDB 是一个具有事务语义的分布式 KV 存储，提供了 NoSQL 的高扩展，高可用和灵活性，同时保证了可序列化（serializable）的强 ACID 语义。该架构简化了元数据整体设计，将可靠性、扩展性等分布式系统通用能力下沉到分布式 KV 存储，元数据服务节点只是充当文件存储元数据的代理（Proxy），负责语义解析。
 
@@ -239,7 +239,7 @@ FFRecord 文件格式具有以下特点：
 
 3FS 面向高吞吐能力设计，系统吞吐能力跟随 SSD 和网络带宽线性扩展，即使个别 SSD 等存储介质发生故障，也能依旧提供很高的吞吐能力。3FS 采用分摊查询的链式复制 CRAQ 来保证数据的可靠性，CRAQ 的 write-all-read-any 特性对于重读场景非常友好。
 
-![存储服务架构图](images/08Deepseek3FS08.png)
+![存储服务架构图](./images/08Deepseek3FS08.png)
 
 如图所示，每个数据节点通过 ext4 或者 XFS 文件系统管理其分配的多块 NVME DISK，对内部模块提供标准的 POSIX 接口。数据节点包含几个关键模块：
 
@@ -261,7 +261,7 @@ FFRecord 文件格式具有以下特点：
 
 传统的链式复制以固定节点形成 chain table。
 
-![传统做法与 3FS 做法](images/08Deepseek3FS09.png)
+![传统做法与 3FS 做法](./images/08Deepseek3FS09.png)
 
 如图所示，节点（Node）A 只与 节点（Node）B、C 形成链（chain）。如果节点 A 故障，只能节点 B、C 分担读的压力。
 
@@ -278,7 +278,7 @@ FFRecord 文件格式具有以下特点：
 
 **1.写数据流程：**
 
-![写数据流程](images/08Deepseek3FS10.png)
+![写数据流程](./images/08Deepseek3FS10.png)
 
 如图所示，步骤如下：
 
@@ -291,7 +291,7 @@ FFRecord 文件格式具有以下特点：
   
 **2.读数据流程：**
 
-![读数据流程](images/08Deepseek3FS11.png)
+![读数据流程](./images/08Deepseek3FS11.png)
 
 如图所示，步骤如下：
 
@@ -302,7 +302,7 @@ FFRecord 文件格式具有以下特点：
 
 **3.文件布局：**
 
-![文件布局](images/08Deepseek3FS12.png)
+![文件布局](./images/08Deepseek3FS12.png)
 
 如图所示，一个文件在创建时，会按照父目录配置的布局规则，包括 chain table 以及 stripe size，从对应的 chain table 中选择多个 chain 来存储和并行写入文件数据。chain range 的信息会记录到 inode 元数据中，包括起始 chain id 以及 seed 信息（用来随机分摊打散）等。在这个基础上，文件数据被进一步按照父目录布局中配置的 chunk size 均分成固定大小的 chunk（官方推荐 64KB、512KB、4MB 3 个设置，默认 512KB），每个 chunk 根据 index 被分配到文件的一个链上，chunk id 由 inode id + track + chunk index 构成。当前 track 始终为 0，后续会支持多 track 功能，主要给未来实现链动态扩展用。
 
@@ -352,7 +352,7 @@ Chunk 大小范围为 64KiB - 64MiB，按照 2 的幂次递增，共 11 种，Al
 
 数据恢复过程整体分成为两个大步骤：**取回远端元数据（Fetch Remote Meta）**、**同步数据（Sync Data）**。其中 Local node 代表前继正常节点，Remote node 为恢复节点。
 
-![取回远端元数据流程](images/08Deepseek3FS13.png)
+![取回远端元数据流程](./images/08Deepseek3FS13.png)
 
 如图所示，取回远端元数据流程如下：
 

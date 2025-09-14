@@ -1,4 +1,4 @@
-<!--Copyright 适用于[License](https://github.com/chenzomi12/AI Infra)版权许可-->
+<!--Copyright 适用于[License](https://github.com/chenzomi12/AIInfra)版权许可-->
 
 # 07.GPU 与 NPU 精度误差分析
 
