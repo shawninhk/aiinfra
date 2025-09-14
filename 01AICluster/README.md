@@ -6,11 +6,11 @@
 
 ## 课程位置
 
-![AIInfra](./images/arch01.png)
+![AI Infra](./images/arch01.png)
 
 ## 课程简介
 
-- [**01. 计算集群之路**](./01Roadmap/)：计算集群之路将深入探讨计算集群的多个关键方面。首先，明确高性能计算（HPC）的整体定义，阐释集群计算如何通过整合多台计算机的资源来解决复杂的计算问题，并详细区分了超级计算机、人工智能和数据中心的不同功能与特点。接着，分析 HPC 硬件的发展趋势，展示了超级计算机硬件架构的演变以及这些变化对人工智能基础设施（AIInfra）未来发展的深远影响。此外，还涵盖计算集群的历史发展，从初期到近期的变化，以及 AI 集群面临的挑战和系统架构设计等内容。
+- [**01. 计算集群之路**](./01Roadmap/)：计算集群之路将深入探讨计算集群的多个关键方面。首先，明确高性能计算（HPC）的整体定义，阐释集群计算如何通过整合多台计算机的资源来解决复杂的计算问题，并详细区分了超级计算机、人工智能和数据中心的不同功能与特点。接着，分析 HPC 硬件的发展趋势，展示了超级计算机硬件架构的演变以及这些变化对人工智能基础设施（AI Infra）未来发展的深远影响。此外，还涵盖计算集群的历史发展，从初期到近期的变化，以及 AI 集群面临的挑战和系统架构设计等内容。
 
 - [**02. L0/L1 AI 集群基建**](./02L0L1Base/)：集群基础建设的内容涵盖了服务器节点的基础知识、散热技术的发展与实践，以及机柜和机房的供电系统。首先，介绍服务器节点的基本概念，帮助初学者对服务器组成和功能有一个初步了解。接着，深入探讨服务器风冷技术的实践和思考，分析风冷在服务器散热中应用及其面临的挑战。随后，转向服务器液冷技术的发展，讨论液冷技术优势和在 AI 智算和传统 DC 数据中心的应用前景。还会探讨液冷技术在实际应用中面临的挑战以及相应的实践思考。最后，对服务器机柜进行深度认识，包括机柜的设计、布局和管理，以及集群机房的供电系统，确保机房的稳定运行和服务器的持续供电。
 
@@ -21,13 +21,13 @@
 | 大纲 | 小节 | 链接 | 状态 |
 |:--- |:---- |:-------------------- |:---- |
 |:sparkling_heart:|:star2:|:sparkling_heart:| |
-| 性能 实践 :computer: | CODE 01: 拆解 Transformer-Decoder | [Markdown](./04Performance/CODE01Modeling.md), [Jupyter](./04Performance/CODE01Modeling.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/01AICluster04Performance/CODE01Modeling.html) | :white_check_mark: |
-| 性能 实践 :computer: | CODE 02: MOE 参数量和计算量 | [Markdown](./04Performance/CODE02MOE.md), [Jupyter](./04Performance/CODE02MOE.ipynb), [文章](https://infrasys-ai.github.io/aiinfra-docs/01AICluster04Performance/CODE02MOE.html) | :white_check_mark: |
-| 性能 实践 :computer: | CODE 03: MFU 模型利用率评估 | [Markdown](./04Performance/CODE03MFU.md), [Jupyter](./04Performance/CODE03MFU.ipynb), [文章](https://infrasys-ai.github.io/aiinfra-docs/01AICluster04Performance/CODE03MFU.html) | :white_check_mark: |
+| 性能 实践 :computer: | CODE 01: 拆解 Transformer-Decoder | [Markdown](./04Performance/CODE01Modeling.md), [Jupyter](./04Performance/CODE01Modeling.md), [文章](https://infrasys-ai.github.io/AI Infra-docs/01AICluster04Performance/CODE01Modeling.html) | :white_check_mark: |
+| 性能 实践 :computer: | CODE 02: MOE 参数量和计算量 | [Markdown](./04Performance/CODE02MOE.md), [Jupyter](./04Performance/CODE02MOE.ipynb), [文章](https://infrasys-ai.github.io/AI Infra-docs/01AICluster04Performance/CODE02MOE.html) | :white_check_mark: |
+| 性能 实践 :computer: | CODE 03: MFU 模型利用率评估 | [Markdown](./04Performance/CODE03MFU.md), [Jupyter](./04Performance/CODE03MFU.ipynb), [文章](https://infrasys-ai.github.io/AI Infra-docs/01AICluster04Performance/CODE03MFU.html) | :white_check_mark: |
 
 ## 课程知识
 
-![AIInfra](./images/arch02.png)
+![AI Infra](./images/arch02.png)
 
 ## 备注
 

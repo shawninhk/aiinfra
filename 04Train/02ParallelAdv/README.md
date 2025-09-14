@@ -18,16 +18,16 @@
 | 分布式并行 | 08 流水并行 1F1B/1F1B Interleaved 原理  | [PPT](./08MGPPCode.pdf), [视频](https://www.bilibili.com/video/BV1aD421g7yZ) | |
 | 分布式并行 | 09 Megatron-LM 流水并行 PP 代码解析  | [PPT](./08MGPPCode.pdf), [视频](https://www.bilibili.com/video/BV1hs421g7vN) | |
 |:sparkling_heart:|:star2:|:sparkling_heart:| |
-| 并行 实践 :computer: | CODE 01: ZeRO 显存优化实践 | [Markdown](./Code01ZeRO.md), [Jupyter](Code01ZeRO.ipynb), [文章](https://infrasys-ai.github.io/aiinfra-docs/04Train02ParallelAdv/Code01ZeRO.html) | :white_check_mark: |
-| 并行 实践 :computer: | CODE 02: Megatron 张量并行复现 | [Markdown](./Code02Megatron.md), [Jupyter](Code02Megatron.ipynb), [文章](https://infrasys-ai.github.io/aiinfra-docs/04Train02ParallelAdv/Code02Megatron.html) | :white_check_mark: |
-| 并行 实践 :computer: | CODE 03: Pipeline 并行实践 | [Markdown](./Code03Pipeline.md), [Jupyter](Code03Pipeline.ipynb), [文章](https://infrasys-ai.github.io/aiinfra-docs/04Train02ParallelAdv/Code03Pipeline.html) | :white_check_mark: |
-| 并行 实践 :computer: | CODE 04: 专家并行大规模训练 | [Markdown](./Code04Expert.md), [Jupyter](Code04Expert.ipynb), [文章](https://infrasys-ai.github.io/aiinfra-docs/04Train02ParallelAdv/Code04Expert.html) | :white_check_mark: |
+| 并行 实践 :computer: | CODE 01: ZeRO 显存优化实践 | [Markdown](./Code01ZeRO.md), [Jupyter](Code01ZeRO.ipynb), [文章](https://infrasys-ai.github.io/AI Infra-docs/04Train02ParallelAdv/Code01ZeRO.html) | :white_check_mark: |
+| 并行 实践 :computer: | CODE 02: Megatron 张量并行复现 | [Markdown](./Code02Megatron.md), [Jupyter](Code02Megatron.ipynb), [文章](https://infrasys-ai.github.io/AI Infra-docs/04Train02ParallelAdv/Code02Megatron.html) | :white_check_mark: |
+| 并行 实践 :computer: | CODE 03: Pipeline 并行实践 | [Markdown](./Code03Pipeline.md), [Jupyter](Code03Pipeline.ipynb), [文章](https://infrasys-ai.github.io/AI Infra-docs/04Train02ParallelAdv/Code03Pipeline.html) | :white_check_mark: |
+| 并行 实践 :computer: | CODE 04: 专家并行大规模训练 | [Markdown](./Code04Expert.md), [Jupyter](Code04Expert.ipynb), [文章](https://infrasys-ai.github.io/AI Infra-docs/04Train02ParallelAdv/Code04Expert.html) | :white_check_mark: |
 
 ## 备注
 
-文字课程内容正在一节节补充更新，每晚会抽空继续更新正在 [AIInfra](https://infrasys-ai.github.io/aiinfra-docs) ，希望您多多鼓励和参与进来！！！
+文字课程内容正在一节节补充更新，每晚会抽空继续更新正在 [AI Infra](https://infrasys-ai.github.io/AI Infra-docs) ，希望您多多鼓励和参与进来！！！
 
-文字课程开源在 [AIInfra](https://infrasys-ai.github.io/aiinfra-docs)，系列视频托管[B 站](https://space.bilibili.com/517221395)和[油管](https://www.youtube.com/@ZOMI666/playlists)，PPT 开源在[github](https://github.com/Infrasys-AI/AIInfra)，欢迎引用！
+文字课程开源在 [AI Infra](https://infrasys-ai.github.io/AI Infra-docs)，系列视频托管[B 站](https://space.bilibili.com/517221395)和[油管](https://www.youtube.com/@ZOMI666/playlists)，PPT 开源在[github](https://github.com/Infrasys-AI/AIInfra)，欢迎引用！
 
 > 非常希望您也参与到这个开源课程中，B 站给 ZOMI 留言哦！
 >

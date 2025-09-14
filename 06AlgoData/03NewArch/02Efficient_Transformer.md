@@ -447,7 +447,7 @@ def sliding_window_attention(Q, K, V, window_size, attention_mask=None):
     attn_scores = torch.matmul(Q, K.transpose(-2, -1)) / (dim ** 0.5)
 
     # 2. 创建滑动窗口掩码 [L, L]
-    # 例如，对于序列中心位置，掩码是一个带宽为window_size的带状矩阵
+    # 例如，对于序列中心位置，掩码是一个带宽为 window_size 的带状矩阵
     row_indices = torch.arange(seq_len).unsqueeze(1) # [L, 1]
     col_indices = torch.arange(seq_len).unsqueeze(0) # [1, L]
     mask = (torch.abs(row_indices - col_indices) <= window_size // 2)
@@ -456,13 +456,13 @@ def sliding_window_attention(Q, K, V, window_size, attention_mask=None):
     # 3. 将窗口外的注意力分数置为负无穷
     attn_scores = torch.where(mask, attn_scores, torch.tensor(float('-inf')).to(attn_scores.device))
 
-    # 4. 可选：加上任务相关的全局注意力掩码（如[CLS] token关注所有）
+    # 4. 可选：加上任务相关的全局注意力掩码（如[CLS] token 关注所有）
     # if global_mask is not None:
     #    attn_scores = attn_scores.masked_fill(global_mask, new_value)
 
     # 5. 计算注意力权重和输出
     attn_weights = F.softmax(attn_scores, dim=-1)
-    # 可选：应用dropout
+    # 可选：应用 dropout
     output = torch.matmul(attn_weights, V)
     return output, attn_weights
 ```
@@ -653,26 +653,26 @@ Linear Attention、AFT 和 Longformer 的出现，极大地推动了自然语言
 
 虽然 Linear Attention、AFT 和 Longformer 提供了显著的进步，但它们是更大、快速发展的生态系统的一部分。最终的"高效 Transformer"可能并非单一的某种架构，而是一个包含多种技术和策略的工具箱，研究人员和工程师可以根据具体任务的需求、数据特性和硬件条件，灵活地选择和组合这些工具，以构建出在特定场景下最优的解决方案。
 
-未来趋势不再是“一种架构统治天下”，而是​​“专模专用”​​。就像计算机有CPU、GPU、TPU一样，未来也会有擅长长文本理解的Longformer、擅长高效生成的Linear Attention模型、擅长边缘部署的AFT模型等。高效Transformer的研究正在为我们提供这个丰富的​​模型工具箱​​。例如，当我们需要处理法律文书或医学报告等长文档时，Longformer 是首选；当我们需要极高吞吐量的自回归生成任务时，Linear Attention 展现出巨大优势；而在资源受限的边缘设备上部署模型时，AFT 的设计哲学则提供了宝贵的参考。
+未来趋势不再是“一种架构统治天下”，而是​​“专模专用”​​。就像计算机有 CPU、GPU、TPU 一样，未来也会有擅长长文本理解的 Longformer、擅长高效生成的 Linear Attention 模型、擅长边缘部署的 AFT 模型等。高效 Transformer 的研究正在为我们提供这个丰富的​​模型工具箱​​。例如，当我们需要处理法律文书或医学报告等长文档时，Longformer 是首选；当我们需要极高吞吐量的自回归生成任务时，Linear Attention 展现出巨大优势；而在资源受限的边缘设备上部署模型时，AFT 的设计哲学则提供了宝贵的参考。
 
 ## 9. 参考文献
 
-1. Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., ... & Polosukhin, I. (2017). Attention is all you need. Advances in neural information processing systems, 30. (提出了Transformer架构)
+1. Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., ... & Polosukhin, I. (2017). Attention is all you need. Advances in neural information processing systems, 30. (提出了 Transformer 架构)
 
-2. Katharopoulos, A., Vyas, A., Pappas, N., & Fleuret, F. (2020). Transformers are RNNs: Fast autoregressive transformers with linear attention. In International Conference on Machine Learning(pp. 5156-5165). PMLR.(将Transformer重新表述为循环神经网络RNN，并提出了线性注意力机制)
+2. Katharopoulos, A., Vyas, A., Pappas, N., & Fleuret, F. (2020). Transformers are RNNs: Fast autoregressive transformers with linear attention. In International Conference on Machine Learning(pp. 5156-5165). PMLR.(将 Transformer 重新表述为循环神经网络 RNN，并提出了线性注意力机制)
 
 3. Beltagy, I., Peters, M. E., & Cohan, A. (2020). Longformer: The long-document transformer. arXiv preprint arXiv:2004.05150. (提出了 Longformer 模型，通过结合局部滑动窗口注意力和任务驱动的全局注意力，以线性复杂度高效处理长文档)
 
-4. Zaheer, M., Guruganesh, G., Dubey, K. A., Ainslie, J., Alberti, C., Ontanon, S., ... & Ahmed, A. (2020). Big bird: Transformers for longer sequences. Advances in Neural Information Processing Systems, 33, 17283-17297. (提出BigBird模型，通过使用稀疏注意力机制（包括全局、局部和随机注意力）来有效地处理更长的序列)
+4. Zaheer, M., Guruganesh, G., Dubey, K. A., Ainslie, J., Alberti, C., Ontanon, S., ... & Ahmed, A. (2020). Big bird: Transformers for longer sequences. Advances in Neural Information Processing Systems, 33, 17283-17297. (提出 BigBird 模型，通过使用稀疏注意力机制（包括全局、局部和随机注意力）来有效地处理更长的序列)
 
-5. Choromanski, K., Likhosherstov, V., Dohan, D., Song, X., Gane, A., Sarlos, T., ... & Weller, A. (2020). Rethinking attention with performers. arXiv preprint arXiv:2009.14794.(提出了Performer模型，使用快速注意力Via正交随机特征（FAVOR+）方法，以线性复杂度近似标准注意力机制）)
+5. Choromanski, K., Likhosherstov, V., Dohan, D., Song, X., Gane, A., Sarlos, T., ... & Weller, A. (2020). Rethinking attention with performers. arXiv preprint arXiv:2009.14794.(提出了 Performer 模型，使用快速注意力 Via 正交随机特征（FAVOR+）方法，以线性复杂度近似标准注意力机制）)
 
-6. Kitaev, N., Kaiser, Ł., & Levskaya, A. (2020). Reformer: The efficient transformer. arXiv preprint arXiv:2001.04451. (提出了Reformer模型，结合局部敏感哈希（LSH）注意力和可逆残差层，大幅降低了长序列处理的内存消耗)
+6. Kitaev, N., Kaiser, Ł., & Levskaya, A. (2020). Reformer: The efficient transformer. arXiv preprint arXiv:2001.04451. (提出了 Reformer 模型，结合局部敏感哈希（LSH）注意力和可逆残差层，大幅降低了长序列处理的内存消耗)
 
-7. Child, R., Gray, S., Radford, A., & Sutskever, I. (2019). Generating long sequences with sparse transformers. arXiv preprint arXiv:1904.10509.（提出了Sparse Transformer模型，通过因子化的稀疏注意力模式来生成更长的序列）
+7. Child, R., Gray, S., Radford, A., & Sutskever, I. (2019). Generating long sequences with sparse transformers. arXiv preprint arXiv:1904.10509.（提出了 Sparse Transformer 模型，通过因子化的稀疏注意力模式来生成更长的序列）
 
-8. Dao, T., Fu, D., Ermon, S., Rudra, A., & Ré, C. (2022). FlashAttention: Fast and memory-efficient exact attention with IO-awareness. Advances in Neural Information Processing Systems, 35, 16344-16359.(提出了FlashAttention，一种具有IO感知能力的快速且内存高效的精确实现注意力算法，通过优化GPU内存读写来加速计算)
+8. Dao, T., Fu, D., Ermon, S., Rudra, A., & Ré, C. (2022). FlashAttention: Fast and memory-efficient exact attention with IO-awareness. Advances in Neural Information Processing Systems, 35, 16344-16359.(提出了 FlashAttention，一种具有 IO 感知能力的快速且内存高效的精确实现注意力算法，通过优化 GPU 内存读写来加速计算)
 
-9. Gu, A., & Dao, T. (2023). Mamba: Linear-time sequence modeling with selective state spaces. arXiv preprint arXiv:2312.00752. (提出了Mamba模型，基于状态空间模型SSM并引入了选择性机制，实现了高效的线性时间序列建模)
+9. Gu, A., & Dao, T. (2023). Mamba: Linear-time sequence modeling with selective state spaces. arXiv preprint arXiv:2312.00752. (提出了 Mamba 模型，基于状态空间模型 SSM 并引入了选择性机制，实现了高效的线性时间序列建模)
 
 10. Zhai, S., Talbott, W., Srivastava, N., Huang, C., Goh, H., Zhang, R., & Susskind, J. (2021). An attention free transformer. arXiv preprint arXiv:2105.14103.（提出了无注意力 Transformer AFT，用一种高效的、基于加权平均的特征交互机制完全替代了自注意力机制）

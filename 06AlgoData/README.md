@@ -6,7 +6,7 @@
 
 ## 课程位置
 
-![AIInfra](./images/arch01.png)
+![AI Infra](./images/arch01.png)
 
 ## 课程简介
 
@@ -69,7 +69,7 @@
 
 ## 课程知识
 
-![AIInfra](./images/arch02.png)
+![AI Infra](./images/arch02.png)
 
 ## 备注
 

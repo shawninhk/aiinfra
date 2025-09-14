@@ -280,10 +280,10 @@ $$ L(N, D) = \left(\frac{N_c}{N}\right)^{\alpha_N} + \left(\frac{D_c}{D}\right)^
 这一定律揭示了：
 1.  **可预测性**：投入更多计算、数据或模型参数，可以可靠地获得更好的性能。
 2.  **资源分配**：为指导如何高效分配计算预算以最小化损失提供了理论依据（例如，是否应该扩大模型还是收集更多数据）。
-3.  **双重边缘**：它既是Transformer扩展成功的**原因**（提供了清晰的扩展路径），也**加剧**了其数据与计算依赖的**挑战**，因为按此定律追求极致性能必然走向超大模型和海量数据。
+3.  **双重边缘**：它既是 Transformer 扩展成功的**原因**（提供了清晰的扩展路径），也**加剧**了其数据与计算依赖的**挑战**，因为按此定律追求极致性能必然走向超大模型和海量数据。
 
 
-由于Transformer 的成功严重依赖大规模、高质量的训练数据，这带来了成本和偏见问题。
+由于 Transformer 的成功严重依赖大规模、高质量的训练数据，这带来了成本和偏见问题。
 * **需求**：LLM 的性能与数据量和质量密切相关，但数据获取困难且成本高昂，模型也易学习并放大数据偏见。
 * **策略**：为了降低数据依赖，研究者们积极探索数据高效学习策略，如少样本/零样本学习（FSL/ZSL）、数据增强、迁移学习和课程学习，以提升模型在数据稀疏场景下的泛化能力。
 
@@ -329,13 +329,13 @@ Transformer 的未来发展将继续围绕效率、专业化、数据和技术�
 * **可解释性与可信赖 AI**：持续开发 XAI 技术，提升模型的透明度、鲁棒性和公平性。
 * **基础理论的深化**：加深对注意力机制、缩放法则和涌现能力等背后原理的理论理解。
 
-除了在Transformer框架内进行优化，研究界也在探索**完全不同的架构**，以期从根本上解决其瓶颈。
+除了在 Transformer 框架内进行优化，研究界也在探索**完全不同的架构**，以期从根本上解决其瓶颈。
 
 最具代表性的之一是**状态空间模型（State Space Models, SSM）**，特别是 **Mamba** 模型。Mamba 的关键创新在于：
-1.  **选择性机制**：其参数是输入的函数，能够动态地选择性地关注或忽略信息，解决了传统SSM在处理离散、信息密集数据（如语言）时的短板。
-2.  **硬件感知算法**：通过扫描操作而非注意力计算，使其实现了**线性复杂度** $O(n)$ 和**长序列的高效建模**，同时在性能上媲美甚至超越相同规模的Transformer。
+1.  **选择性机制**：其参数是输入的函数，能够动态地选择性地关注或忽略信息，解决了传统 SSM 在处理离散、信息密集数据（如语言）时的短板。
+2.  **硬件感知算法**：通过扫描操作而非注意力计算，使其实现了**线性复杂度** $O(n)$ 和**长序列的高效建模**，同时在性能上媲美甚至超越相同规模的 Transformer。
 
-Mamba 等模型的出现，标志着序列建模领域可能正在孕育一场新的范式转移，形成了与“高效Transformer”并行发展的另一条技术路线。
+Mamba 等模型的出现，标志着序列建模领域可能正在孕育一场新的范式转移，形成了与“高效 Transformer”并行发展的另一条技术路线。
 
 ## VII. 结论
 
@@ -347,32 +347,32 @@ Transformer 架构以其核心的自注意力机制，彻底改变了深度学�
 
 ## 参考文献
 
-1. Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, Ł., & Polosukhin, I. (2017).​​ ​​Attention Is All You Need.​​ In Advances in Neural Information Processing Systems (NeurIPS). (Transformer的奠基性论文)
+1. Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, Ł., & Polosukhin, I. (2017).​​ ​​Attention Is All You Need.​​ In Advances in Neural Information Processing Systems (NeurIPS). (Transformer 的奠基性论文)
 
-2.  Xiong, R., Yang, Y., He, D., Zheng, K., Zheng, S., Xing, C., Zhang, H., Lan, Y., Wang, L., & Liu, T. (2020).​​ ​​On Layer Normalization in the Transformer Architecture.​​ In International Conference on Machine Learning (ICML). (深入分析了Pre-LN与Post-LN的区别与影响)
+2.  Xiong, R., Yang, Y., He, D., Zheng, K., Zheng, S., Xing, C., Zhang, H., Lan, Y., Wang, L., & Liu, T. (2020).​​ ​​On Layer Normalization in the Transformer Architecture.​​ In International Conference on Machine Learning (ICML). (深入分析了 Pre-LN 与 Post-LN 的区别与影响)
 
-3. ​​Su, J., Lu, Y., Pan, S., Murtadha, A., Wen, B., & Liu, Y. (2024).​​ ​​RoFormer: Enhanced Transformer with Rotary Position Embedding.​​ Neurocomputing. (提出了旋转位置编码RoPE)
+3. ​​Su, J., Lu, Y., Pan, S., Murtadha, A., Wen, B., & Liu, Y. (2024).​​ ​​RoFormer: Enhanced Transformer with Rotary Position Embedding.​​ Neurocomputing. (提出了旋转位置编码 RoPE)
 
-4. ​​Press, O., Smith, N. A., & Lewis, M. (2022).​​ ​​Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation.​​ In International Conference on Learning Representations (ICLR). (提出了线性偏置注意力ALiBi)
+4. ​​Press, O., Smith, N. A., & Lewis, M. (2022).​​ ​​Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation.​​ In International Conference on Learning Representations (ICLR). (提出了线性偏置注意力 ALiBi)
 
-5. ​​Shazeer, N., Mirhoseini, A., Maziarz, K., Davis, A., Le, Q., Hinton, G., & Dean, J. (2017).​​ ​​Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer.​​ In International Conference on Learning Representations (ICLR). (混合专家模型MoE的开创性工作)
+5. ​​Shazeer, N., Mirhoseini, A., Maziarz, K., Davis, A., Le, Q., Hinton, G., & Dean, J. (2017).​​ ​​Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer.​​ In International Conference on Learning Representations (ICLR). (混合专家模型 MoE 的开创性工作)
 
-6. ​​Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D., Zhai, X., Unterthiner, T., Dehghani, M., Minderer, M., Heigold, G., Gelly, S., Uszkoreit, J., & Houlsby, N. (2021).​​ ​​An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.​​ In International Conference on Learning Representations (ICLR). (视觉Transformer-ViT的开山之作)
+6. ​​Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D., Zhai, X., Unterthiner, T., Dehghani, M., Minderer, M., Heigold, G., Gelly, S., Uszkoreit, J., & Houlsby, N. (2021).​​ ​​An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.​​ In International Conference on Learning Representations (ICLR). (视觉 Transformer-ViT 的开山之作)
 
-7. ​​Tay, Y., Dehghani, M., Bahri, D., & Metzler, D. (2022).​​ ​​Efficient Transformers: A Survey.​​ ACM Computing Surveys. (对各类高效Transformer模型的全面综述)
+7. ​​Tay, Y., Dehghani, M., Bahri, D., & Metzler, D. (2022).​​ ​​Efficient Transformers: A Survey.​​ ACM Computing Surveys. (对各类高效 Transformer 模型的全面综述)
 
-8. ​​Lin, T., Wang, Y., Liu, X., & Qiu, X. (2022).​​ ​​A Survey of Transformers.​​ AI Open. (对Transformer模型及其变体的广泛综述)
+8. ​​Lin, T., Wang, Y., Liu, X., & Qiu, X. (2022).​​ ​​A Survey of Transformers.​​ AI Open. (对 Transformer 模型及其变体的广泛综述)
 
-9. ​​Brown, T. B., Mann, B., Ryder, N., Subbiah, M., Kaplan, J., Dhariwal, P., Neelakantan, A., Shyam, P., Sastry, G., Askell, A., Agarwal, S., Herbert-Voss, A., Krueger, G., Henighan, T., Child, R., Ramesh, A., Ziegler, D. M., Wu, J., Winter, C., … Amodei, D. (2020).​​ ​​Language Models are Few-Shot Learners.​​ In Advances in Neural Information Processing Systems (NeurIPS). (GPT-3论文，展示了大规模Transformer的涌现能力)
+9. ​​Brown, T. B., Mann, B., Ryder, N., Subbiah, M., Kaplan, J., Dhariwal, P., Neelakantan, A., Shyam, P., Sastry, G., Askell, A., Agarwal, S., Herbert-Voss, A., Krueger, G., Henighan, T., Child, R., Ramesh, A., Ziegler, D. M., Wu, J., Winter, C., … Amodei, D. (2020).​​ ​​Language Models are Few-Shot Learners.​​ In Advances in Neural Information Processing Systems (NeurIPS). (GPT-3 论文，展示了大规模 Transformer 的涌现能力)
 
-10. ​​Devlin, J., Chang, M.-W., Lee, K., & Toutanova, K. (2019).​​ ​​BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding.​​ In Conference of the North American Chapter of the Association for Computational Linguistics (NAACL). (BERT论文，展示了双向Transformer在语言理解中的强大能力)
+10. ​​Devlin, J., Chang, M.-W., Lee, K., & Toutanova, K. (2019).​​ ​​BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding.​​ In Conference of the North American Chapter of the Association for Computational Linguistics (NAACL). (BERT 论文，展示了双向 Transformer 在语言理解中的强大能力)
 
-11. ​​Raffel, C., Shazeer, N., Roberts, A., Lee, K., Narang, S., Matena, M., Zhou, Y., Li, W., & Liu, P. J. (2020).​​ ​​Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer.​​ Journal of Machine Learning Research (JMLR). (T5模型论文，将各类NLP任务统一为文本到文本的框架)
+11. ​​Raffel, C., Shazeer, N., Roberts, A., Lee, K., Narang, S., Matena, M., Zhou, Y., Li, W., & Liu, P. J. (2020).​​ ​​Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer.​​ Journal of Machine Learning Research (JMLR). (T5 模型论文，将各类 NLP 任务统一为文本到文本的框架)
 
-12. ​​Zaheer, M., Guruganesh, G., Dubey, K. A., Ainslie, J., Alberti, C., Ontanon, S., Pham, P., Ravula, A., Wang, Q., Yang, L., & Ahmed, A. (2020).​​ ​​Big Bird: Transformers for Longer Sequences.​​ In Advances in Neural Information Processing Systems (NeurIPS). (BigBird模型，结合了稀疏注意力机制以处理长序列)
+12. ​​Zaheer, M., Guruganesh, G., Dubey, K. A., Ainslie, J., Alberti, C., Ontanon, S., Pham, P., Ravula, A., Wang, Q., Yang, L., & Ahmed, A. (2020).​​ ​​Big Bird: Transformers for Longer Sequences.​​ In Advances in Neural Information Processing Systems (NeurIPS). (BigBird 模型，结合了稀疏注意力机制以处理长序列)
 
-13. ​​Kitaev, N., Kaiser, Ł., & Levskaya, A. (2020).​​ ​​Reformer: The Efficient Transformer.​​ In International Conference on Learning Representations (ICLR). (Reformer模型，引入了局部敏感哈希注意力等高效技术)
+13. ​​Kitaev, N., Kaiser, Ł., & Levskaya, A. (2020).​​ ​​Reformer: The Efficient Transformer.​​ In International Conference on Learning Representations (ICLR). (Reformer 模型，引入了局部敏感哈希注意力等高效技术)
 
-14. ​​Child, R., Gray, S., Radford, A., & Sutskever, I. (2019).​​ ​​Generating Long Sequences with Sparse Transformers.​​ arXiv preprint arXiv:1904.10509. (提出了稀疏Transformer，降低注意力计算复杂度)
+14. ​​Child, R., Gray, S., Radford, A., & Sutskever, I. (2019).​​ ​​Generating Long Sequences with Sparse Transformers.​​ arXiv preprint arXiv:1904.10509. (提出了稀疏 Transformer，降低注意力计算复杂度)
 
-15. ​​Hendrycks, D., & Gimpel, K. (2016).​​ ​​Gaussian Error Linear Units (GELUs).​​ arXiv preprint arXiv:1606.08415. (提出了GELU激活函数，被BERT等后续Transformer模型采用)
+15. ​​Hendrycks, D., & Gimpel, K. (2016).​​ ​​Gaussian Error Linear Units (GELUs).​​ arXiv preprint arXiv:1606.08415. (提出了 GELU 激活函数，被 BERT 等后续 Transformer 模型采用)

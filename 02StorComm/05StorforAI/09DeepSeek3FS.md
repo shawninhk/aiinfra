@@ -1,4 +1,4 @@
-<!--Copyright © ZOMI 适用于[License](https://github.com/chenzomi12/AIInfra)版权许可-->
+<!--Copyright © ZOMI 适用于[License](https://github.com/chenzomi12/AI Infra)版权许可-->
 
 # DeepSeek 3FS 架构解析
 

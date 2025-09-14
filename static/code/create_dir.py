@@ -162,15 +162,15 @@ def getallfile(path):
 
 # target_dir1 = '/home/< 主机用户名 >/< 目录 >/< 从网络拉取的总文件夹名称 >/01AICluster'
 # 用户在本地编译时按照如上方式更改路径名称。以下为博主个人所配置路径。
-target_dir0 = '/Users/a1-6/Workspaces/AIInfer/00Summary'
-target_dir1 = '/Users/a1-6/Workspaces/AIInfer/01AICluster'
-target_dir2 = '/Users/a1-6/Workspaces/AIInfer/02StorComm'
-target_dir3 = '/Users/a1-6/Workspaces/AIInfer/03DockCloud'
-target_dir4 = '/Users/a1-6/Workspaces/AIInfer/04Train'
-target_dir5 = '/Users/a1-6/Workspaces/AIInfer/05Infer'
-target_dir6 = '/Users/a1-6/Workspaces/AIInfer/06AlgoData'
-target_dir7 = '/Users/a1-6/Workspaces/AIInfer/07Application'
-dir_paths = '/Users/a1-6/Workspaces/aiinfra_BOOK/source/'
+target_dir0 = '/Users/a1-6/Workspaces/AI Infra/00Summary'
+target_dir1 = '/Users/a1-6/Workspaces/AI Infra/01AICluster'
+target_dir2 = '/Users/a1-6/Workspaces/AI Infra/02StorComm'
+target_dir3 = '/Users/a1-6/Workspaces/AI Infra/03DockCloud'
+target_dir4 = '/Users/a1-6/Workspaces/AI Infra/04Train'
+target_dir5 = '/Users/a1-6/Workspaces/AI Infra/05Infer'
+target_dir6 = '/Users/a1-6/Workspaces/AI Infra/06AlgoData'
+target_dir7 = '/Users/a1-6/Workspaces/AI Infra/07Application'
+dir_paths = '/Users/a1-6/Workspaces/AI Infra_BOOK/source/'
 
 getallfile(target_dir0)
 getallfile(target_dir1)

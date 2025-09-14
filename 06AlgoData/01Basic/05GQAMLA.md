@@ -10,18 +10,18 @@ Author by:  张志达
 
 ![MHA vs MQA](./images/MQA.png)
 
-Multi-Query Attention (MQA) 是传统Multi-Head Attention的一种优化变体，它通过共享Key和Value矩阵来减少内存使用和计算复杂度，同时保持查询的多样性。
+Multi-Query Attention (MQA) 是传统 Multi-Head Attention 的一种优化变体，它通过共享 Key 和 Value 矩阵来减少内存使用和计算复杂度，同时保持查询的多样性。
 
 ### 1.2 解决的问题
 
-- **内存效率**：减少KV缓存的内存占用
+- **内存效率**：减少 KV 缓存的内存占用
 - **计算效率**：降低注意力计算的时间复杂度
 - **推理加速**：在生成任务中显著提升推理速度
 - **资源优化**：在保持性能的同时减少模型参数量
 
 ### 1.3 数学表达
 
-**在MQA中，多个Query头共享同一个Key和Value矩阵**：
+**在 MQA 中，多个 Query 头共享同一个 Key 和 Value 矩阵**：
 
 $$
 \begin{align*}
@@ -32,44 +32,44 @@ $$
 $$
 
 其中：
-- $Q_i$：第$i$个查询头
-- $K, V$：共享的Key和Value矩阵
-- $W_i^Q$：第$i$个查询头的权重矩阵
-- $W^K, W^V$：共享的Key和Value权重矩阵
+- $Q_i$：第 $i$ 个查询头
+- $K, V$：共享的 Key 和 Value 矩阵
+- $W_i^Q$：第 $i$ 个查询头的权重矩阵
+- $W^K, W^V$：共享的 Key 和 Value 权重矩阵
 
 ### 1.4 伪代码实现
 
 ```python
 def multi_query_attention(X, num_heads, d_model):
     """
-    Multi-Query Attention实现
+    Multi-Query Attention 实现
     X: 输入序列 [seq_len, d_model]
     num_heads: 查询头数量
     d_model: 模型维度
     """
     d_k = d_model // num_heads
     
-    # 为每个查询头创建Q的权重矩阵
+    # 为每个查询头创建 Q 的权重矩阵
     W_q = [random_matrix(d_model, d_k) for _ in range(num_heads)]
     
-    # 共享的K和V权重矩阵
+    # 共享的 K 和 V 权重矩阵
     W_k = random_matrix(d_model, d_k)
     W_v = random_matrix(d_model, d_k)
     
-    # 计算共享的K和V
+    # 计算共享的 K 和 V
     K = X @ W_k  # [seq_len, d_k]
     V = X @ W_v  # [seq_len, d_k]
     
     heads = []
     for i in range(num_heads):
-        # 计算第i个查询头
+        # 计算第 i 个查询头
         Q_i = X @ W_q[i]  # [seq_len, d_k]
         
         # 计算注意力分数
         scores = Q_i @ K.T  # [seq_len, seq_len]
         scores = scores / sqrt(d_k)
         
-        # 应用softmax
+        # 应用 softmax
         attention_weights = softmax(scores)
         
         # 加权求和
@@ -92,18 +92,18 @@ def multi_query_attention(X, num_heads, d_model):
 
 ![MHA vs MQA vs GQA](./images/GQA.png)
 
-Grouped-Query Attention (GQA) 是MQA和传统Multi-Head Attention之间的折中方案，它将查询头分组，每组共享一个Key和Value矩阵，在性能和效率之间取得平衡。
+Grouped-Query Attention (GQA) 是 MQA 和传统 Multi-Head Attention 之间的折中方案，它将查询头分组，每组共享一个 Key 和 Value 矩阵，在性能和效率之间取得平衡。
 
 ### 2.2 解决的问题
 
-- **平衡性能与效率**：在MQA和MHA之间找到最佳平衡点
+- **平衡性能与效率**：在 MQA 和 MHA 之间找到最佳平衡点
 - **灵活配置**：支持不同的分组策略
-- **渐进优化**：可以逐步从MHA迁移到MQA
+- **渐进优化**：可以逐步从 MHA 迁移到 MQA
 - **任务适应性**：根据任务需求调整分组数量
 
 ### 2.3 数学表达
 
-**在GQA中，查询头被分为$G$组，每组共享Key和Value**：
+**在 GQA 中，查询头被分为 $G$ 组，每组共享 Key 和 Value**：
 
 $$
 \begin{align*}
@@ -115,15 +115,15 @@ $$
 
 其中：
 - $G$：分组数量
-- $g(i)$：第$i$个查询头所属的组
-- $K_{g(i)}, V_{g(i)}$：第$g(i)$组共享的Key和Value矩阵
+- $g(i)$：第 $i$ 个查询头所属的组
+- $K_{g(i)}, V_{g(i)}$：第 $g(i)$ 组共享的 Key 和 Value 矩阵
 
 ### 2.4 伪代码实现
 
 ```python
 def grouped_query_attention(X, num_heads, num_groups, d_model):
     """
-    Grouped-Query Attention实现
+    Grouped-Query Attention 实现
     X: 输入序列 [seq_len, d_model]
     num_heads: 查询头数量
     num_groups: 分组数量
@@ -132,14 +132,14 @@ def grouped_query_attention(X, num_heads, num_groups, d_model):
     d_k = d_model // num_heads
     heads_per_group = num_heads // num_groups
     
-    # 为每个查询头创建Q的权重矩阵
+    # 为每个查询头创建 Q 的权重矩阵
     W_q = [random_matrix(d_model, d_k) for _ in range(num_heads)]
     
-    # 为每个组创建共享的K和V权重矩阵
+    # 为每个组创建共享的 K 和 V 权重矩阵
     W_k = [random_matrix(d_model, d_k) for _ in range(num_groups)]
     W_v = [random_matrix(d_model, d_k) for _ in range(num_groups)]
     
-    # 计算每组的K和V
+    # 计算每组的 K 和 V
     K_groups = []
     V_groups = []
     for g in range(num_groups):
@@ -153,10 +153,10 @@ def grouped_query_attention(X, num_heads, num_groups, d_model):
         # 确定当前头所属的组
         group_id = i // heads_per_group
         
-        # 计算第i个查询头
+        # 计算第 i 个查询头
         Q_i = X @ W_q[i]  # [seq_len, d_k]
         
-        # 使用对应组的K和V
+        # 使用对应组的 K 和 V
         K_g = K_groups[group_id]
         V_g = V_groups[group_id]
         
@@ -164,7 +164,7 @@ def grouped_query_attention(X, num_heads, num_groups, d_model):
         scores = Q_i @ K_g.T  # [seq_len, seq_len]
         scores = scores / sqrt(d_k)
         
-        # 应用softmax
+        # 应用 softmax
         attention_weights = softmax(scores)
         
         # 加权求和
@@ -198,7 +198,7 @@ Multi-Latent Attention (MLA) 是一种创新的注意力机制，它通过引入
 
 ### 3.3 数学表达
 
-MLA通过潜在变量$Z$来建模注意力分布：
+MLA 通过潜在变量 $Z$ 来建模注意力分布：
 
 $$
 \begin{align*}
@@ -219,7 +219,7 @@ $$
 ```python
 def multi_latent_attention(X, num_heads, d_model, latent_dim):
     """
-    Multi-Latent Attention实现
+    Multi-Latent Attention 实现
     X: 输入序列 [seq_len, d_model]
     num_heads: 注意力头数量
     d_model: 模型维度
@@ -227,7 +227,7 @@ def multi_latent_attention(X, num_heads, d_model, latent_dim):
     """
     d_k = d_model // num_heads
     
-    # 为每个头创建Q, K, V的权重矩阵
+    # 为每个头创建 Q, K, V 的权重矩阵
     W_q = [random_matrix(d_model, d_k) for _ in range(num_heads)]
     W_k = [random_matrix(d_model, d_k) for _ in range(num_heads)]
     W_v = [random_matrix(d_model, d_k) for _ in range(num_heads)]
@@ -237,7 +237,7 @@ def multi_latent_attention(X, num_heads, d_model, latent_dim):
     
     heads = []
     for i in range(num_heads):
-        # 计算Q, K, V
+        # 计算 Q, K, V
         Q_i = X @ W_q[i]  # [seq_len, d_k]
         K_i = X @ W_k[i]  # [seq_len, d_k]
         V_i = X @ W_v[i]  # [seq_len, d_k]
@@ -251,7 +251,7 @@ def multi_latent_attention(X, num_heads, d_model, latent_dim):
         scores = scores + Z_i  # 加入潜在变量
         scores = scores / sqrt(d_k)
         
-        # 应用softmax
+        # 应用 softmax
         attention_weights = softmax(scores)
         
         # 加权求和
@@ -287,9 +287,9 @@ def latent_module(X, latent_dim):
 
 | 特性 | MQA | GQA | MLA |
 |------|-----|-----|-----|
-| **KV缓存占用** | 显存占用低(仅需1组KV缓存) | 显存占用低于MHA, 但高于MQA(分组共享KV cache) | 显存占用显著降低(低秩压缩) |
-|**计算复杂度**|最低(共享KV计算)|中等(分组共享KV计算)|低于MHA和GQA(低秩空间计算)|
-|**模型效果**|略低于MHA(共享KV导致信息损失)|接近MHA(分组共享平衡性能效率)|接近MHA(低秩压缩保留关键特征)|
+| **KV 缓存占用** | 显存占用低(仅需 1 组 KV 缓存) | 显存占用低于 MHA, 但高于 MQA(分组共享 KV cache) | 显存占用显著降低(低秩压缩) |
+|**计算复杂度**|最低(共享 KV 计算)|中等(分组共享 KV 计算)|低于 MHA 和 GQA(低秩空间计算)|
+|**模型效果**|略低于 MHA(共享 KV 导致信息损失)|接近 MHA(分组共享平衡性能效率)|接近 MHA(低秩压缩保留关键特征)|
 |**应用模型**|Falcon 系列模型|LLaMA-2/LLaMA-3、Qwen3|DeepSeek-V3、Kimi-K2|
 
 
