@@ -1,8 +1,8 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/chenzomi12/AIInfra)版权许可-->
 
-# GSard MOE 解读
+# GShard MOE 解读
 
-解读 by: 张晓天
+Author by: 张晓天
 
 2018年，Transformer架构的兴起奠定了现代大语言模型的基础，但其密集特性也导致了训练与推理成本的急剧攀升。为解决此根本性挑战，条件计算（Conditional Computation）尤其是混合专家（Mixture of Experts, MoE）模型，被视为突破参数规模瓶颈的关键路径。2020年6月，Google发布论文《GShard: Scaling Giant Models with Conditional Computation and Automatic Sharding》，首次成功地将MoE结构大规模、高效地应用于Encoder-Decoder架构的Transformer模型，并训练出参数量高达6000亿（600B）的稀疏激活模型。
 
@@ -75,7 +75,6 @@ GShard采用**Top-2门控**。即每个令牌`x`会选择权重最高的前两�
 通过“分组”和“专家容量”这两个设计，GShard将动态且不可预测的稀疏计算，转换为了一个**具有已知且固定计算与通信预算**的准静态操作，从而使得大规模分布式训练成为可能。
 
 ## 小结
-
 
 GShard是一项里程碑式的工作，它不仅在算法层面创新地提出了Top-2随机路由、专家容量等机制，更在工程层面通过分组（Grouping）和自动分片技术，首次实现了在通用硬件上高效训练万亿参数级别的稀疏模型。
 
