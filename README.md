@@ -220,6 +220,18 @@ AI 集群云原生篇：容器技术、K8S 编排、AI 云平台与任务调度�
 
 ![大模型系统全栈](static/images/aifoundation02.png)
 
+## Contributing to AIInfra
+
+Considering contibuting to AIInfra? To get started, please take a moment to read the CONTRIBUTING.md guide.
+
+Join Aim contributors by submitting your first pull request. Happy coding! 😊
+
+<a href="https://github.com/Infrasys-AI/AIInfra/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Infrasys-AI/AIInfra" />
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
+
 ## 备注
 
 > 这个仓已经到达疯狂的 10G 啦（ZOMI 把所有制作过程、高清图片都原封不动提供），如果你要 git clone 会非常的慢，因此建议优先到  [Releases · chenzomi12/AIInfra](https://github.com/Infrasys-AI/AIInfra/releases) 来下载你需要的内容！

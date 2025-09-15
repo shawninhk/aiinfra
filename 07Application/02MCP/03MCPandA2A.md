@@ -22,7 +22,7 @@ MCP 定义了应用程序和 AI 模型之间交换上下文信息的方式。统
 
 大模型使用 Function Call 调用工具的架构如下：
 
-![](images/03MCPandA2A_01.png)
+![](./images/03MCPandA2A_01.png)
 
 Function Call 已经可以让大模型去调用工具，那为什么我们还需要 MCP 呢，因为对于不同的大模型 Function Call 对应的要发开一个 Function Call 工具，需要对不同的模型进行适配，比如参数格式、触发逻辑、返回结构等等，这个成本是非常高的。我们需要对每个模型都开发一套适配层。
 
@@ -32,7 +32,7 @@ MCP 制定统一规范，不管是连接数据库、第三方 API，还是本地
 
 大模型使用 MCP 调用工具的架构如下：
 
-![](images/03MCPandA2A_02.png)
+![](./images/03MCPandA2A_02.png)
 
 有了 MCP 之后
 
@@ -55,15 +55,15 @@ MCP 制定统一规范，不管是连接数据库、第三方 API，还是本地
 
 以下演示在 Cherry Studio 客户端中进行，[下载地址](https://www.cherry-ai.com/download)
 
-![](images/03MCPandA2A_04.png)
+![](./images/03MCPandA2A_04.png)
 
 点击右上角右上角设置，在设置页面中可以在模型服务菜单中添加模型，在 MCP 菜单中添加 MCP 服务。
 
 ## MCP 核心原理
 
-![](images/03MCPandA2A_03.png)
+![](./images/03MCPandA2A_03.png)
 
-上图是类比于USB-C来看MCP，核心设计理念上是要成为AI的USB-C，架构上的核心组件则是 MCP server 、 MCP client 、 MCP host。下面将进行详细的介绍。
+上图是类比于 USB-C 来看 MCP，核心设计理念上是要成为 AI 的 USB-C，架构上的核心组件则是 MCP server 、 MCP client 、 MCP host。下面将进行详细的介绍。
 
 ### MCP 设计理念
 

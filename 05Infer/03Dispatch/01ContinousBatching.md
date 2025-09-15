@@ -26,7 +26,7 @@ Batching 技术并不是推理引擎独有的，在训练的过程中需要对�
 !!!!!!!!!!!!
 因为 XXXXX 这种根本性的差异导致了传统静态批处理（Static Batching）的失效。
 
-![推理两阶段示意图](images/01ContinousBatching01.png)
+![推理两阶段示意图](./images/01ContinousBatching01.png)
 
 !!!!!!!!!!!!
 这段内容看上去很大模型，建议用自己的理解来写，PD 原理前面会有这里我删掉了。
@@ -35,7 +35,7 @@ Batching 技术并不是推理引擎独有的，在训练的过程中需要对�
 
 图中黄色区域代表 Prefill 阶段，蓝色区域代表 Decode 阶段。两阶段的计算特性差异表明：
 
-![使用 Static Batching 的推理负载情况示意图](images/01ContinousBatching02.png)
+![使用 Static Batching 的推理负载情况示意图](./images/01ContinousBatching02.png)
 
 在一个批次的请求中，当所有请求都完成了计算密集型的 Prefill 阶段后，会集体进入访存密集型的 Decode 阶段。这意味着 GPU 的计算单元会从接近满载的繁忙状态，突然转为大部分时间都在等待从显存中读取 KV Cache 的空闲状态。这导致了 GPU 计算利用率的“断崖式”下跌，在整个服务过程中形成了巨大的性能“气泡”（Bubble），严重影响了系统的总吞吐量。
 
@@ -52,14 +52,14 @@ Batching 和批处理统一指代，不要一会用中文，一会用英文
 
 如图所示，当并发请求数为变量时，系统吞吐量在低并发区几乎呈线性增长。这是因为在访存受限的 Decode 阶段，增大 Batching 规模能有效提升 GPU 利用率。然而，一旦 GPU 利用率饱和，系统进入计算受限状态，即使再增加并发数，整体吞吐量也将趋于平稳，达到性能上限。
 
-![Llama-3.1-8B on an H100 吞吐量和并发关系示意图](images/01ContinousBatching03.png)
+![Llama-3.1-8B on an H100 吞吐量和并发关系示意图](./images/01ContinousBatching03.png)
 
 !!!!!!!!!!!!
 补充引用的论文地址，参考 markdown 如何引用论文的
 
 由于两阶段推理特性的不同，针对不同阶段的最佳 Batch 大小应该是不同的，这也意味着需要针对 Prefill 和 Decode 分别进行 Batch 策略。**这种阶段感知的 Batching 思想，正是 Continuous Batching 技术的核心所在**。
 
-![Mistral-7B 在单卡 A100 上 prefill 和 Decode 阶段不同 Batch 下对吞吐影响示意图](images/01ContinousBatching06.png)
+![Mistral-7B 在单卡 A100 上 prefill 和 Decode 阶段不同 Batch 下对吞吐影响示意图](./images/01ContinousBatching06.png)
 
 ### 吞吐 VS 有效吞吐
 
@@ -70,7 +70,7 @@ Batching 和批处理统一指代，不要一会用中文，一会用英文
 
 吞吐量衡量的是所有用户和请求完成的请求数或标记数，因此忽略了这些延迟要求。可以将用户单个请求的端到端延迟看作是 Prefill 和 decode 过程的总延迟。
 
-![单个 Request 延迟示意图](images/01ContinousBatching05.png)
+![单个 Request 延迟示意图](./images/01ContinousBatching05.png)
 
 **因此推理系统中 Batching 策略应该在满足这些不同的 SLO 延迟指标的情况下，尽可能提升系统的推理吞吐。**
 
@@ -88,7 +88,7 @@ Batching 和批处理统一指代，不要一会用中文，一会用英文
 !!!!!!!!!!!!!
 没有对图片进行解释
 
-![Batching 实现中调度器和请求队列示意图](images/01ContinousBatching07.png)
+![Batching 实现中调度器和请求队列示意图](./images/01ContinousBatching07.png)
 
 ### 高效请求队列
 
@@ -105,7 +105,7 @@ Batching 和批处理统一指代，不要一会用中文，一会用英文
 
 意识到传统 Batching 方法效率低下的问题。OSDI ’22 上发表的 Orca 论文，这是首个系统性解决该问题的工作，引入了 iteration-level scheduling，也就是常说的 Continous Batching 方法。**针对推理中每个 Request 的 Decode 长度不同的特性，这种调度策略中不再等待 batch 中所有序列生成完成，而是每轮迭代动态决定 batch 大小**。这样一来，batch 中的某个序列一旦完成生成，就可以立即被替换为新的请求，从而相比 Static Batching 显著提升了 GPU 的利用率。
 
-![Continous Batching 效果示意图](images/01ContinousBatching08.png)
+![Continous Batching 效果示意图](./images/01ContinousBatching08.png)
 
 上面的示意图非常直观地展示了新的调度策略，接下来稍微深入探讨一下实现上的问题。Ocra 提出了两个设计思路：Iteration-level Batching 和 Selective Batching。
 
@@ -120,7 +120,7 @@ Batching 和批处理统一指代，不要一会用中文，一会用英文
 !!!!!!
 介绍下面的图片，可以融入上面的原理
 
-![Orca 计算图拆分示意图](images/01ContinousBatching09.png)
+![Orca 计算图拆分示意图](./images/01ContinousBatching09.png)
 
 从本质上来看除了 Attention 操作，其余的 Linear 和 Norm 部分都是 token level 的计算，因此很自然可以将 Batch 和 Seq_len 维度进行合并为一个维度进行计算。
 
@@ -138,7 +138,7 @@ Continous Batching 混合了 Prefill 和 Decode 阶段进行 Batching，其优�
 
 下图展示了 prefill 和 decode 阶段中各个操作的算术强度（arithmetic intensity）。如下图所示，在 prefill 阶段，即使 batch size 为 1，所有操作的算术强度依然很高。而在 decode 阶段，这些操作的算术强度下降了两个数量级以上，只有在 batch size 达到 256 这种极大值时，decode 阶段才开始变得计算密集。
 
-![通过计算强度和可用 Batch，定性分析推理阶段的瓶颈](images/01ContinousBatching10.png)
+![通过计算强度和可用 Batch，定性分析推理阶段的瓶颈](./images/01ContinousBatching10.png)
 
 ### Prefill first 调度策略
 
@@ -146,15 +146,15 @@ Continous Batching 混合了 Prefill 和 Decode 阶段进行 Batching，其优�
 
 通过上面的分析，由于 KV Cache 的限制，我们无法通过简单地增加批次大小来让 Decode 阶段摆脱内存瓶颈。这意味着，如果一个系统只处理 Decode 任务，必然会浪费掉 GPU 宝贵的计算资源。为了不浪费这些资源，我们必须找到一种方法来填补这些“计算空窗期”。计算密集的 Prefill 任务是完美的“填充物”。
 
-![Static Batching 下对单个 Request 延迟的影响](images/01ContinousBatching11.png)
+![Static Batching 下对单个 Request 延迟的影响](./images/01ContinousBatching11.png)
 
 **我们再回头审视一下 Static Batching 策略对单个 Request 延迟的影响。其实针对单个 Request，由于 Static Batching 是连续解码的，可以看作是优化了每个输出标记的时间的，但是 GPU 资源的利用率很低，导致推理系统的吞吐低。因此在有大量用户请求的情况下，API 服务器的请求队列更有可能会造成请求堆积。一旦请求堆积了，那么单个 Request 的整体延迟就会明显上升。**
 
-![Static Batching 的缺陷分析](images/01ContinousBatching12.png)
+![Static Batching 的缺陷分析](./images/01ContinousBatching12.png)
 
 为了减少单个请求的等待时间，推理引擎（如 vLLM 和 TGI）会在新请求到达并能放入当前 Batching 时，立即调度其预填充（prefill）阶段。 并行执行新请求的预填充（prefill）与所有先前请求的单次解码（decode）步骤，但由于所有操作都在同一 GPU 操作中执行，其持续时间主要由预填充决定，因此在每个请求的解码阶段，只能在该时间内生成一个输出标记。因此，这种优先处理预填充的策略虽然最小化了首个标记的生成时间，但却中断了已运行请求的解码过程。
 
-![Prefill-first 调度示意图](images/01ContinousBatching13.png)
+![Prefill-first 调度示意图](./images/01ContinousBatching13.png)
 
 ### Selective Batching 问题
 

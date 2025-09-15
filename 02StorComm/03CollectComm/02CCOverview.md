@@ -17,7 +17,7 @@ Author by: SingularityKChen
 
 神经网络训练的过程是神经网络模型通过梯度下降算法优化参数的过程。在单卡训练中，神经网络模型的训练过程主要依赖于单个 GPU 卡的计算能力。
 
-![02CCOverview02](images/02CCOverview02.png)
+![02CCOverview02](./images/02CCOverview02.png)
 
 上图左侧展示了梯度下降算法在三维空间中寻找数据鞍点的过程。梯度下降算法通过不断调整参数，沿着损失函数的负梯度方向移动，以最小化损失函数。图中的三维曲面表示损失函数，黑色线条表示梯度下降算法的路径，最终目标是找到损失函数的最小值点，也称为鞍点。
 
@@ -25,7 +25,7 @@ Author by: SingularityKChen
 
 左侧图中梯度下降算法逐步找到损失函数的最小值点，对应右侧图中损失值随着训练轮数的增加而逐渐降低。
 
-![02CCOverview03](images/02CCOverview03.png)
+![02CCOverview03](./images/02CCOverview03.png)
 
 如上如图所示，一个典型的多层前馈神经网络包含输入层、多个隐藏层和输出层。输入层接收图像数据，这些图像数据通过网络的各个层进行处理。每个层之间通过权重矩阵（$W_1$, $W_2$, $W_3$, $W_4$, $W_5$）连接，数据在前向传播过程中经过线性变换和非线性激活函数处理，最终在输出层生成预测结果。
 
@@ -40,7 +40,7 @@ Author by: SingularityKChen
 
 在单卡训练的基础上，多卡并行训练可以显著提高训练速度和效率。多卡并行训练通过将模型和数据分布到多个 GPU 卡上，利用多个卡的计算能力同时进行训练，从而加速模型的收敛。
 
-![02CCOverview04](images/02CCOverview04.png)
+![02CCOverview04](./images/02CCOverview04.png)
 
 以下是常见的多卡并行策略：
 
@@ -64,19 +64,19 @@ Author by: SingularityKChen
 
 #### 数据并行 Data Parallelism
 
-![02CCOverview05](images/02CCOverview05.gif)
+![02CCOverview05](./images/02CCOverview05.gif)
 
 数据并行是最常用的并行策略之一。在这种策略中，数据集被分割成多个子集，每个子集分配给不同的计算卡。每个卡上都保存模型的完整副本，并独立计算梯度。计算完成后，通过集合通信算法 **AllReduce** 将所有卡的梯度汇总，计算出全局梯度，并更新模型参数。
 
 #### 流水并行 Pipeline Parallelism
 
-![02CCOverview06](images/02CCOverview06.gif)
+![02CCOverview06](./images/02CCOverview06.gif)
 
 流水并行将模型按层分为多个连续阶段（Stage），每个阶段放置在不同设备上。数据以流水线方式在阶段之间流动，通过集合通信原语 **Send/Recv** 进行数据传输，全局梯度同步还需要用到集合通信原语 **AllReduce**。流水并行的优势在于能够同时并行处理模型不同部分的数据，减小单阶段计算压力，但需合理设计以减少通信等待。这种策略通过重叠计算和通信来提高效率。
 
 #### 张量并行 Tensor Parallelism
 
-![02CCOverview07](images/02CCOverview07.gif)
+![02CCOverview07](./images/02CCOverview07.gif)
 
 张量并行适用于模型规模特别大的场景，它将单个模型层内的大矩阵或张量计算分割到多个设备上并行处理。计算完成后，使用集合通信原语 **AllGather** 汇总计算结果。张量并行的关键是高效切分计算任务并降低通信成本。
 
@@ -86,7 +86,7 @@ Author by: SingularityKChen
 
 #### 多维并行 Multi Parallelism
 
-![02CCOverview08](images/02CCOverview08.png)
+![02CCOverview08](./images/02CCOverview08.png)
 
 多维并行组合了数据、流水、张量与专家并行等多种策略，以适应复杂的训练场景。例如：
 
@@ -111,7 +111,7 @@ XCCL（XXXX Collective Communication Library）架构源自于高性能计算（
 - 提升集群训练性能（HFU/MFU）
 - 防止通信等待时间过长导致的“假死锁”问题
 
-![02CCOverview09](images/02CCOverview09.png)
+![02CCOverview09](./images/02CCOverview09.png)
 
 上图 Stream 77 和 14 分别是计算和通信的进程。
 
@@ -133,7 +133,7 @@ XCCL（XXXX Collective Communication Library）架构源自于高性能计算（
 
 HPC 场景中的集合通信（如 MPI）关注于传统的高性能计算任务，而 AI 场景中的通信需求则更为特殊，如频繁的梯度同步、更复杂的数据流动模式。
 
-![02CCOverview11](images/02CCOverview11.png)
+![02CCOverview11](./images/02CCOverview11.png)
 
 !!!!!!!!!!!
 用段落来描述，不要用大模型的列表方式。
@@ -148,7 +148,7 @@ HPC 场景中的集合通信（如 MPI）关注于传统的高性能计算任务
 
 ### XCCL 在 AI 系统中的位置
 
-![03CCPrimtive01](images/03CCPrimtive01.png)
+![03CCPrimtive01](./images/03CCPrimtive01.png)
 
 !!!!!!!!!!!
 一眼感觉是大模型生成的内容，用自己的理解去概括和总结技术
