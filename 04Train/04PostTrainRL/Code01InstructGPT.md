@@ -122,7 +122,7 @@ class SimpleTransformer(nn.Module):
         self.embedding = nn.Embedding(vocab_size, d_model)
         self.d_model = d_model
         self.max_len = max_len
-        # 使用动态位置编码，支持更长序列
+        # 位置编码
         self.register_buffer('pos_enc', self._create_pos_encoding(d_model, max_len))
         encoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, batch_first=True)
         self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
@@ -130,28 +130,20 @@ class SimpleTransformer(nn.Module):
     
     def _create_pos_encoding(self, d_model, max_len):
         # 正弦/余弦位置编码
-        pos = torch.arange(max_len).unsqueeze(1).float()
-        div_term = torch.exp(torch.arange(0, d_model, 2).float() * 
-                            -(torch.log(torch.tensor(10000.0)) / d_model))
+        pos = torch.arange(max_len).unsqueeze(1).float()  # [max_len, 1]
+        # 简化频率计算
+        div_term = 1.0 / (1000 ** (torch.arange(0, d_model, 2).float() / d_model))
         enc = torch.zeros(max_len, d_model)
-        enc[:, 0::2] = torch.sin(pos * div_term)  # 偶数位置使用sin
-        enc[:, 1::2] = torch.cos(pos * div_term)  # 奇数位置使用cos
-        return enc  # [max_len, d_model]
-    
-    def get_pos_encoding(self, seq_len):
-        # 动态获取位置编码，如果序列长度超过预设长度则扩展
-        if seq_len > self.max_len:
-            # 动态扩展位置编码
-            new_pos_enc = self._create_pos_encoding(self.d_model, seq_len)
-            return new_pos_enc[:seq_len, :].to(self.pos_enc.device)
-        return self.pos_enc[:seq_len, :]
+        enc[:, 0::2] = torch.sin(pos * div_term)  # 偶数位置
+        enc[:, 1::2] = torch.cos(pos * div_term)  # 奇数位置
+        return enc
     
     def forward(self, x):
         # x: [batch_size, seq_len]
         batch_size, seq_len = x.shape
         x_emb = self.embedding(x)  # [batch_size, seq_len, d_model]
-        # 使用动态位置编码，自动处理长序列
-        pos_enc = self.get_pos_encoding(seq_len)
+        # 添加位置编码（截断到实际序列长度）
+        pos_enc = self.pos_enc[:seq_len, :]  # [seq_len, d_model]
         x_emb = x_emb + pos_enc.unsqueeze(0)  # 添加位置编码
         output = self.transformer(x_emb)  # [batch_size, seq_len, d_model]
         return self.fc_out(output)  # [batch_size, seq_len, vocab_size]
@@ -159,7 +151,7 @@ class SimpleTransformer(nn.Module):
 model = SimpleTransformer(vocab_size=tokenizer.vocab_size).to(device)
 ```
 
-简化 Transformer 模型包含嵌入层、动态位置编码和 Transformer 编码器。我们使用了正弦/余弦位置编码，并实现了动态扩展机制，能够自动处理超出预设长度的序列。位置编码让模型能够理解文本中的顺序信息，是Transformer架构的关键组件。
+简化 Transformer 模型包含嵌入层、固定位置编码和 Transformer 编码器。我们使用了正弦/余弦位置编码，位置编码让模型能够理解文本中的顺序信息，是 Transformer 架构的关键组件。
 
 ### 2.3 SFT 训练
 
@@ -291,8 +283,8 @@ class RewardModel(nn.Module):
     def forward(self, x):
         # x: [batch_size, seq_len]
         x_emb = self.base_model.embedding(x)  # [batch_size, seq_len, d_model]
-        # 使用基础模型的动态位置编码
-        pos_enc = self.base_model.get_pos_encoding(x.shape[1])
+        # 添加位置编码（截断到实际序列长度）
+        pos_enc = self.base_model.pos_enc[:x.shape[1], :]  # [seq_len, d_model]
         x_emb = x_emb + pos_enc.unsqueeze(0)  # 添加位置编码
         
         # 获取基础模型的特征输出
