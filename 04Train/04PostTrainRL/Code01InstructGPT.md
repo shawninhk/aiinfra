@@ -151,7 +151,7 @@ class SimpleTransformer(nn.Module):
 model = SimpleTransformer(vocab_size=tokenizer.vocab_size).to(device)
 ```
 
-简化 Transformer 模型包含嵌入层、固定位置编码和 Transformer 编码器。我们使用了正弦/余弦位置编码，位置编码让模型能够理解文本中的顺序信息，是 Transformer 架构的关键组件。
+简化 Transformer 模型包含嵌入层、位置编码和 Transformer 编码器。我们使用了正弦/余弦位置编码，位置编码让模型能够理解文本中的顺序信息，是 Transformer 架构的关键组件。
 
 ### 2.3 SFT 训练
 
