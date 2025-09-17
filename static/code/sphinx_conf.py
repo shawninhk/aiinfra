@@ -3,7 +3,7 @@ import os
 from urllib.request import urlopen
 from pathlib import Path
 
-project = "AIInfra & AIInfra (大模型系统原理)"
+project = "AI Infra & AI Infra (大模型系统原理)"
 # copyright = "2025"
 # author = "ZOMI"
 language = "cn"  # For testing language translations
@@ -75,7 +75,7 @@ myst_enable_extensions = [
 #
 html_theme = "sphinx_book_theme"
 html_logo = "_static/logo-wide.svg"
-html_title = "AIInfra"
+html_title = "AI Infra"
 html_copy_source = True
 html_favicon = "_static/logo-square.svg"
 html_last_updated_fmt = ""
