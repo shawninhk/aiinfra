@@ -32,7 +32,7 @@ html_theme = "sphinx_book_theme"
 
 > 因为网络不稳定的问题，建议翻墙或者直接使用 github desktop 软件应用下载，使其支持断点下载项目。
 
-接着进入 AIInfra 目录下的 `build_books` 文件，并修改里面的源目录地址 `xxxxx/AIInfra` 和目标构建本地部署内容的地址 `xxxxx/AIInfra_BOOK`。
+接着进入 AI Infra 目录下的 `build_books` 文件，并修改里面的源目录地址 `xxxxx/AIInfra` 和目标构建本地部署内容的地址 `xxxxx/AIInfra_BOOK`。
 
 ```python
 target_dir1 = '/xxxxx/AIInfra/02Hardware'
@@ -58,7 +58,7 @@ python create_dir.py
 在编译前先去到需要编译的目录，所有的编译命令都在这个文件目录内执行。
 
 ```bash
-cd AIInfra_BOOK
+cd AI Infra_BOOK
 make html
 ```
 
@@ -66,7 +66,7 @@ make html
 
 此时我们将编译好的 html 整个文件夹下的内容拷贝至 xxxxxx.github.io 发布。
 
-需要注意的是 docs(AIInfra_BOOK) 目录下的 /source/index.md 不要删除了，不然网页无法检索渲染。
+需要注意的是 docs(AI Infra_BOOK) 目录下的 /source/index.md 不要删除了，不然网页无法检索渲染。
 
 ## 配置文件与代码
 
@@ -79,7 +79,7 @@ import os
 from urllib.request import urlopen
 from pathlib import Path
 
-project = "AIInfra & AIInfra (大模型系统原理)"
+project = "AI Infra & AI Infra (大模型系统原理)"
 language = "cn"  # For testing language translations
 master_doc = "index"
 
@@ -224,7 +224,7 @@ def setup(app):
 <!--
 ```md
 ---
-title: AIInfra & AIInfra 
+title: AI Infra & AI Infra 
 ---
 
 # 课程目录内容
@@ -243,3 +243,7 @@ title: AIInfra & AIInfra
 Thanks you!!!
 ```
 -->
+
+## 附录
+
+使用主题链接：https://daobook.github.io/sphinx-book-theme

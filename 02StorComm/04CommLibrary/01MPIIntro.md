@@ -2,12 +2,12 @@
 
 # MPI 通信与通信库
 
->>>>>>>>>>>>>>
+!!!!!!!!!!!!!!!!!!!!!
 添加作者，用于宣传自己
 
 在大模型系统中，集合通信（Collective communication）尤为重要，业界比较重要的就是 MPI/OpenMPI。MPI 是集合通信库 XCCL 的基础，包含了很多基本概念和基础 API 定义，方便入门和进一步了解英伟达的 NCCL 和华为的 HCCL。因此本节主要讲解什么是 MPI，在 MPI 通信中有三个比较重要的概念：（1）P2P（Per2Per）通信，也称为点对点通信；（2）CC，collective communication，集合通信；（3）PM（program management），集合通信中的程序和 API。
 
->>>>>>>>>>>>>>
+!!!!!!!!!!!!!!!!!!!!!
 建议稍微展开三级内容，对某些内容再深入研究哈
 
 ## MPI 基本概念
@@ -18,11 +18,11 @@ MPI（Message Passing Interface）是一个跨语言的通讯协议，是高性�
 
 MPI 与 TCP/IP 网络协议本身没有直接关系，OSI 参考模型包括应用层、表示层、会话层、传输层、网络层、数据链路层和物理层，一共 7 层。在 TCP/IP 网络协议中只要 4 层，MPI 属于 OSI 参考模型第五层或者更高，MPI 实现可以通过传输层 sockets 和 TCP，大部分 MPI 实现由指定 API 组成。
 
-![OSI 参考模型](images/1osimodule.png)
+![OSI 参考模型](./images/1osimodule.png)
 
 OSI 模型，即开放式通信系统互联参考模型（Open Systems Interconnection Reference Model），国际标准化组织提出一个试图使各种计算机在世界范围内互连的网络标准框架，简称 OSI。由于 OSI 模型并没有提供可实现方法，只是概念描述，用来协调进程间通信。即 OSI 模型并不是标准，而是制定标准时所使用的概念性框架，事实上网络标准是 TCP/IP。
 
-![OSI 和 TCP/IP](images/2osicomparewithTCP-IPmodule.png)
+![OSI 和 TCP/IP](./images/2osicomparewithTCP-IPmodule.png)
 
 在开始正式介绍 MPI 之前，先解释 MPI 消息传递模型相关的核心概念，重要概念包括进程、通信器、秩和标签等。
 
@@ -45,20 +45,20 @@ OSI 模型，即开放式通信系统互联参考模型（Open Systems Interconn
 
 接受者可以发送一个接收特定标签标记的消息的请求（或者也可以完全不管标签，接收任何消息），然后依次处理接收到的数据。类似这样的涉及一个发送者以及一个接受者的通信被称作点对点通信。当然在很多情况下，某个进程可能需要跟所有其他进程通信。比如主进程想发一个广播给所有的从进程。在这种情况下，手动去写每一个进程分别进行点对点的信息传递就显得很笨拙，而且也会导致网络利用率低下，MPI 则有专门的接口处理这类所有进程间的集体通信。
 
->>>>>>>>>>>>>
+!!!!!!!!!!!!!!
 接受者这种说法很大模型，或者很翻译，直接用 sender/receiver 业界通用的叫法
 
 ## P2P 点对点通信
 
 点对点通信是在两个特定进程（一个发送者 sender，一个接收者 receiver）之间进行消息传递。这是最基本的通信模式，用于控制同步或者数据传输，如 MPI_Send 和 MPI_Recv 分别实现了用于发送数据和接收数据的逻辑。通信采用的方式是两个进程计算结束后，相互交换消息前需要请求访问，再进行下一阶段计算。
 
->>>>>>>>>>>>>>
+!!!!!!!!!!!!!!!!!!!!!
 图片命名要规范，不然图片太多没办法找对应的内容了
-![p2p 通信](images/3p2pcommunication.png)
+![p2p 通信](./images/3p2pcommunication.png)
 
 点对点通信分为同步和异步两种，同步阻塞 （Blocking）是发送/接收函数调用在消息操作（发送完成被对方接收/接收完成数据可用）安全完成之前不会返回，例如 MPI_Send 和 MPI_Recv。MPI_Send 返回意味进程发送数据结束，进程缓冲可以重用或覆盖，但不代表 Receiver 收到数据。MPI_Recv 返回意味着数据已经接收到进程的缓冲区，可以使用。
 
-![同步与异步](images/4blockingnon-blocking.png)
+![同步与异步](./images/4blockingnon-blocking.png)
 
 异步非阻塞（Non-blocking） 是发送/接收函数调用立即返回一个“请求句柄”，而实际的通信操作在后台进行。程序员随后需要使用 MPI_Wait 或 MPI_Test 等函数来查询或等待操作完成，例如 MPI_Isend 和 MPI_Irecv。非阻塞通信的意义在于进程发送或接收操作后马上返回，继续后续阶段的计算。当程序要求操作必须确认完成时，调用相应测试接口 MPI_Wait 阻塞等待操作完成。异步编程相对复杂，但使得计算和通信可以一定程度并行，降低数据同步带来的运行时开销，是实现通信与计算重叠、提高性能的关键。
 
@@ -66,7 +66,7 @@ OSI 模型，即开放式通信系统互联参考模型（Open Systems Interconn
 
 集体通信是在通信器内所有进程（或一个定义的子集）之间进行的协调操作，这些操作比用点对点操作手动实现更高效、更简洁。包括了一对多、多对一和多对多的通信方式，常用于一组进程之间的数据交换，包括通信、规约和同步三种类型。常见操作包括同步 (Barrier)、广播 (Broadcast)、收集 (Gather)、散播 (Scatter)、全局归约 (Reduce)、全归约 (Allreduce)、全收集 (Allgather)和扫描/前缀归约 (Scan/Prefix Reduction)。不同通信类型使用通信原语的方式进行表示，MPI 通信中不同函数名对应的含义如下表所示。
 
->>>>>>>>>>>>>>
+!!!!!!!!!!!!!!!!!!!!!
 表格用 markdown 的格式，方便 shpinx 渲染哈
 
 <table>
@@ -150,13 +150,13 @@ MPI_Bcast(array, 100, MPI_INT, root, comm);
 
 虽然每个进程都调用 MPI_Bcast，但根进程负责广播数据，其它进程接收数据。当进程调用 MPI_Bcast，执行的时候会把 MPI_Bcast 里面主进程的数据一一发送到对应的其它进程，或者其它卡上面的缓冲区。
 
-![MPI_Bcast 过程](images/5MPI_Bcast.png)
+![MPI_Bcast 过程](./images/5MPI_Bcast.png)
 
 MPI_Gather 行为与 MPI_Bcast 恰好相反，每个进程将数据发送给根进程。如下代码实现了一个典型数据聚合过程：
 
 如下图所示，当启动 MPI_Gather 时，每个进程（process 0~p-1）里面对应的数据全部汇聚到第一个进程中，也就是主进程（Root），通过 MPI_Bcast 和 MPI_Gather 可以看出 MPI 相关 API 所做的操作。
 
-![MPI_Gather 过程](images/6MPI_Gather.png)
+![MPI_Gather 过程](./images/6MPI_Gather.png)
 
 ```c
 MPI_Comm comm;
@@ -176,19 +176,19 @@ MPI 集合通信编程模式就是当每个程序独立完成计算后，到达�
 
 在 MPI 中有个很重要的概念就是同步（Barrier），在某些场景下，多个进程需要协调同步进入某个过程。MPI 提供了同步原语例如 MPI_Barrier，所有进程调用 MPI_Barrier，阻塞程序直到所有进程都开始执行这个接口，然后返回。同步的作用就是让所有进程确保 MPI_Barrier 之前的工作都已完成，同步进入下一个阶段。
 
-![Barrier](images/7Barrier.png)
+![Barrier](./images/7Barrier.png)
 
 ## MPI 程序运行
 
 MPI 程序编程模式为迭代式“计算 + 通信”，程序可以分为计算块和通信块。每个程序可以独立完成计算块，计算完成后进行交互（通信或同步）。交互后进入下一阶段计算，直到所有任务完成，程序退出。
 
-![MPI 程序编程模式](images/8MPIprogramming.png)
+![MPI 程序编程模式](./images/8MPIprogramming.png)
 
 以下是一个 MPI Hello World 程序，MPI 程序的第一步是引入 `include <mpi.h>` 这个头文件，主函数在进行 `MPI_Init` 的过程中，所有 MPI 的全局变量或者内部变量都会被创建。MPI_Comm_size 会返回 `MPI_COMM_WORLD` 这个通信器的大小，也就是当前 MPI 任务中所有的进程数目。
 
 `MPI_Comm_rank` 函数会返回通信器中当前进程的秩，MPI_Get_processor_name 会得到当前进程实际跑的时候所在的处理器名字，最后使用 `MPI_Finalize` 清除当前 MPI 环境。
 
->>>>>>>>>>>>>
+!!!!!!!!!!!!!!
 介绍函数的时候加上`xxxx()`这种符号，方便系统识别，如上
 
 ```c
@@ -239,9 +239,9 @@ clean:
 
 一个典型的 MPI 程序由用户程序部分（MPI User）链接 MPI 库（MPI Interface）构成，计算任务本身的算法实现、任务分解和合并实现在用户程序部分，与 MPI 无关，也不受 MPI 限制。因此 MPI 提供给开发者灵活性，实现了最小封装。
 
-![MPI 程序](images/9MPIInterface.png)
+![MPI 程序](./images/9MPIInterface.png)
 
-## 小结
+## 总结与思考
 
 MPI 是集合通信库 XCCL 的基础，其中包含了很多基本概念和基础 API 定义，OpenMPI 作为早期的开源集合通信库，定义了 P2P 通信、集合通信和对应的程序运行。通过对 MPI 相关定义和实现可以更好地理解之后英伟达的 NCCL 和华为的 HCCL。
 

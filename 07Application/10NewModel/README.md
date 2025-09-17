@@ -21,14 +21,14 @@
 | 新算法解读 | 2014.07 Mate-Llama3 深度解读  | [PPT](./20240724_LLAMA3.1.pdf), [视频](https://www.bilibili.com/video/BV1Xf421v7Go/) |
 | | | |
 | 新算法解读 | 2014.04 KIMI 长序列  | [PPT](./20240415_KIMI.pdf), [视频](https://www.bilibili.com/video/BV1Fx421D7Je/) |
-| 新算法解读 | 2015.01 KIMI-K1.5 深度解读 | [PPT](./20250203KIMIK1.5.pdf), [视频]() |
+| 新算法解读 | 2015.01 KIMI-K1.5 深度解读 | [PPT](./20250202KIMIK15.pdf), [视频](https://www.bilibili.com/video/BV1goNAecE5W/) |
 
 ## 备注
 
-文字课程开源在 [AIInfra](https://infrasys-ai.github.io/aiinfra-docs)，系列视频托管[B 站](https://space.bilibili.com/517221395)和[油管](https://www.youtube.com/@ZOMI666/playlists)，PPT 开源在[github](https://github.com/Infrasys-AI/AIInfra)，欢迎取用！！！
+文字课程开源在 [AI Infra](https://infrasys-ai.github.io/aiinfra-docs)，系列视频托管[B 站](https://space.bilibili.com/517221395)和[油管](https://www.youtube.com/@ZOMI666/playlists)，PPT 开源在[github](https://github.com/Infrasys-AI/AIInfra)，欢迎引用！
 
 > 非常希望您也参与到这个开源课程中，B 站给 ZOMI 留言哦！
 > 
-> 欢迎大家使用的过程中发现 bug 或者勘误直接提交代码 PR 到开源社区哦！
+> 欢迎发现 bug 或者勘误直接提交代码 PR 到社区哦！
 > 
 > 希望这个系列能够给大家、朋友们带来一些些帮助，也希望自己能够继续坚持完成所有内容哈！
