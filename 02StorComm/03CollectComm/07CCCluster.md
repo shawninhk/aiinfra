@@ -8,11 +8,11 @@ Author by: SingularityKChen
 
 ## Scale-Up 和 Scale-Out 的背景
 
-随着大模型参数规模不断增加，其对算力和内存的需求也与日俱增，对算力集群的规模需求也在不断增加：从千卡到十万卡再到
+随着大模型参数规模不断增加，其对算力和内存的需求也与日俱增，对算力集群的规模需求也在不断增加：从千卡到十万卡到百万卡规模。而构建这样巨大的算力集群，将各算力和存储池化，则需要通过 scale-up 和 scale-out 实现。
 
 ## XPU 卡间互联与 Scale-Up
 
-
+Scale-Up fabric 有以下要求：超低延迟和抖动、访存保序、非阻塞、带宽利用率高、无损、零软件开销等需求。
 
 ### PCIe 诞生的背景
 
@@ -32,18 +32,18 @@ Author by: SingularityKChen
 
 按照这个趋势，PCIe 8.0/9.0/10.0 标准将会在 2028 年、2031 年和 2034 年公布，其带宽将会增加到最高 4 TB/s。
 
-| PCI 版本         | 年份      | 传输速率     | 编码方式       | x1 单向带宽    | x16 双向总带宽 |
-| ------------ | ------- | -------- | ---------- | ---------- | --------- |
-| **PCI** | 1992    | 33 MHz | 32b/34b     | 113 MB/s   | --    |
-| **PCI 2.0** | 1993    | 66 MHz | 64b/66b     | 533 MB/s   | --    |
-| **PCIe 1.0** | 2003    | 2.5 GT/s | 8b/10b     | 256 MB/s   | 8 GB/s    |
-| **PCIe 2.0** | 2007    | 5.0 GT/s | 8b/10b     | 512 MB/s   | 16 GB/s   |
-| **PCIe 3.0** | 2010    | 8.0 GT/s | 128b/130b  | 1 GB/s   | 32 GB/s |
-| **PCIe 4.0** | 2017    | 16 GT/s  | 128b/130b  | 2 GB/s  | 64 GB/s   |
-| **PCIe 5.0** | 2019    | 32 GT/s  | 128b/130b  | 4 GB/s  | 128 GB/s  |
-| **PCIe 6.0** | 2022    | 64 GT/s  | PAM4 + FEC | 8 GB/s  | 256 GB/s  |
-| **PCIe 7.0** | 2025 | 128 GT/s | PAM4 + FEC | 16 GB/s | 512 GB/s  |
-| **PCIe 8.0** | 2028 | 256 GT/s | PAM16 | 32 GB/s | 1 TB/s  |
+| PCI 版本     | 年份 | 传输速率 | 编码方式   | x1 单向带宽 | x16 双向总带宽 |
+| ------------ | ---- | -------- | ---------- | ----------- | -------------- |
+| **PCI**      | 1992 | 33 MHz   | 32b/34b    | 113 MB/s    | --             |
+| **PCI 2.0**  | 1993 | 66 MHz   | 64b/66b    | 533 MB/s    | --             |
+| **PCIe 1.0** | 2003 | 2.5 GT/s | 8b/10b     | 256 MB/s    | 8 GB/s         |
+| **PCIe 2.0** | 2007 | 5.0 GT/s | 8b/10b     | 512 MB/s    | 16 GB/s        |
+| **PCIe 3.0** | 2010 | 8.0 GT/s | 128b/130b  | 1 GB/s      | 32 GB/s        |
+| **PCIe 4.0** | 2017 | 16 GT/s  | 128b/130b  | 2 GB/s      | 64 GB/s        |
+| **PCIe 5.0** | 2019 | 32 GT/s  | 128b/130b  | 4 GB/s      | 128 GB/s       |
+| **PCIe 6.0** | 2022 | 64 GT/s  | PAM4 + FEC | 8 GB/s      | 256 GB/s       |
+| **PCIe 7.0** | 2025 | 128 GT/s | PAM4 + FEC | 16 GB/s     | 512 GB/s       |
+| **PCIe 8.0** | 2028 | 256 GT/s | PAM16      | 32 GB/s     | 1 TB/s         |
 
 ### NVLink 诞生的背景
 
@@ -63,15 +63,19 @@ NVLink 原本只用于机箱内部通信。2022 年，Hopper 实现跨机箱的�
 
 下表总结了 NVLink 从诞生至今的时间线、性能指标和对应的 GPU 型号：
 
-| NVLink 代际 | 年份     | 单链路速率      | 最大链路数 | GPU 总带宽    | 对应 GPU 架构 / 型号 | NVSwitch 世代           | 关键改变 / 重新定位                                                                 |
-| --------- | ------ | ---------- | ----- | ---------- | -------------- | --------------------- | --------------------------------------------------------------------------- |
-| NVLink 1  | 2016   | 20 GB/s    | 4     | 80 GB/s    | Pascal P100    | 无（仅点对点）               | 首次量产化；支持链路成组叠带宽，确立“多链路聚合”范式                                                 |
-| NVLink 2  | 2017   | 25 GB/s    | 6     | 300 GB/s   | Volta V100     | NVSwitch v1（实验性）      | 与 IBM POWER9 实现 CPU↔GPU 直连；NVSwitch 首秀，把 NVLink 从点对点扩展为交换网络                 |
-| NVLink 3  | 2020   | 50 GB/s    | 12    | 600 GB/s   | Ampere A100    | NVSwitch v2，8 GPU 全互联 | 机内全互联工程化：6×NVSwitch 连接 8×A100，提升端口速率与拓扑整洁度                                  |
-| NVLink 4  | 2022   | 100 GB/s   | 18    | 900 GB/s   | Hopper H100    | NVSwitch v3，256 GPU   | NVLink Switch System 把域扩展到跨节点/机箱，最多 256×H100；引入 NVLink-C2C 实现 CPU↔GPU 片间一致性 |
-| NVLink 5  | 2024   | 200 GB/s   | 18    | 1.8 TB/s   | Blackwell B100 | NVSwitch v4，576 GPU   | 进入机柜级“单域”常态化：NVL72 单柜 72 GPU、域内 130 TB/s，总规模可达 576 GPU                      |
-| NVLink 6  | \~2026 | 400 GB/s\* | 18+   | 3.6 TB/s\* | Rubin（计划）      | NVSwitch v5（预期）       |  |
-| NVLink 7  | \~2028 | 800 GB/s\* | 18+   | 7.2 TB/s\* | Vera（计划）       | NVSwitch v6（预期）       |  |
+| NVLink 代际 | 年份   | 单链路速率 | 最大链路数 | GPU 总带宽 | 对应 GPU 架构 / 型号 | NVSwitch 世代             | 关键改变 / 重新定位                                                                                 |
+| ----------- | ------ | ---------- | ---------- | ---------- | -------------------- | ------------------------- | --------------------------------------------------------------------------------------------------- |
+| NVLink 1    | 2016   | 20 GB/s    | 4          | 80 GB/s    | Pascal P100          | 无（仅点对点）            | 首次量产化；支持链路成组叠带宽，确立“多链路聚合”范式                                                |
+| NVLink 2    | 2017   | 25 GB/s    | 6          | 300 GB/s   | Volta V100           | NVSwitch v1（实验性）     | 与 IBM POWER9 实现 CPU↔GPU 直连；NVSwitch 首秀，把 NVLink 从点对点扩展为交换网络                   |
+| NVLink 3    | 2020   | 50 GB/s    | 12         | 600 GB/s   | Ampere A100          | NVSwitch v2，8 GPU 全互联 | 机内全互联工程化：6×NVSwitch 连接 8×A100，提升端口速率与拓扑整洁度                                  |
+| NVLink 4    | 2022   | 100 GB/s   | 18         | 900 GB/s   | Hopper H100          | NVSwitch v3，256 GPU      | NVLink Switch System 把域扩展到跨节点/机箱，最多 256×H100；引入 NVLink-C2C 实现 CPU↔GPU 片间一致性 |
+| NVLink 5    | 2024   | 200 GB/s   | 18         | 1.8 TB/s   | Blackwell B100       | NVSwitch v4，576 GPU      | 进入机柜级“单域”常态化：NVL72 单柜 72 GPU、域内 130 TB/s，总规模可达 576 GPU                        |
+| NVLink 6    | \~2026 | 400 GB/s\* | 18+        | 3.6 TB/s\* | Rubin（计划）        | NVSwitch v5（预期）       |                                                                                                     |
+| NVLink 7    | \~2028 | 800 GB/s\* | 18+        | 7.2 TB/s\* | Vera（计划）         | NVSwitch v6（预期）       |                                                                                                     |
+
+### 其他 Scale-Up 协议
+
+除了 NVLink 之前，目前业内还有 ETH-X、OISA、SUE、UALink、UB 等协议。
 
 ## 节点间互联与 Scale-Out
 
