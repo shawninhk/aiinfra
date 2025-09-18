@@ -58,7 +58,7 @@ $$
 
 ## 专家专业化
 
-![Moe 前世今生](images/02MOEHistory_06.png)
+![Moe 前世今生](./images/02MOEHistory_06.png)
 
 对于这个架构的训练，也就是相应的代价函数和如何整合 experts 和 gating 的输出，作者提出了两种思路，“赋予关联学习竞争性”和“赋予竞争学习关联性”。
 

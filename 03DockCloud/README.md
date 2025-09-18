@@ -12,7 +12,7 @@ Author by: 张柯帆
 
 ## 课程位置
 
-![AIInfra](./images/arch01.png)
+![AI Infra](./images/arch01.png)
 
 ## 课程简介
 
@@ -20,7 +20,7 @@ xxx
 
 ## 课程知识
 
-![AIInfra](./images/arch02.png)
+![AI Infra](./images/arch02.png)
 
 ## 备注
 
@@ -28,4 +28,3 @@ xxx
 
 > 非常希望您参与到这个开源课程中，B 站给 ZOMI 留言哦！
 >
-> 欢迎发现 bug 或者勘误直接提交代码 PR 到社区哦！

@@ -32,7 +32,7 @@ Google Research 在 2017 年发布的《Outrageously Large Neural Networks: The 
 
 在 Google 的 1370 亿参数实现中，专家网络采用多层 LSTM 结构，每个专家约含 6800 万参数，共计 2048 个专家；宿主 RNN 负责处理跨时间步的序列依赖，而门控网络则基于输入动态选择每步激活的专家组合
 
-![Moe 前世今生](images/02MOERNN_01.png)
+![Moe 前世今生](./images/02MOERNN_01.png)
 
 如上所示，其设计核心采用**对称 LSTM-MoE-LSTM 结构**：
 

@@ -16,8 +16,8 @@
 ### SqueezeLLM
 
 ## 激活量化优化
-### ZeroQuant系列
+### ZeroQuant 系列
 
-### FP6量化
+### FP6 量化
 
 ### KV 缓存量化
