@@ -32,14 +32,14 @@ html_theme = "sphinx_book_theme"
 
 > 因为网络不稳定的问题，建议翻墙或者直接使用 github desktop 软件应用下载，使其支持断点下载项目。
 
-接着进入 AI Infra 目录下的 `build_books` 文件，并修改里面的源目录地址 `xxxxx/AI Infra` 和目标构建本地部署内容的地址 `xxxxx/AI Infra_BOOK`。
+接着进入 AI Infra 目录下的 `build_books` 文件，并修改里面的源目录地址 `xxxxx/AIInfra` 和目标构建本地部署内容的地址 `xxxxx/AIInfra_BOOK`。
 
 ```python
-target_dir1 = '/xxxxx/AI Infra/02Hardware'
-target_dir2 = '/xxxxx/AI Infra/03Compiler'
-target_dir3 = '/xxxxx/AI Infra/04Inference'
-target_dir4 = '/xxxxx/AI Infra/05Framework'
-dir_paths = '/xxxxx/AI Infra_BOOK/source/'
+target_dir1 = '/xxxxx/AIInfra/02Hardware'
+target_dir2 = '/xxxxx/AIInfra/03Compiler'
+target_dir3 = '/xxxxx/AIInfra/04Inference'
+target_dir4 = '/xxxxx/AIInfra/05Framework'
+dir_paths = '/xxxxx/AIInfra_BOOK/source/'
 
 getallfile(target_dir1)
 getallfile(target_dir2)

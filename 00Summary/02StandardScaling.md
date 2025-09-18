@@ -26,7 +26,7 @@ OpenAI 的 Kaplan et al.于 2020 年发表的论文[Scaling Laws for Neural Lang
 
 该研究的三大核心发现如下：
 
-![模型性能与计算量、数据集大小、模型规模之间的关系](images/01ScalingLaw01.png)
+![模型性能与计算量、数据集大小、模型规模之间的关系](./images/01ScalingLaw01.png)
 
 ### 2.1 数据集大小
 
@@ -70,11 +70,11 @@ $$
 
 因此，为最大化计算资源利用效率和训练时间价值，应当优先采用接近最优 batch size 的配置。
 
-![batch size](images/01ScalingLaw07.png)
+![batch size](./images/01ScalingLaw07.png)
 
 此外，如下图所示，在充分大 batch size 下，训练步长与模型性能间存在幂律关系，且此规律在不同参数规模的模型架构中均呈现一致性。
 
-![训练步长](images/01ScalingLaw08.png)
+![训练步长](./images/01ScalingLaw08.png)
 
 前面的结论成立有一个前提，就是不受其他因素限制，这在实际情况下很难成立。
 
@@ -82,11 +82,11 @@ $$
 
 下图展示了在固定数据集大小后，模型性能随模型规模变化的关系。可以看到，在 $D$ 为 21M 时，模型规模超过 $10^7$ 后，性能就不再有显著提升。而在 $D$ 为 22B 时，模型规模直到 $10^9$ 后，性能依然在持续提升。
 
-![模型参数与数据](images/01ScalingLaw03.png)
+![模型参数与数据](./images/01ScalingLaw03.png)
 
 类似的，下图展示了在固定模型规模后，模型性能随数据集大小变化的关系。可以看到，在 $N$ 为393.2K时，训练数据超过 $10^8$ 后，性能就不再有显著提升。而在 $N$ 为708M时，训练数据超过 $10^{10}$ 后，性能依然在持续提升。
 
-![模型参数与数据](images/01ScalingLaw05.png)
+![模型参数与数据](./images/01ScalingLaw05.png)
 
 建议在给定 $C$ 时，模型与数据应符合如下比例： $N_{opt} \propto C^{0.74}, D_{opt} \propto C^{0.27}$ 。
 
@@ -96,7 +96,7 @@ $$
 
 如下图所示，深蓝色代表小模型，浅黄色代表大模型。可以看出，如果要达到相同的 loss，大模型比小模型需要更少的训练轮次（tokens processed）。
 
-![样本效率](images/01ScalingLaw02.png)
+![样本效率](./images/01ScalingLaw02.png)
 
 ### 2.4 其他因素
 
@@ -109,7 +109,7 @@ Kaplan et al.发现只要学习率不是太小且衰减不要太快，学习率�
 
 不过后续研究[Predictable Scale: Part I, Step Law – Optimal Hyperparameter Scaling Law in Large Language Model Pre-training](https://arxiv.org/abs/2503.04715)比较了不同的最优学习率和 batch size，并提出了自己的改进方案。
 
-![最优学习率和 batch size](images/01ScalingLaw09.png)
+![最优学习率和 batch size](./images/01ScalingLaw09.png)
 
 #### 模型结构
 
@@ -123,7 +123,7 @@ Kaplan et al.发现只要学习率不是太小且衰减不要太快，学习率�
 
 通过对比 Token 4/8 < Token 4/1024，发现在相同绝对位置上，较短上下文中的 token 损失更小。对比 Token 1024/1024 < Token 8/8，发现在相同相对位置上，较长上下文中的 token 损失更小。
 
-![上下文长度](images/01ScalingLaw11.png)
+![上下文长度](./images/01ScalingLaw11.png)
 
 #### 数据分布偏移
 
@@ -131,7 +131,7 @@ Kaplan et al.发现只要学习率不是太小且衰减不要太快，学习率�
 
 Kaplan et al.发现模型在域外数据上的性能相比于训练集会出现固定幅度的下降，但整体表现仍大致与其在训练集上的性能成正比。如下图所示，模型是在 WebText2 上训练的，在其他数据集上测试时，loss 有一定程度的上移。
 
-![数据分布偏移](images/01ScalingLaw12.png)
+![数据分布偏移](./images/01ScalingLaw12.png)
 
 然而在真实场景下，源于分布偏移的知识缺失依然会对使用体验造成明显影响。
 
@@ -142,14 +142,14 @@ Kaplan et al.发现模型在域外数据上的性能相比于训练集会出现�
 如图所示，作者采用了三种不同方法来研究在固定的 FLOPs 预算下，应该如何权衡模型大小和训练标记数，并得出一个关键结论：当时的大型模型普遍存在训练不足的问题。这一发现也解释了为何在 2021 年，许多研究者在尝试复现 GPT-3 时未能取得理想的成果。
 为了验证这一结论，作者用更多的训练数据训练了一个参数量更小的模型 Chinchilla (70B)。尽管 Chinchilla 的模型规模远小于 Gopher (280B)、GPT-3 (175B)、Jurassic-1 (178B) 和 Megatron-Turing NLG (530B) 等模型，但实验结果表明，它在众多下游任务中的表现反而更胜一筹。
 
-![叠加预测](images/01ScalingLaw06.png)
-![叠加预测](images/01ScalingLaw13.png)
+![叠加预测](./images/01ScalingLaw06.png)
+![叠加预测](./images/01ScalingLaw13.png)
 
 ### 3.1 固定模型大小，改变训练token数量
 
 在第一种方法中，作者改变了一系列模型（参数量从 7000 万到超过 100 亿）的训练步数。
 
-![叠加预测](images/01ScalingLaw14.png)
+![叠加预测](./images/01ScalingLaw14.png)
 
 ### 3.2 IsoFLOP 配置
 

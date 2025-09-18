@@ -1,7 +1,6 @@
 # 语音模型基础
 
 > Author by: 李长康
-> 
 
 ## 引言：语音生成流程
 
@@ -152,7 +151,7 @@ $$
     - **WaveNet (2016):** DeepMind 提出的里程碑式声码器。它使用**因果卷积 (Causal Convolution)** 直接在原始波形空间进行建模，通过自回归方式逐点生成音频采样。其生成的语音音质极高，但推理速度极慢。
     - **Parallel WaveGAN / HiFi-GAN (2019-2021):** 基于**生成对抗网络 (GAN)** 的声码器。生成器网络根据梅尔频谱图生成波形，判别器网络则负责判断生成的波形是真是假。通过这种对抗训练，HiFi-GAN 等模型能够生成高质量的语音，并且实现了**并行推理**，在音质和速度上取得了良好的平衡。
 
-![image.png](images/intro06.png)
+![image.png](./images/intro06.png)
 
 #### 单阶段端到端模型 (Single-Stage End-to-End)
 

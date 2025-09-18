@@ -18,11 +18,11 @@ MPI（Message Passing Interface）是一个跨语言的通讯协议，是高性�
 
 MPI 与 TCP/IP 网络协议本身没有直接关系，OSI 参考模型包括应用层、表示层、会话层、传输层、网络层、数据链路层和物理层，一共 7 层。在 TCP/IP 网络协议中只要 4 层，MPI 属于 OSI 参考模型第五层或者更高，MPI 实现可以通过传输层 sockets 和 TCP，大部分 MPI 实现由指定 API 组成。
 
-![OSI 参考模型](images/1osimodule.png)
+![OSI 参考模型](./images/1osimodule.png)
 
 OSI 模型，即开放式通信系统互联参考模型（Open Systems Interconnection Reference Model），国际标准化组织提出一个试图使各种计算机在世界范围内互连的网络标准框架，简称 OSI。由于 OSI 模型并没有提供可实现方法，只是概念描述，用来协调进程间通信。即 OSI 模型并不是标准，而是制定标准时所使用的概念性框架，事实上网络标准是 TCP/IP。
 
-![OSI 和 TCP/IP](images/2osicomparewithTCP-IPmodule.png)
+![OSI 和 TCP/IP](./images/2osicomparewithTCP-IPmodule.png)
 
 在开始正式介绍 MPI 之前，先解释 MPI 消息传递模型相关的核心概念，重要概念包括进程、通信器、秩和标签等。
 
@@ -54,11 +54,11 @@ OSI 模型，即开放式通信系统互联参考模型（Open Systems Interconn
 
 !!!!!!!!!!!!!!!!!!!!!
 图片命名要规范，不然图片太多没办法找对应的内容了
-![p2p 通信](images/3p2pcommunication.png)
+![p2p 通信](./images/3p2pcommunication.png)
 
 点对点通信分为同步和异步两种，同步阻塞 （Blocking）是发送/接收函数调用在消息操作（发送完成被对方接收/接收完成数据可用）安全完成之前不会返回，例如 MPI_Send 和 MPI_Recv。MPI_Send 返回意味进程发送数据结束，进程缓冲可以重用或覆盖，但不代表 Receiver 收到数据。MPI_Recv 返回意味着数据已经接收到进程的缓冲区，可以使用。
 
-![同步与异步](images/4blockingnon-blocking.png)
+![同步与异步](./images/4blockingnon-blocking.png)
 
 异步非阻塞（Non-blocking） 是发送/接收函数调用立即返回一个“请求句柄”，而实际的通信操作在后台进行。程序员随后需要使用 MPI_Wait 或 MPI_Test 等函数来查询或等待操作完成，例如 MPI_Isend 和 MPI_Irecv。非阻塞通信的意义在于进程发送或接收操作后马上返回，继续后续阶段的计算。当程序要求操作必须确认完成时，调用相应测试接口 MPI_Wait 阻塞等待操作完成。异步编程相对复杂，但使得计算和通信可以一定程度并行，降低数据同步带来的运行时开销，是实现通信与计算重叠、提高性能的关键。
 
@@ -150,13 +150,13 @@ MPI_Bcast(array, 100, MPI_INT, root, comm);
 
 虽然每个进程都调用 MPI_Bcast，但根进程负责广播数据，其它进程接收数据。当进程调用 MPI_Bcast，执行的时候会把 MPI_Bcast 里面主进程的数据一一发送到对应的其它进程，或者其它卡上面的缓冲区。
 
-![MPI_Bcast 过程](images/5MPI_Bcast.png)
+![MPI_Bcast 过程](./images/5MPI_Bcast.png)
 
 MPI_Gather 行为与 MPI_Bcast 恰好相反，每个进程将数据发送给根进程。如下代码实现了一个典型数据聚合过程：
 
 如下图所示，当启动 MPI_Gather 时，每个进程（process 0~p-1）里面对应的数据全部汇聚到第一个进程中，也就是主进程（Root），通过 MPI_Bcast 和 MPI_Gather 可以看出 MPI 相关 API 所做的操作。
 
-![MPI_Gather 过程](images/6MPI_Gather.png)
+![MPI_Gather 过程](./images/6MPI_Gather.png)
 
 ```c
 MPI_Comm comm;
@@ -176,13 +176,13 @@ MPI 集合通信编程模式就是当每个程序独立完成计算后，到达�
 
 在 MPI 中有个很重要的概念就是同步（Barrier），在某些场景下，多个进程需要协调同步进入某个过程。MPI 提供了同步原语例如 MPI_Barrier，所有进程调用 MPI_Barrier，阻塞程序直到所有进程都开始执行这个接口，然后返回。同步的作用就是让所有进程确保 MPI_Barrier 之前的工作都已完成，同步进入下一个阶段。
 
-![Barrier](images/7Barrier.png)
+![Barrier](./images/7Barrier.png)
 
 ## MPI 程序运行
 
 MPI 程序编程模式为迭代式“计算 + 通信”，程序可以分为计算块和通信块。每个程序可以独立完成计算块，计算完成后进行交互（通信或同步）。交互后进入下一阶段计算，直到所有任务完成，程序退出。
 
-![MPI 程序编程模式](images/8MPIprogramming.png)
+![MPI 程序编程模式](./images/8MPIprogramming.png)
 
 以下是一个 MPI Hello World 程序，MPI 程序的第一步是引入 `include <mpi.h>` 这个头文件，主函数在进行 `MPI_Init` 的过程中，所有 MPI 的全局变量或者内部变量都会被创建。MPI_Comm_size 会返回 `MPI_COMM_WORLD` 这个通信器的大小，也就是当前 MPI 任务中所有的进程数目。
 
@@ -239,7 +239,7 @@ clean:
 
 一个典型的 MPI 程序由用户程序部分（MPI User）链接 MPI 库（MPI Interface）构成，计算任务本身的算法实现、任务分解和合并实现在用户程序部分，与 MPI 无关，也不受 MPI 限制。因此 MPI 提供给开发者灵活性，实现了最小封装。
 
-![MPI 程序](images/9MPIInterface.png)
+![MPI 程序](./images/9MPIInterface.png)
 
 ## 总结与思考
 

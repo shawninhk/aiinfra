@@ -18,7 +18,7 @@ title: AI Infra
 
 本开源项目主要是跟大家一起探讨和学习人工智能、深度学习的系统设计，而整个系统是围绕着在 NVIDIA、ASCEND 等芯片厂商构建算力层面，所用到的、积累、梳理得到大模型系统全栈的内容。希望跟所有关注 AI 开源项目的好朋友一起探讨研究，共同促进学习讨论。
 
-![大模型系统全栈架构图](images/01Introduction/03Architecture03.png)
+![大模型系统全栈架构图](./images/01Introduction/03Architecture03.png)
 
 # 课程内容大纲
 
@@ -183,10 +183,8 @@ title: AI Infra
 
 ## 备注
 
-文字课程开源在 [AI Infra](https://chenzomi12.github.io/)，系列视频托管[B 站](https://space.bilibili.com/517221395)和[油管](https://www.youtube.com/@ZOMI666/playlists)，PPT 开源在[github](https://github.com/chenzomi12/AI Infra)，欢迎引用！
+文字课程开源在 [AI Infra](https://chenzomi12.github.io/)，系列视频托管[B 站](https://space.bilibili.com/517221395)和[油管](https://www.youtube.com/@ZOMI666/playlists)，PPT 开源在[github](https://github.com/chenzomi12/AIInfra)，欢迎引用！
 
 > 非常希望您也参与到这个开源项目中，B 站给 ZOMI 留言哦！
-> 
-> 欢迎发现 bug 或者勘误直接提交代码 PR 到社区哦！
 >
-> 请大家尊重开源和 ZOMI 的努力，引用 PPT 的内容请规范转载标明出处哦！
+> 请大家尊重开源和 ZOMI 和贡献者的努力，引用 PPT 的内容请规范转载标明出处哦！

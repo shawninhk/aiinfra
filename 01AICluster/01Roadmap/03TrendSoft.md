@@ -35,7 +35,7 @@ OpenMP 由 OpenMP Architecture Review Board 牵头制定，是共享内存并行
 
 通俗来讲，OpenMP 能实现跨平台多线程：主线程（顺序执行指令）生成多个子线程，将任务分配给它们并行运行，由运行时环境将线程分配到不同处理器。
 
-![Fortran 和 OpenMP](images/03TrendSoft01.png)
+![Fortran 和 OpenMP](./images/03TrendSoft01.png)
 
 ### 发展历程：异构编译时代（2010s-至今）
 
@@ -73,7 +73,7 @@ oneAPI 的体系架构为开发者提供统一开放的多架构开发环境，S
 
 毕昇融合编译器则实现鲲鹏、昇腾 AI 等多算力的融合统一编译优化，通过编译算法优化与处理器架构深度协同，强化自动向量化、循环优化、多面体优化等能力，标准 Benchmark 峰值性能提升 30%。目前，毕昇 C++结合毕昇编译器，已与 10 多所高校及研究机构合作，在飞机噪声仿真、湍流仿真、地震模拟等领域开展多样算力应用开发——比如基于鲲鹏+昇腾 AI 多样性计算架构实现飞机噪声仿真，开发效率翻倍，混合精度求解性能提升 10 倍以上。此外，在 CANN 异构计算架构下，毕昇编译器还提供异构编程编译能力。
 
-![CUDA 异构编译器和 CANN 下毕昇编译器](images/03TrendSoft02.png)
+![CUDA 异构编译器和 CANN 下毕昇编译器](./images/03TrendSoft02.png)
 
 ### 未来趋势
 
@@ -109,7 +109,7 @@ Triton 是开源 GPU 编程语言与编译器，旨在平衡 AI 模型训练中 
 
 Triton 的整体架构是这样的：Triton 围绕“分块（tile）”概念构建，包含 Triton-C（基于 C 的语言，用参数化分块变量表达张量程序）与 Triton-IR（基于 LLVM 的中间表示）；通过分块级优化将程序编译为高效 GPU 代码，其中 Triton-C 为转编译器与 GPU 开发者提供稳定接口，Triton-IR 支持分块级数据流与控制流分析；最后由 Triton-JIT 编译器通过机器无关与机器相关优化，结合自动调谐引擎，生成目标硬件的高效机器码。
 
-![Triton 过程](images/03TrendSoft03.png)
+![Triton 过程](./images/03TrendSoft03.png)
 
 
 ## 计算库：从基础数学到领域专用
@@ -130,7 +130,7 @@ BLAS（Basic Linear Algebra Subprograms，基础线性代数程序集）则是 A
 
 FFTW（The Fastest Fourier Transform in the West）是麻省理工学院超级计算技术组开发的离散傅里叶变换（DFT）计算库，以开源、高效、标准 C 语言编写为特点，应用广泛——英特尔数学库、Scilib（类 Matlab 科学计算软件）均采用 FFTW 处理 FFT 计算。在天文信号处理、气候模拟、医学 MRI 成像、量子计算模拟等超大规模数据场景中，FFTW 可支持 10M~100M 点的千万级数据计算。
 
-![经典数学库](images/03TrendSoft04.png)
+![经典数学库](./images/03TrendSoft04.png)
 
 ### 发展历程：领域专用库（2010s 至今）
 
@@ -147,7 +147,7 @@ AI 加速领域，NVIDIA 的 cuDNN（CUDA Deep Neural Network Library）是专�
 
 聚焦国内，华为 CANN（Compute Architecture for Neural Networks，神经网络计算架构）是面向 AI 计算的全栈软件平台，旨在高效发挥昇腾（Ascend）AI 处理器 NPU（如昇腾 910/310）的异构计算能力。其核心组件 AI 算子库（Operator Library）为深度学习训练与推理提供高度优化的计算算子，是昇腾生态的关键基础设施。下图展示华为 CANN 的架构组成。
 
-![英特尔 oneDNN 和华为 CANN](images/03TrendSoft05.png)
+![英特尔 oneDNN 和华为 CANN](./images/03TrendSoft05.png)
 
 ### NVIDIA CUDA 计算库
 
@@ -188,7 +188,7 @@ AI 加速领域，NVIDIA 的 cuDNN（CUDA Deep Neural Network Library）是专�
 
 下图展示 CUDA 计算库的整体生态。
 
-![CUDA 计算库](images/03TrendSoft06.png)
+![CUDA 计算库](./images/03TrendSoft06.png)
 
 ### 未来趋势
 
@@ -229,7 +229,7 @@ NAS 与 SAN 均支持集中存储与多主机共享，但 NAS 基于以太网，
 
 下图对比 NAS 与 SAN 的架构差异。
 
-![NAS 和 SAN](images/03TrendSoft07.png)
+![NAS 和 SAN](./images/03TrendSoft07.png)
 
 ### 发展历程 2：并行文件系统（2010s-至今）
 
@@ -244,7 +244,7 @@ Lustre 是由 Intel 主导的开源高性能面向对象并行文件系统，广
 
 Ceph 与 Gluster 是 Red Hat 旗下的成熟开源存储产品。Ceph 基于 RADOS 对象存储系统，通过系列 API 以块、文件、对象形式提供数据服务，拓扑围绕副本与信息分布设计，保障数据完整性。Gluster 由 Brick Server（存储节点）、Client（客户端）、NAS 网关组成，三者可部署于同一物理服务器；卷（Block）通过 Client 或 NAS 网关的卷管理器提供服务，卷管理器管理集群中多个 Brick Server；存储节点对外提供的服务目录称为 Brick，对应本地文件系统，Gluster 以 Brick 为单位管理存储。下图展示 Ceph 的系统架构。
 
-![Lustre 和 Ceph](images/03TrendSoft08.png)
+![Lustre 和 Ceph](./images/03TrendSoft08.png)
 
 #### 国产突破：DeepSeek 3FS 的 MoE 成本优化
 
@@ -284,7 +284,7 @@ Gather 是采集数据的原语，MPI_Gather 让所有进程将数据发送给�
 
 Intel MPI 与 Open MPI 是主流 MPI 实现，均支持多操作系统，但优化重点不同。Intel MPI 由英特尔开发，在 Intel 处理器与架构集群上性能突出，提供高级优化与调试功能，在 Windows、Linux、Mac OS 上均有良好表现，尤其在 Intel 处理器系统上有额外优化。Open MPI 是开源高性能库，支持多硬件架构，在共享内存 Linux 系统上表现优异，支持单副本优化；针对 Mellanox InfiniBand 的 Linux 系统，其在支持 MPI-3 或 MPI_THREAD_MULTIPLE 的发行版上性能良好，开源特性与跨平台支持是其核心优势。
 
-![MPI](images/03TrendSoft09.png)
+![MPI](./images/03TrendSoft09.png)
 
 #### 性能优化：RDMA 的微秒级延迟
 
@@ -305,7 +305,7 @@ UCX 针对 RDMA 的优化包括：自动选择最优传输层与设备（在多�
 
 其中 OpenSHMEM 是单程序多数据（SPMD）编程模型，强调单边通信与数据移动-同步解耦，是高性能可扩展通信与同步程序的库；其程序由松散同步的处理单元（PE）组成，所有 PE 同时启动执行相同程序，在子域操作并周期性通信。PGAS 是数据并行模型，地址空间全局统一，并行工作聚焦数据集操作——数据集常组织为数组、数立方等结构，任务操作不同分区；共享内存架构下任务通过全局内存存取数据，分布式架构下全局数据物理或逻辑分割，代表实现包括 Coarray Fortran（Fortran 95 扩展，编译器相关）、Unified Parallel C（UPC，C 语言扩展，编译器相关）。
 
-![OpenSHMEM 和 PGAS 编程模型](images/03TrendSoft10.png)
+![OpenSHMEM 和 PGAS 编程模型](./images/03TrendSoft10.png)
 
 #### 云原生通信：gRPC 与 RDMA 的结合
 
@@ -361,7 +361,7 @@ SGE 是 Sun Microsystems 开发的一款开源集群调度系统，它能够管�
 
 PBS 是一个可移植的批处理作业调度系统，它能够在不同的操作系统和硬件平台上运行。PBS 支持多种作业调度策略和资源管理功能，如作业优先级、作业依赖、资源预留等。由于其良好的可移植性和稳定性，PBS 在工业制造业等领域得到了广泛应用。
 
-![集群调度系统](images/03TrendSoft11.png)
+![集群调度系统](./images/03TrendSoft11.png)
 
 ### 发展历程：现代调度系统（2010s 至今）  
 
@@ -371,7 +371,7 @@ Slurm 工作调度工具是面向 Linux 和 Unix 类似内核的免费和开源�
 #### 云原生调度：Kubernetes 通过插件扩展支持 HPC 混合负载，实现容器化任务弹性伸缩。
 近几年，随着大数据和人工智能技术的迅猛发展，AI 应用场景日益丰富，成为推动产业升级的重要驱动力。云计算作为 AI 发展的坚实基础，提供了强大的计算资源和灵活的部署环境。Kubernetes 作为云原生领域的旗舰项目，凭借其出色的可扩展性、高可用性和自动化能力，成为了管理云原生应用的事实标准。在 AI 领域的 GPU 作为加速计算的利器，在云计算里调度 GPU 资源是 AI 计算应用的要求。云原生编排系统 Kubernetes 凭借其强大的资源调度能力，为 GPU 资源的管理提供了高效可靠的解决方案。Kubernetes Device Plugin 是 Kubernetes 中的一种标准化资源扩展机制，将特殊硬件（如 GPU、FPGA）作为可调度资源集成到 Kubernetes 的资源管理框架中。对于 NVIDIA GPU，Device Plugin 充当了连接 Kubernetes 调度器与底层 GPU 硬件的桥梁，负责发现、注册和管理 GPU 资源，使工作负载能够无缝利用 GPU 提供的计算能力。
 
-![Slurm 和 K8S](images/03TrendSoft12.png)
+![Slurm 和 K8S](./images/03TrendSoft12.png)
 
 
 ### 未来趋势
@@ -449,7 +449,7 @@ WRF 和 MM5 都是开源的、广泛使用的中尺度数值天气预报模型�
 
 到 2000 年后，可复用开源框架出现，行业专家和高性能计算开发者协同优化出行业软件。
 
-![复用开源框架](images/03TrendSoft13.png)
+![复用开源框架](./images/03TrendSoft13.png)
 
 ### 阶段 3：多学科融合与 AI 赋能（2020s-至今）
 
@@ -481,7 +481,7 @@ WRF 和 MM5 都是开源的、广泛使用的中尺度数值天气预报模型�
 
 汽车碰撞测试正经历以混合精度计算为核心的范式变革，即在保持高精度（FP64）进行关键物理验证的同时，利用半精度（FP16）高效训练融合物理规律的安全 AI 模型，以实现极速的虚拟安全测试。这一变革依托于现代化的工具链集成：传统显式有限元分析标杆 LS-DYNA 负责高保真碰撞物理仿真，而基于 NVIDIA Modulus 等物理 AI 框架构建的神经网络则学习并内化物理规律，最终形成能够替代部分仿真的高效代理模型，成千上万次地加速安全测试与优化迭代
 
-![工程制造](images/03TrendSoft14.png)
+![工程制造](./images/03TrendSoft14.png)
 
 #### 行业应用 3：地球科学领域
 
@@ -493,7 +493,7 @@ WRF 和 MM5 都是开源的、广泛使用的中尺度数值天气预报模型�
 
 油气勘探行业的核心趋势是广泛采用全波形反演（FWI） 这一高精度地下成像技术，以获取更准确的速度模型。为克服其巨大的计算与通信开销，性能瓶颈正通过两大创新得以突破：一方面引入通信避免算法（CA-FWI），极大降低大规模并行计算中的同步与数据交换代价；另一方面充分利用 GPU 中的 Tensor Core 对计算密集的波场重建过程进行混合精度加速，使完成高分辨率反演所需时间从数周缩短至数天，大幅提升勘探效率。
 
-![地球科学领域](images/03TrendSoft15.png)
+![地球科学领域](./images/03TrendSoft15.png)
 
 ## 总结与思考
 

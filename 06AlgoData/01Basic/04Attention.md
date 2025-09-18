@@ -25,7 +25,7 @@ Self-Attention 是 Transformer 的核心组件，它允许序列中的每个位�
 
 ### 2.1 基本原理
 
-![SelfAttention](images/SelfAttention01.png)
+![SelfAttention](./images/SelfAttention01.png)
 
 对于每个输入向量 a, 经过蓝色部分 self-attention 之后都输出一个向量 b, **这个向量 b 是考虑所有输入向量对 a1 产生的影响**才得到, 
 
@@ -220,7 +220,7 @@ def create_causal_mask(seq_len):
 
 ### 4.3 掩码效果
 
-![掩码注意力机制](images/MaskAttention.png)
+![掩码注意力机制](./images/MaskAttention.png)
 
 图中显示，掩码确保每个位置只能关注到它之前的位置，保持了生成过程的因果性。
 
