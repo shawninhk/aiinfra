@@ -18,7 +18,7 @@ Author by: 张柯帆
 
 想象一下，我们有多个只读的目录层（lower directories）和一个可写的目录层（upper directory）。UFS 会将它们“堆叠”起来：
 
-![UFS](images/03Image01.webp)
+![UFS](./images/03Image01.webp)
 
 *   当读取文件时，UFS 会从最上层的可写层开始查找。如果找到，则直接返回。如果找不到，则逐层向下到只读层查找。
 *   当修改文件时，如果文件位于下层的只读层，U.S. 会触发 **写时复制 (Copy-on-Write, CoW)** 机制。它会先将只读文件**复制**到最上层的可写层，然后再对这个副本进行修改。原始的只读文件保持不变。
@@ -31,7 +31,7 @@ Author by: 张柯帆
 
 AUFS，作为 UnionFS 的一个重要分支和重新实现，是早期 Docker 能够迅速崛起的关键技术功臣。尽管它从未被正式合入 Linux 内核主线，但这并不妨碍我们对其设计思想和实现细节进行深入探讨。
 
-![AUFS](images/03Image02.jpg)
+![AUFS](./images/03Image02.jpg)
 
 #### 架构与原理
 
@@ -59,7 +59,7 @@ AUFS 最大的问题，也是其最终被 OverlayFS 取代的根本原因，是*
 
 OverlayFS 的设计哲学与 AUFS 有显著不同，它更加贴近 VFS（虚拟文件系统）的通用模型，实现也更为简洁优雅。
 
-![overlay](images/03Image03.jpg)
+![overlay](./images/03Image03.jpg)
 
 #### 架构与核心组件
 
