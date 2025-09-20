@@ -1,6 +1,6 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# 04.LoRA 算法原理与技术
+# 04.参数高效微调算法原理
 
 > Author by: 李亚鹏
 
