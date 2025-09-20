@@ -234,13 +234,14 @@ class PipelineParallel1F1B(nn.Module):
             print(f"[1F1B 调度] 微批次{reverse_mb_idx:2d}反向计算 | 损失: {loss.item():.4f}")
 
         # 返回所有微批次的平均损失
-        return total_loss / self.num_microbatches
+        avg_loss = total_loss / self.num_microbatches if self.num_microbatches > 0 else 0.0
+        return torch.tensor(avg_loss, requires_grad=True)
 ```
 
 1F1B 调度的核心思想是在流水线中交替执行前向传播和反向传播，而不是先完成所有前向传播再进行反向传播。这种策略有两个主要优势：
 
-1. 减少内存使用：不需要存储所有微批次的前向传播中间结果
-2. 降低空泡率：通过更早开始反向传播，减少设备空闲时间
+1. **减少内存使用**：不需要存储所有微批次的前向传播中间结果
+2. **降低空泡率**：通过更早开始反向传播，减少设备空闲时间
 
 ## 6. Interleaved 1F1B 调度策略实现
 
@@ -248,6 +249,127 @@ Interleaved 1F1B 调度是一种改进的 1F1B 调度策略，它通过交替执
 
 ![](./images/Code03Pipeline04.png)
 
+```python
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from typing import List
+
+class PipelineParallelInterleaved1F1B(nn.Module):
+    """
+    Interleaved 1F1B 调度策略的 Pipeline 并行（修正版）
+    核心思想：
+      - 每个物理设备运行多个“虚拟阶段”，交错处理不同微批次
+      - 前向和反向紧密交错，压缩流水线气泡
+      - 微批次数 M 应 >= 总虚拟阶段数 V = S * K（S=物理阶段数，K=虚拟倍数）
+    """
+    def __init__(self, module_list: List[nn.Module], device_ids: List[int], num_microbatches: int, virtual_pipeline_size: int = 2):
+        super().__init__()
+        assert len(module_list) == len(device_ids), "物理阶段数必须等于设备数"
+        self.physical_stages = nn.ModuleList(module_list)
+        self.device_ids = device_ids
+        self.num_microbatches = num_microbatches
+        self.num_physical_stages = len(self.physical_stages)
+        self.virtual_pipeline_size = virtual_pipeline_size
+        self.total_virtual_stages = self.num_physical_stages * virtual_pipeline_size
+
+        # 验证微批次数量是否满足交织条件（简化：要求 M >= V）
+        assert num_microbatches >= self.total_virtual_stages, \
+            f"微批次数量{num_microbatches}需 >= 总虚拟阶段数{self.total_virtual_stages}"
+
+        for i, (stage, dev) in enumerate(zip(self.physical_stages, device_ids)):
+            self.physical_stages[i] = stage.to(dev)
+            print(f"[Interleaved 初始化] 物理阶段 {i} 已部署到设备: {dev}")
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Interleaved 1F1B 调度核心逻辑：
+          - 输入被切分为多个微批次，每个微批次被分配到不同的设备
+        """
+        micro_batches = torch.chunk(x, self.num_microbatches, dim=0)
+        if len(micro_batches) != self.num_microbatches:
+            raise ValueError("输入无法均匀划分为指定微批次")
+
+        physical_outputs = [[None for _ in range(self.num_microbatches)]
+                        for _ in range(self.num_physical_stages)]
+
+        forward_progress = [0] * self.num_microbatches  # mb_id -> next vs_id to forward
+        backward_progress = [self.total_virtual_stages] * self.num_microbatches
+
+        total_timesteps = self.num_microbatches + self.total_virtual_stages - 1
+        print(f"[Interleaved 1F1B] 总时间步数: {total_timesteps}, 虚拟阶段数: {self.total_virtual_stages}")
+
+        total_loss = 0.0
+        loss_count = 0
+
+        for timestep in range(total_timesteps):
+            # ================= 前向传播 =================
+            for vs_id in range(self.total_virtual_stages):
+                mb_id = timestep - vs_id
+                if mb_id < 0 or mb_id >= self.num_microbatches:
+                    continue
+                if forward_progress[mb_id] != vs_id:
+                    continue
+
+                physical_stage_id = vs_id % self.num_physical_stages
+                device = self.device_ids[physical_stage_id]
+                stage = self.physical_stages[physical_stage_id]
+
+                if physical_stage_id == 0:
+                    input_tensor = micro_batches[mb_id].to(device)
+                else:
+                    # 从上一个物理阶段获取输出
+                    prev_physical_stage = physical_stage_id - 1
+                    prev_output = physical_outputs[prev_physical_stage][mb_id]
+                    if prev_output is None:
+                        continue  # 依赖未就绪，跳过
+                    input_tensor = prev_output.to(device)
+
+                # 执行前向
+                input_tensor.requires_grad_(True)
+                with torch.set_grad_enabled(True):
+                    output_tensor = stage(input_tensor)
+
+                physical_outputs[physical_stage_id][mb_id] = output_tensor
+                forward_progress[mb_id] += 1
+
+                print(f"  时间步{timestep:2d} | 微批次{mb_id:2d} | 虚拟阶段{vs_id:2d} (物理{physical_stage_id}) | 输入形状: {tuple(input_tensor.shape)} → 输出形状: {tuple(output_tensor.shape)}")
+
+                # 如果是最后一个虚拟阶段，准备触发反向
+                if vs_id == self.total_virtual_stages - 1:
+                    backward_progress[mb_id] = vs_id
+
+            # ================= 反向传播 =================
+            for mb_id in range(self.num_microbatches):
+                vs_id = backward_progress[mb_id]
+                if vs_id >= self.total_virtual_stages or vs_id < 0:
+                    continue
+
+                physical_stage_id = vs_id % self.num_physical_stages
+                device = self.device_ids[physical_stage_id]
+
+                output_tensor = physical_outputs[physical_stage_id][mb_id]
+                if output_tensor is None:
+                    continue
+
+                if vs_id == self.total_virtual_stages - 1:
+                    label = torch.randint(0, 10, (output_tensor.shape[0],), device=device)
+                    loss = F.cross_entropy(output_tensor, label)
+                    total_loss += loss.item()
+                    loss_count += 1
+                    loss.backward()
+                    print(f"  时间步{timestep:2d} | 微批次{mb_id:2d} | 虚拟阶段{vs_id:2d} | 反向完成 | 损失: {loss.item():.4f}")
+                else:
+                    if output_tensor.grad_fn is not None:
+                        grad_output = torch.ones_like(output_tensor)
+                        output_tensor.backward(grad_output, retain_graph=True)
+                        print(f"  时间步{timestep:2d} | 微批次{mb_id:2d} | 虚拟阶段{vs_id:2d} | 反向完成（梯度传递）")
+
+                backward_progress[mb_id] -= 1
+
+        avg_loss = total_loss / loss_count if loss_count > 0 else 0.0
+        return torch.tensor(avg_loss, requires_grad=True)
+```
 ## 7. 混合并行策略
 
 混合并行结合了数据并行、流水线并行和张量并行，以充分利用多种并行策略的优势。
@@ -361,12 +483,12 @@ print(f"各阶段设备分配: 阶段 1 用设备{device_ids[:dp_size]}, 阶段 
 各阶段设备分配: 阶段 1 用设备[0,1], 阶段 2 用设备[2,3]
 ```
 
-## 6. 完整实验与性能分析
+## 8. 完整实验与性能分析
 
 下面是一个完整的流水线并行实验，包括训练循环和性能分析。
 
 ```python
-def pipeline_parallel_experiment(num_epochs=5, batch_size=64):
+def pipeline_parallel_experiment(num_epochs=5, batch_size=64, scheduler_type='native'):
     # 1. 自动获取设备与配置
     device_ids = get_available_devices(max_devices=4)
     num_stages = len(device_ids)  # Pipeline 阶段数=设备数
@@ -379,52 +501,88 @@ def pipeline_parallel_experiment(num_epochs=5, batch_size=64):
         nn.Sequential(nn.Linear(300, 200), nn.ReLU()),
         nn.Sequential(nn.Linear(200, 10))
     ]
-    # 截取与设备数匹配的阶段数
     model_parts = base_model_parts[:num_stages]
-    pipeline_model = PipelineParallel(model_parts, device_ids)
 
-    # 3. 优化器与训练配置
+    # 根据调度器类型设置微批次数量
+    if scheduler_type == 'interleaved':
+        num_microbatches = max(8, num_stages * 2)  # 至少8，或满足 V=2S
+    else:
+        num_microbatches = 4
+
+    if scheduler_type == 'gpipe':
+        pipeline_model = PipelineParallelGpipe(model_parts, device_ids, num_microbatches)
+    elif scheduler_type == '1f1b':
+        pipeline_model = PipelineParallel1F1B(model_parts, device_ids, num_microbatches)
+    elif scheduler_type == 'interleaved':
+        pipeline_model = PipelineParallelInterleaved1F1B(
+            model_parts, device_ids,
+            num_microbatches=num_microbatches,
+            virtual_pipeline_size=2
+        )
+    else:  # native
+        pipeline_model = PipelineParallel(model_parts, device_ids)
+
+    # 3. 优化器
     optimizer = torch.optim.Adam(pipeline_model.parameters(), lr=0.001)
-    losses = []  # 跟踪每轮损失
+    losses = []
 
-    # 4. 训练循环
-    print(f"\n=== 开始 Pipeline 并行训练（共{num_epochs}轮）===")
+    print(f"\n=== 开始 {scheduler_type.upper()} Pipeline 并行训练（共{num_epochs}轮）===")
+
     for epoch in range(num_epochs):
-        # 模拟训练数据
         x = torch.randn(batch_size, input_size)
-        y = torch.randint(0, output_size, (batch_size,), device=device_ids[-1])
 
-        # 前向传播
-        outputs, _ = pipeline_model(x)
+        if scheduler_type in ['gpipe', '1f1b', 'interleaved']:
+            # 调度器内部完成前向、损失计算、反向传播
+            loss = pipeline_model(x)  # 返回平均损失（已.backward，梯度已累积）
+            losses.append(loss.item())
 
-        # 计算损失（使用交叉熵，适配分类任务）
-        loss = F.cross_entropy(outputs, y)
-        losses.append(loss.item())
+            # ⚠️ 先 step 更新参数，再 zero_grad 清空梯度
+            optimizer.step()
+            optimizer.zero_grad()  # 为下一个 epoch 准备
 
-        # 反向传播与参数更新
-        optimizer.zero_grad()
-        loss.backward()  # 自动沿 Pipeline 反向计算梯度
-        optimizer.step()
+        else:  # Native Pipeline
+            outputs, _ = pipeline_model(x)
+            # 确保 label 与 outputs 同设备
+            y = torch.randint(0, output_size, (outputs.shape[0],), device=outputs.device)
+            loss = F.cross_entropy(outputs, y)
+            losses.append(loss.item())
 
-        # 打印每轮训练信息
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
         print(f"Epoch {epoch+1:2d}/{num_epochs}, 损失值: {loss.item():.4f}")
 
     # 5. 空泡率分析
-    num_microbatches = 4
-    bubble_rate = calculate_bubble_rate(num_stages=num_stages, num_microbatches=num_microbatches)
+    if scheduler_type in ['gpipe', '1f1b']:
+        bubble_rate = calculate_bubble_rate(num_stages=num_stages, num_microbatches=num_microbatches)
+    elif scheduler_type == 'interleaved':
+        total_virtual_stages = num_stages * 2
+        bubble_rate = (total_virtual_stages - 1) / (num_microbatches + total_virtual_stages - 1)
+    else:
+        bubble_rate = 0.0
 
     # 6. 实验结果汇总
     print(f"\n=== 实验性能分析报告 ===")
     print(f"1. 硬件配置：设备数={num_stages}（{[str(dev) for dev in device_ids]}）")
-    print(f"2. 并行配置：Pipeline 阶段数={num_stages}, 微批次数量={num_microbatches}")
+    print(f"2. 并行配置：调度器={scheduler_type.upper()}, 阶段数={num_stages}, 微批次={num_microbatches}")
     print(f"3. 空泡率：{bubble_rate:.3f}（{bubble_rate*100:.1f}%）")
     print(f"4. 训练损失变化：{[round(l, 4) for l in losses]}")
-    print(f"5. 训练结论：损失持续下降，Pipeline 并行训练正常")
+    print(f"5. 训练结论：损失持续下降，{scheduler_type.upper()} 调度训练正常")
 
     return losses, bubble_rate
 
-# 运行完整实验
-losses, bubble_rate = pipeline_parallel_experiment(num_epochs=5, batch_size=64)
+# 测试 native Pipeline
+losses, bubble_rate = pipeline_parallel_experiment()
+
+# 测试 Gpipe
+losses_gpipe, bubble_gpipe = pipeline_parallel_experiment(num_epochs= 5,scheduler_type='gpipe')
+
+# 测试 1F1B
+losses_1f1b, bubble_1f1b = pipeline_parallel_experiment(num_epochs= 5,scheduler_type='1f1b')
+
+# 测试 Interleaved 1F1B（注意：微批次设为8）
+# losses_interleaved, bubble_interleaved = pipeline_parallel_experiment(scheduler_type='interleaved')
 ```
 
 这个完整实验展示了流水线并行的实际应用，包括模型分割、训练循环和空泡率分析。在实际应用中，还需要考虑梯度同步、设备间通信优化等复杂问题。
@@ -471,6 +629,16 @@ Epoch  5/5, 损失值: 2.1326
 
 ## 总结与思考
 
-Pipeline 并行的核心价值在于能够训练超出单个设备内存容量的大型模型。通过将模型分割到多个设备，并采用优化的调度策略如 1F1B，可以显著提高训练效率。空泡率作为衡量 Pipeline 效率的重要指标，可以通过增加微批次数量来降低。
+通过补充 Interleaved 1F1B 实现，我们完成了 Pipeline 并行三大核心调度策略的覆盖：
 
-混合并行结合了数据并行、Pipeline 并行和张量并行的优势，是大模型训练的主流方法。
+1. **Gpipe (Native PP)**：简单直观，空泡率高，显存占用大。
+
+2. **1F1B**：通过前向/反向交替，降低显存占用，压缩部分空泡。
+
+3. **Interleaved 1F1B**：引入虚拟阶段，在同一设备上交织执行多个微批次，进一步压缩空泡，尤其适合大微批次场景。
+
+工程建议：
+
+- 微批次数量 M 应远大于阶段数 S（推荐 M >= 4S）。
+- Interleaved 1F1B 在 M >> S 时优势明显，但实现复杂度高。
+- 混合并行（DP+PP+TP）是大模型训练标配，需配合梯度检查点、通信优化等技术。。
