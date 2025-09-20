@@ -118,11 +118,11 @@ Draft-then-Verify（草稿-验证）是推测式解码的核心逻辑，通过�
    - 若出现“目标模型概率 < 草稿模型”（即草稿 Token 质量不达标），则拒绝该 Token 及其后续所有草稿 Token；
 4. **循环迭代**：若所有草稿 Token 被接受，目标模型直接生成下一个 Token（延续上下文）；若存在被拒绝 Token，目标模型生成“第一个被拒绝位置的正确 Token”，随后重新进入“草稿生成-验证”循环。
 
-## 2.2 EAGLE 框架演进
+### 2.2 EAGLE 框架演进
 
 EAGLE 框架是推测式解码领域的代表性工作，其从 EAGLE-1 到 EAGLE-3 的迭代，核心围绕“提升草稿质量、优化验证效率、控制误差累积”三个方向展开，深刻反映了研究社区对该技术的理解深化。本节将按版本顺序，拆解各代 EAGLE 的技术定位、核心创新及改进方向，并通过对比总结其演进逻辑。
 
-### 2.2.1 EAGLE-1 特征层预测
+#### 2.2.1 EAGLE-1 特征层预测
 
 EAGLE-1 是该系列的开创性工作，首次将推测式解码的“预测对象”从“Token 层面”升级到“特征层面”，突破了传统 Token 直接预测的局限——通过让草稿模型学习目标模型的隐藏特征，利用特征空间更丰富的语义信息提升草稿序列质量。
 
@@ -137,7 +137,7 @@ EAGLE-1 是该系列的开创性工作，首次将推测式解码的“预测对
 
 ![图 5：EAGLE-1 架构示意图](./images/04.MultiTokenGen.05.png)
 
-### 2.2.2 EAGLE-2 动态草稿树优化
+#### 2.2.2 EAGLE-2 动态草稿树优化
 
 EAGLE-2 针对 EAGLE-1“静态草稿树适应性差”的问题进行改进——引入“动态草稿树机制”，根据上下文的“可预测性”（由草稿模型置信度判断）灵活调整草稿生成策略，进一步提升草稿利用率与验证效率。
 
@@ -154,11 +154,11 @@ EAGLE-2 针对 EAGLE-1“静态草稿树适应性差”的问题进行改进—�
 ![图 6：EAGLE-2 草稿树构建](./images/04.MultiTokenGen.06.png)  
 ![图 7：EAGLE-2 草稿筛选与验证](./images/04.MultiTokenGen.07.png)
 
-### 2.2.3 EAGLE-3 技术融合
+#### 2.2.3 EAGLE-3 技术融合
 
 EAGLE-3 是该系列的最新进展，核心突破是“摒弃前代的特征预测约束”——研究发现 EAGLE-1/2 中“草稿模型必须预测目标模型特征”的限制会束缚其表达能力，因此转而采用“直接 Token 预测”与“多层特征融合”，同时通过“训练时测试”解决误差累积问题，实现更高加速比。
 
-**相关论文**：《EAGLE-3: Scaling up Inference Acceleration of Large Language Models via Training-Time Test》（[arXiv:2503.01840](https://arxiv.org/abs/2503.01840)，注：原文 2503 为预印本时间标注，核心技术仍属 2024 年研究范畴）  
+**相关论文**：《EAGLE-3: Scaling up Inference Acceleration of Large Language Models via Training-Time Test》（[arXiv:2503.01840](https://arxiv.org/abs/2503.01840)
 
 在深入理解 EAGLE-3 的创新前，先回顾 EAGLE-1 与 EAGLE-2 存在的关键局限 —— 这两代框架虽推动了推测式解码的发展，但仍有三个核心问题待解决。
 
@@ -177,7 +177,7 @@ EAGLE-3 是该系列的最新进展，核心突破是“摒弃前代的特征预
 
 ![图 10：EAGLE-3 多层特征融合](./images/04.MultiTokenGen.10.png)
 
-### 2.2.4 EAGLE 框架对比
+#### 2.2.4 EAGLE 框架对比
 
 EAGLE 系列的演进本质是“持续优化草稿质量、验证效率与误差控制”，下表从核心特性、性能等维度对三版本进行系统对比，清晰呈现其迭代方向：
 
@@ -212,7 +212,7 @@ EAGLE 系列的演进本质是“持续优化草稿质量、验证效率与误�
 ## 5. 参考资料
 
 - [探秘 Transformer 系列之（33）--- DeepSeek MTP](https://www.cnblogs.com/rossiXYZ/p/18880573)
-- [DeepSeek 技术解读(2)-MTP（Multi-Token Prediction）的前世今生](https://zhuanlan.zhihu.com/p/180560411)（注：修正原文异常 URL 末尾多余字符）
+- [DeepSeek 技术解读(2)-MTP（Multi-Token Prediction）的前世今生](https://zhuanlan.zhihu.com/p/180560411)
 - [大模型推理妙招—投机采样（Speculative Decoding）](https://zhuanlan.zhihu.com/p/651359908)
 - [[LLM 投机推理] 超越 Medusa 的投机采样—— EAGLE 1/2 论文解读](https://zhuanlan.zhihu.com/p/716344354)
 - 《Better & Faster Large Language Models via Multi-token Prediction》（[arXiv:2404.19737](https://arxiv.org/abs/2404.19737)）
