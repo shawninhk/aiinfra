@@ -1,8 +1,30 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# 07.PP 并行：基本原理
+# 07.流水并行 PP 基本原理
 
-***Megatron-Core：PP 基本原理（朴素流水并行原理，Bubble 空泡率计算，Gpipe 原理解析与动态内存峰值分析）***
+Author by: 高亮
+
+!!!!!!!!!
+## 朴素流水并行基本原理
+
+## Bubble 空泡率计算与影响分析
+
+## Gpipe 原理解析
+
+### Google Gpipe 的核心思想：交错调度前向与反向
+### 1F1B（One Forward One Backward）调度策略
+### 如何消除尾部 Bubble？
+### 通信与计算重叠优化
+### 对比朴素 PP：吞吐提升、延迟降低
+
+## 动态内存峰值分析
+
+### 前向缓存激活值（activation）的内存压力
+### Gpipe 中激活值生命周期管理
+### 内存峰值公式估算：Max Memory ∝ Layer Params + Activations × M
+### 如何通过梯度检查点（Gradient Checkpointing）降低峰值？
+### 实际 Megatron-Core 中的内存优化策略简述
+
 
 **1）朴素流水并行原理：**
 
