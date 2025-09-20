@@ -8,11 +8,19 @@ Author by: SingularityKChen
 
 ## Scale-Up 和 Scale-Out 的背景
 
-随着大模型参数规模不断增加，其对算力和内存的需求也与日俱增，对算力集群的规模需求也在不断增加：从千卡到十万卡到百万卡规模。而构建这样巨大的算力集群，将各算力和存储池化，则需要通过 scale-up 和 scale-out 实现。
+大模型的参数从数十亿到数万亿级别，使得单机算力远不足以支撑训练和推理。这促使业界构建由数万卡乃至百万卡算力集群。
+
+然而，随着算力芯片数量增加，通信开销迅速攀升，形成“通信墙”瓶颈：如果互联网络带宽和延迟跟不上，算力卡增加带来的加速比将大打折扣。
+
+大模型训练需要数万算力芯片紧密协同，并行处理海量数据，这些算力卡间必须持续高速交换梯度、参数等数据；没有高性能互联架构，算力卡会因网络瓶颈而无法线性扩展性能。
+
+为突破通信瓶颈，Scale-Up 与 Scale-Out 两种体系架构被结合运用： **Scale-Up（纵向扩展）** 指在单个超级节点/服务器内集成尽可能多的加速器，通过高速互联总线使其看似“一台机器”，减少节点内通信延迟； **Scale-Out（横向扩展）** 则通过集群网络将多台服务器相连，实现大规模扩容。传统上，HPC 领域更多采用Scale-Out 的集群方式，但在大模型训练中，单节点内部署更多算力卡（Scale-Up）可以显著降低部分通信开销，从而提升整体效率。
+
+因此，大模型训练集群往往由多算力卡超级节点（SuperPod）（如华为 CloudMatrix 384 超节点由 384 张 910C 芯片构成）通过高速网络互联组成，两种架构优势互补。
+
+在这种背景下，各类互联技术迅猛发展，以满足大模型对低延迟、高带宽、强一致性通信的苛刻需求。
 
 ## XPU 卡间互联与 Scale-Up
-
-Scale-Up fabric 有以下要求：超低延迟和抖动、访存保序、非阻塞、带宽利用率高、无损、零软件开销等需求。
 
 ### PCIe 诞生的背景
 
@@ -51,15 +59,37 @@ Scale-Up fabric 有以下要求：超低延迟和抖动、访存保序、非阻�
 
 为了解决这一矛盾，NVIDIA 在 2014 年首次公布了 NVLink，采用高速差分信号和多链路聚合的方式为 GPU 与 GPU、GPU 与 CPU 之间提供更高带宽、更低延迟的互联通道，其目标是突破 PCIe 的限制，把多 GPU 之间、GPU 与 CPU 之间做成更接近同一内存域的高带宽、低延迟互联，使多 GPU 系统能够像单 GPU 一样高效协同工作。
 
-2016 年，Pascal P100 首次把 NVLink 带到量产平台，支持多条链路成组以叠加带宽，这一做法直接奠定了后续各代 NVLink 以更多链路和更快带宽扩展规模的路线图。Volta 实现与 IBM POWER9 做到 GPU 与 CPU 直连，在当时的 Power 系统里绕开了 GPU 与 CPU 间的 PCIe 限速；同时，首次亮相的 NVLink Switch 把多条 NVLink 聚合成非阻塞交叉互联，让 16 卡 V100 的 DGX-2 能在单机内实现全互联，这是 NVLink 从点对点走向交换网络的关键转折。Ampere 时代引入第三代 NVLink，DGX A100 机内用 6 颗第二代 NVSwitch 把 8 卡 A100 做成全互联拓扑；这一代的变化不在更大的 GPU 域，而在更干净的机内全互联与更高端口速率的工程化落地。
+2016 年，Pascal P100 首次把 NVLink 带到量产平台，支持多条链路成组以叠加带宽，这一做法直接奠定了后续各代 NVLink 以更多链路和更快带宽扩展规模的路线图。
 
-NVLink 原本只用于机箱内部通信。2022 年，Hopper 实现跨机箱的域：推出 **NVLink Switch System**，把 NVLink 从机内/机箱级扩展到跨节点、跨机箱的域，可将多达 256 块 H100组成一个 NVLink 域；与此同时，**NVLink-C2C** 作为片间（die/package）一致性互联用于 Grace-Hopper 等形态，把 CPU 大容量内存纳入可寻址空间，这两项共同把 NVLink 从机内总线升级为“机柜-级域内网络”的角色。Blackwell 进入第五代 NVLink，NVL72 单柜把 72×Blackwell 组成一个超高带宽 NVLink 域、GPU 与 GPU 互通总带宽达 130 TB/s；单一 NVLink 域可扩展到 576 GPU 的上限。
+![NVLink at P100](images/07CCCluster_NVLink_P100.png)
 
-2022年，英伟达推出 **NVLink Switch System**，将 NVSwitch 芯片独立出来，变成了 NVLink 交换机，用于连接服务器之间的 GPU 设备。这意味着，节点已经不再仅限于1台服务器了，而是可以由多台服务器和网络设备共同组成。
+Volta 实现与 IBM POWER9 做到 GPU 与 CPU 直连，在当时的 Power 系统里绕开了 GPU 与 CPU 间的 PCIe 限速。
 
-这些设备处于同一个 HBD（High Bandwidth Domain，超带宽域）。 英伟达将这种以超大带宽互联16卡以上GPU-GPU的Scale Up系统，称为超节点（SuperPod）。
+![NVLink DGX-1](images/07CCCluster_NVLink_DGX-1_topology.png)
 
-> NVLink 从“多链路点对点”的板间直连起步，经由 **NVSwitch** 完成机内全互联，再以 **NVLink Switch System** 扩展到跨机箱的 **域内网络**；期间通过 **NVLink-C2C** 把 CPU 的大容量内存纳入可寻址空间，最终 Blackwell 把 NVLink 域做成“机柜为基本单元、可拼成数百 GPU 的统一加速器”。这也是其从单机 Scale-Up 向“机柜级 Scale-Up”的关键跨越。
+同时，首次亮相的 NVLink Switch 把多条 NVLink 聚合成非阻塞交叉互联，让 16 卡 V100 的 DGX-2 能在单机内实现全互联，这是 NVLink 从点对点走向交换网络的关键转折。
+
+![DGX-2 with NVLink Switch](images/07CCCluster_NVLink_DGX-2_nvswitch_topology.png)
+
+Ampere 时代引入第三代 NVLink，DGX A100 机内用 6 颗第二代 NVSwitch 把 8 卡 A100 做成全互联拓扑；这一代的变化不在更大的 GPU 域，而在更干净的机内全互联与更高端口速率的工程化落地。
+
+![NVLink DGX A100 with NVSwitch](images/07CCCluster_NVLink_DGX_A100_topology.png)
+
+NVLink 原本只用于机箱内部通信。2022 年，Hopper 实现跨机箱的域：推出 **NVLink Switch System**，把 NVLink 从机内/机箱级扩展到跨节点、跨机箱的域，可将多达 256 块 H100 组成一个 NVLink HBD（High Bandwidth Domain，超带宽域）。 英伟达将这种以超大带宽互联 16 卡以上 GPU-GPU 的 Scale Up系统，称为超节点（SuperPod）。
+
+![NVLink Switch System](images/07CCCluster_NVLink-Switch-System-hopper.png)
+
+与此同时，NVIDIA 也推出了**NVLink-C2C**，作为片间（die/package）一致性互联用于 Grace-Hopper 等超芯片（SuperChip）形态，把 CPU 大容量内存纳入可寻址空间，这两项共同把 NVLink 从机内总线升级为“机柜-级域内网络”的角色。
+
+![NVLink-C2C](images/07CCCluster_NVLink-C2C.png)
+
+Blackwell 进入第五代 NVLink，NVL72 单柜把 72×Blackwell 组成一个超高带宽 NVLink 域、GPU 与 GPU 互通总带宽达 130 TB/s；单一 NVLink 域可扩展到 576 GPU 的上限。
+
+2025 年，NVIDIA 面向产业推出“半定制”开放计划 NVLink Fusion，其将已量产的 NVLink 规模化 fabric 与参考设计、IP 及认证生态开放给第三方 CPU/ASIC/XPU，使其能原生接入 NVLink 的 Scale-Up 域并与 Spectrum-X 等以太 Scale-Out 方案协同，构建异构混合 AI 基础设施。
+
+![NVLink Fusion](images/07CCCluster_NVLink-Fusion-Rack.jpg)
+
+> NVLink 从“多链路点对点”的板间直连开始，经由 **NVSwitch** 完成机内全互联，再以 **NVLink Switch System** 扩展到跨机箱的 **域内网络**；期间通过 **NVLink-C2C** 把 CPU 的大容量内存纳入可寻址空间，最终 Blackwell 把 NVLink 域做成“机柜为基本单元、可拼成数百 GPU 的统一加速器”。这也是其从单机 Scale-Up 向“机柜级 Scale-Up”的关键跨越。
 
 下表总结了 NVLink 从诞生至今的时间线、性能指标和对应的 GPU 型号：
 
@@ -73,9 +103,17 @@ NVLink 原本只用于机箱内部通信。2022 年，Hopper 实现跨机箱的�
 | NVLink 6    | \~2026 | 400 GB/s\* | 18+        | 3.6 TB/s\* | Rubin（计划）        | NVSwitch v5（预期）       |                                                                                                     |
 | NVLink 7    | \~2028 | 800 GB/s\* | 18+        | 7.2 TB/s\* | Vera（计划）         | NVSwitch v6（预期）       |                                                                                                     |
 
-### 其他 Scale-Up 协议
+### 华为灵渠总线
+
+### Scale-Up fabric 与其他 Scale-Up 协议
+
+Scale-Up 的 fabric 首先要在一个受限物理域里，把几十到上千个加速器组织成统一的计算与内存池。这要求链路具备内存语义（load/store、原子操作）以支撑直接访存，而不是仅靠消息传递；并要求在端到端极低时延下提供有序或可选无序的可靠传输与无损链路（链路层重传或PFC/CBFC），以保证同步与集合通信的确定性。
 
 除了 NVLink 之前，目前业内还有 ETH-X、OISA、SUE、UALink、UB 等协议。
+
+Broadcom 在 2025 年 4 月的 OCP 全球峰会上发布了SUE，以解决标准以太网在横向扩展方面的问题。
+
+UALink 1.0 将内存语义作为核心能力，规定读、写与原子事务，由软件维持一致性，同时支持 1024 个端点的单域扩展；其物理与链路层基于 200G/lane（212.5 GT/s 信令）SerDes。
 
 ## 节点间互联与 Scale-Out
 
@@ -87,5 +125,8 @@ NVLink 原本只用于机箱内部通信。2022 年，Hopper 实现跨机箱的�
 
 ## 引用
 
+- [NVLink - NVIDIA - WikiChip](https://en.wikichip.org/wiki/nvidia/nvlink)
+- [Scale-up fabrics](https://blog.apnic.net/2025/06/03/scale-up-fabrics/)
+- [Integrating Semi-Custom Compute into Rack-Scale Architecture with NVIDIA NVLink Fusion](https://developer.nvidia.com/blog/integrating-custom-compute-into-rack-scale-architecture-with-nvidia-nvlink-fusion)
 - [一文看懂英伟达的NVLink技术, 鲜枣课堂, 20250520](https://mp.weixin.qq.com/s/gkm23FxWCTR4UFZYJ3onEw?poc_token=HGKQLmijVfsZp_r8vUDpiC8N_5C0mhuAhZV9LXx2)
 - [The Path Is Set For PCI-Express 7.0 In 2025](https://www.nextplatform.com/2022/06/23/the-path-is-set-for-pci-express-7-0-in-2025/)
