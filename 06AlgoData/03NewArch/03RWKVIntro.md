@@ -1,4 +1,11 @@
-## RWKV 架构研究:核心特点与版本演进
+<!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
+
+## 04. RWKV 基本架构原理
+
+> Author by: 张嘉瑶
+
+!!!!!!
+同样的问题，都是大模型生成的
 
 ### I. RWKV 架构简介
 
@@ -204,6 +211,10 @@ RWKV 在多语言环境和长上下文处理（尤其 RWKV-X）展现出**战略
 ---
 
 ### Works Cited
+
+!!!!!!!!
+只引用你参考的，没有参考的不用放，真正自己去 review
+
 1.  RWKV: Reinventing RNNs for the Transformer Era - OpenReview. Accessed May 19, 2025. `https://openreview.net/forum?id=7SaXczaBpG`
 2.  A Survey of RWKV - arXiv. Accessed May 19, 2025. `https://arxiv.org/pdf/2412.14847`
 3.  arxiv.org. Accessed May 19, 2025. `https://arxiv.org/abs/2402.05964`

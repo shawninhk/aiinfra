@@ -1,3 +1,5 @@
+<!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
+
 # Mamba: S4 结构化状态空间模型剖析
 
 ## 1. 引言：结构化状态空间模型的兴起

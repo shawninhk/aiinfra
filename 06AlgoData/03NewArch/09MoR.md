@@ -1,4 +1,6 @@
-# Mixture-of-Recursions (MoR)：大型语言模型的统一效率范式
+<!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
+
+# Mixture-of-Recursions, MoR 架构
 
 ## 摘要
 
