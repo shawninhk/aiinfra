@@ -2,7 +2,7 @@
 
 # 05.Attention 变种算法
 
-Author by:  张志达
+> Author by:  张志达
 
 !!!!!!!!!
 内容太过于常规和简单，参考 PDF 和 PPT 里面的
