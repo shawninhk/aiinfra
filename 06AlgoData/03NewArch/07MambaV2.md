@@ -1,3 +1,5 @@
+<!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
+
 # Mamba 演进之路:从选择性状态空间到结构化对偶性
 
 ## 引言:寻求后注意力时代的新架构

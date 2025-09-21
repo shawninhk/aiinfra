@@ -1,4 +1,8 @@
-# **RWKV 在工业化的演进、潜力以及挑战**
+<!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
+
+# RWKV V5/6/7 架构演进
+
+> Author by: 张嘉瑶
 
 ## **摘要**
 
