@@ -27,7 +27,7 @@ Author by: 陈悦孜
 
 三者协同形成现代服务器处理器设计哲学：从追求单核极致速度，转向 “给定功耗与成本下，通过架构创新实现系统计算吞吐量最大化”。
 
-![Intel Xeon 和 AMD Opteron](images/02TrendHard01.png)
+![Intel Xeon 和 AMD Opteron](./images/02TrendHard01.png)
 
 1. 主频提升达瓶颈
 
@@ -42,7 +42,7 @@ Author by: 陈悦孜
 | Intel Xeon  | Xeon E5-2600 v4    | 2016 | 22  | 2.2GHz | 超线程，AVX2 指令集              |
 | Intel Xeon  | Xeon Platinum 8380 | 2021 | 40  | 2.3GHz | 支持 PCIe 4.0，8 通道 DDR4     |
 
-![Intel Xeon 和 AMD Opteron](images/02TrendHard02.png)
+![Intel Xeon 和 AMD Opteron](./images/02TrendHard02.png)
 
 2. 协处理器兴起
 
@@ -56,11 +56,11 @@ Author by: 陈悦孜
 | Phi 5110P | 60  | 1.01 TFlops | 8 GB  | 320 GB/s | 225W | \$2,649   |
 | Phi 7120  | 61  | 1.2 TFlops  | 16 GB | 352 GB/s | 300W | \$4,129   |
 
-![PHI](images/02TrendHard03.png)
+![PHI](./images/02TrendHard03.png)
 
 **GPU 加速**：NV CUDA 技术革命性地将 GPU 用于通用计算，Tesla 系列成为标杆。首代 Tesla 架构（如 G80）引入统一着色器设计，将矢量计算单元拆分为标量核心（CUDA Core），支持 C 语言编程与 SIMT（单指令多线程）执行模型，使 GPU 从图形协处理器升级为通用计算引擎，奠定 “CPU+GPU” 异构标准。
 
-![Tesla](images/02TrendHard04.png)
+![Tesla](./images/02TrendHard04.png)
 
 3. 国产 CPU 突破
 
@@ -68,7 +68,7 @@ Author by: 陈悦孜
 
 该处理器采用完全自主的申威指令集架构（SW ISA），摆脱对国外指令集的依赖。搭载 4 万余颗 SW26010 的 “神威・太湖之光”，于 2016 年 6 月登顶 TOP500 榜单，终结美国超算 23 年榜首垄断，其 Linpack 实测性能达 93 PFlops（每秒 9.3 亿亿次），是全球首台突破 100 PFlops 的超算，标志人类迈入 E 级（百亿亿次）计算时代。
 
-![申威 SW26010](images/02TrendHard05.png)
+![申威 SW26010](./images/02TrendHard05.png)
 
 4. ARM 崛起
 
@@ -78,11 +78,11 @@ ARM 架构以 RISC（精简指令集）设计为核心，具备低功耗、高�
 
 - **NVIDIA Grace CPU**：基于 ARMv9 指令集，采用 LPDDR5X 内存子系统（能效提升 2 倍），通过 CPU-GPU 协同一致性缓存与 NVLink-C2C 直连，将延迟降至 1/10。
 
-![NVIDIA Grace CPU](images/02TrendHard06.png)
+![NVIDIA Grace CPU](./images/02TrendHard06.png)
 
 - **鲲鹏 920（Kunpeng 920）**：华为自主设计，基于 ARMv8.2 指令集，7nm 工艺，最高 64 核，通过优化分支预测、提升运算单元数量、改进内存子系统提升性能。
 
-![鲲鹏 920ARM-based 处理器](images/02TrendHard07.png)
+![鲲鹏 920ARM-based 处理器](./images/02TrendHard07.png)
 
 **传统 ARM（移动端）与 HPC 优化版（服务器级）架构对比**
 
@@ -107,7 +107,7 @@ NVIDIA H100/H200、AMD MI300X 成为 AI/HPC 核心算力，国产替代（寒武
 
     该技术可提升良率、降低成本、灵活复用成熟模块，AMD、Intel 均通过多芯片封装提升集成度。
 
-![Chiplet](images/02TrendHard08.png)
+![Chiplet](./images/02TrendHard08.png)
 
 - **存算一体技术**
 
@@ -121,16 +121,16 @@ NVIDIA H100/H200、AMD MI300X 成为 AI/HPC 核心算力，国产替代（寒武
 
 ## 2. 高性能网络
 
-### 2.1 网络技术早期阶段 (1990s-2000s)
+### 2.1 早期阶段 (1990s-2000s)
 
 此阶段形成 “以太网主导 + 专有网络补充” 的格局：
 
 - **以太网**：千兆以太网（IEEE 802.3ab/z 标准，1Gbps 速率）因成本低被广泛采用，但延迟高（>100μs）、带宽瓶颈明显，主要用于企业局域网、家庭宽带等场景。
 - **专有网络**：Myrinet、Quadrics 等私有协议网络延迟约 10μs、吞吐量高，但生态封闭（依赖专属硬件与软件栈）、成本高、兼容性差，2009 年前后被 InfiniBand 与以太网 RDMA 取代。
 
-![Ethernet 和 Myrinet](images/02TrendHard09.png)
+![Ethernet 和 Myrinet](./images/02TrendHard09.png)
 
-### 2.2 网络主流技术成型（2010s-至今）
+### 2.2 技术成型（2010s-至今）
 
 当前主流技术包括 InfiniBand、RoCE、NVLink，分别适配不同场景需求：
 
@@ -147,7 +147,7 @@ AI 与超大规模数据中心推动网络向 “更低延迟、更高带宽、�
 3.  **光互连突破铜缆限制**：硅光集成（低成本光器件）、共封装光学（光引擎与芯片同封装降功耗）、光学链路开关（光层动态配置路径）成为下一代网络核心；
 4.  **专用协议适配异构计算**：如华为灵渠总线，专为 CPU-NPU、NPU-NPU 通信设计，优化大规模 AI 集群数据交换效率。
 
-![高性能网络发展趋势](images/02TrendHard11.png)
+![高性能网络发展趋势](./images/02TrendHard11.png)
 
 ## 3. 高性能存储
 
@@ -156,20 +156,20 @@ AI 与超大规模数据中心推动网络向 “更低延迟、更高带宽、�
 - **HDD（机械硬盘）**：依赖旋转磁盘与机械臂读写，速度慢（延迟 ms 级）、易出机械故障，但容量大、每 GB 成本低，希捷、西数等厂商产品难满足 HPC 需求；
 - **SSD（固态硬盘）**：基于闪存芯片，无活动部件，读取速度、耐用性、能效均优于 HDD，如三星 PM1733（30TB）顺序读写达 7GB/s、延迟降至 50μs，逐步取代 HDD。
 
-![硬盘革命](images/02TrendHard12.png)
+![硬盘革命](./images/02TrendHard12.png)
 
 ### 3.2 分布式存储与文件系统
 
 分布式文件系统（DFS）将网络中分散存储资源整合为逻辑树形结构，方便用户访问，Lustre、Ceph 等支撑 EB 级吞吐（如 Lustre 带宽突破 1TB/s）。
 
-![Lustre](images/02TrendHard18.png)
+![Lustre](./images/02TrendHard18.png)
 
 LLM（LLM ）参数量达 100B 级，传统存储因数据复制耗时导致 GPU 利用率低，全闪文件系统成为解决方案：
 
 - 全闪文件系统专为 SSD 优化，通过 NVMe-OF+RDMA 实现高性能存储集群，NVMe-OF 时延比肩直连存储；
 - 商业方案为主（weka.io、VAST，阿里云 CPFS、百度云 PFS），开源方案较少（如 Intel DAOS）。
 
-![WekaIO](images/02TrendHard19.png)
+![WekaIO](./images/02TrendHard19.png)
 
 ### 3.3 新存储技术革命
 
@@ -184,7 +184,7 @@ HBM 通过硅通孔垂直堆叠 DRAM，与 GPU/NPU 封装集成，实现大容�
 - 发展历程：2013 年 SK 海力士研发 HBM1，2016 年 HBM2 量产，2022 年 HBM3 规范发布（每引脚速率 6.4Gb/s，单设备带宽 819GB/s）；
 - AI 场景价值：支撑大模型权重与中间数据高速交换，如 NVIDIA A100 的 40GB HBM2e 显存（带宽 1.5TB/s）可高效训练百亿参数模型。
 
-![HBM 技术示意图](images/02TrendHard14.png)
+![HBM 技术示意图](./images/02TrendHard14.png)
 
 ### 3.4 高性能存储发展
 
@@ -193,7 +193,7 @@ HBM 通过硅通孔垂直堆叠 DRAM，与 GPU/NPU 封装集成，实现大容�
 3.  **存算一体架构重构**：计算单元嵌入存储层（如三星 HBM-PIM），减少数据搬运；
 4.  **新型存算器件应用**：忆阻器、相变存储器（PCM）等支持内存计算，边缘 AI 场景能效提升 100 倍。
 
-![高性能发展趋势](images/02TrendHard15.png)
+![高性能发展趋势](./images/02TrendHard15.png)
 
 ## 4. 高性能服务器
 
@@ -207,7 +207,7 @@ HBM 通过硅通孔垂直堆叠 DRAM，与 GPU/NPU 封装集成，实现大容�
 - 2003 年：IBM BladeCenter 平衡 “计算密度与单刀片性能”；
 - 2006 年：IBM BladeCenter H 提升 10 倍带宽，HP BladeSystem c-class 引入虚拟连接、能量智控技术。
 
-![刀片式服务器和机架式服务器](images/02TrendHard16.png)
+![刀片式服务器和机架式服务器](./images/02TrendHard16.png)
 
 2. 风冷散热瓶颈
 
@@ -215,7 +215,7 @@ HBM 通过硅通孔垂直堆叠 DRAM，与 GPU/NPU 封装集成，实现大容�
 
 （注：PUE = 数据中心总耗电量 / IT 设备耗电量，理想值 1.0，超算 / AI 数据中心液冷可降至 1.1 以下）
 
-### 4.2 服务器绿色化阶段（2010s-至今）
+### 4.2 绿色化阶段（2010s-至今）
 
 1. 散热技术突破
 
@@ -243,7 +243,7 @@ HBM 通过硅通孔垂直堆叠 DRAM，与 GPU/NPU 封装集成，实现大容�
 - 曙光硅立方：单机柜集成计算 / 冷却 / 供电，浸没相变液冷，PUE=1.04，功率密度 160kW（较风冷提升 4-5 倍）；
 - 华为昇腾 384 超节点：12 个计算柜 + 4 个总线柜，384 颗昇腾 NPU+192 颗鲲鹏 CPU 通过 MatrixLink 互联，算力 300Pflops，单卡推理吞吐量 2300 Tokens/s。
 
-![华为昇腾 384 超节点](images/02TrendHard18.jpg)
+![华为昇腾 384 超节点](./images/02TrendHard18.jpg)
 
 ## 5. 总结与思考
 

@@ -8,7 +8,7 @@ Author by: 刘军
 
 NCCL 是一个通信库，为高性能应用程序提供优化的 GPU 与 GPU 通信。与 MPI 不同，它不提供包含进程启动器和管理器的并行环境。CPU、GPU/NPU 作为最基本的物理设备，再往上是 PCIe、CXL、RoCE 等链路层，然后使用 Ring 或者 Tree 进行拓扑组网，在一定拓扑的基础上有负责数据传输的通信库，集合通信库 NCCL，HCCL 会向上提供通信相关 API，相关 API 会集成在相关分布式加速库或者 AI 框架中。
 
-![high-bandwidth-NVLink-connections](images/05NCCLAPI01.png)
+![high-bandwidth-NVLink-connections](./images/05NCCLAPI01.png)
 
 NCCL 在通信方面发挥着重要的作用：
 
