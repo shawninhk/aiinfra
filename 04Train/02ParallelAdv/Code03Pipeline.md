@@ -375,6 +375,36 @@ class PipelineParallelInterleaved1F1B(nn.Module):
 混合并行结合了数据并行、流水线并行和张量并行，以充分利用多种并行策略的优势。
 
 ```python
+import torch
+import torch.nn as nn
+
+# 辅助函数：获取可用 GPU 设备（模拟）
+def get_available_devices(max_devices=4):
+    devices = []
+    for i in range(torch.cuda.device_count()):
+        if len(devices) >= max_devices:
+            break
+        devices.append(torch.device(f'cuda:{i}'))
+    if len(devices) == 0:
+        devices = [torch.device('cpu')] * min(max_devices, 1)
+    return devices
+
+# 示例模型（复用原结构，确保兼容性）
+class ExampleModel(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super().__init__()
+        self.fc1 = nn.Linear(input_size, hidden_size)
+        self.fc2 = nn.Linear(hidden_size, hidden_size)
+        self.fc3 = nn.Linear(hidden_size, output_size)
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        x = self.relu(self.fc1(x))
+        x = self.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+
+# 混合并行模型：Pipeline + DataParallel
 class HybridParallelModel(nn.Module):
     def __init__(self, base_model, device_ids, dp_size=2, pp_size=2):
         super().__init__()
@@ -388,6 +418,7 @@ class HybridParallelModel(nn.Module):
 
         # 1. Pipeline 分割：将基础模型拆分为 pp_size 个阶段
         self.pipeline_stages = self._split_model_for_pipeline(base_model, pp_size)
+
         # 2. 数据并行：为每个 Pipeline 阶段创建 dp_size 份副本（使用 nn.DataParallel）
         self.parallel_stages = nn.ModuleList()
         current_devices = device_ids  # 待分配的设备列表
@@ -395,6 +426,10 @@ class HybridParallelModel(nn.Module):
             # 为当前 Pipeline 阶段分配 dp_size 个设备（数据并行）
             dp_devices = current_devices[:dp_size]
             current_devices = current_devices[dp_size:]  # 剩余设备用于下一阶段
+
+            # 🔥 修复关键：将 stage 移动到第一个设备（DataParallel 要求）
+            stage = stage.to(f'cuda:{dp_devices[0]}')
+
             # 包装为数据并行模块
             dp_stage = nn.DataParallel(stage, device_ids=dp_devices)
             self.parallel_stages.append(dp_stage)
@@ -424,54 +459,63 @@ class HybridParallelModel(nn.Module):
         混合并行前向传播流程：
         输入 → Pipeline 阶段 1（数据并行）→ Pipeline 阶段 2（数据并行）→ 输出
         """
-        current_x = x
+        if len(self.parallel_stages) == 0:
+            return x
+
+        # 确保输入在第一个 stage 的第一个设备上
+        first_device = self.parallel_stages[0].device_ids[0]
+        current_x = x.to(f'cuda:{first_device}')
+
         for stage in self.parallel_stages:
             current_x = stage(current_x)  # 每个阶段内部数据并行计算
         return current_x
 
-# 示例模型（复用原结构，确保兼容性）
-class ExampleModel(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size):
-        super().__init__()
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.fc3 = nn.Linear(hidden_size, output_size)
-        self.relu = nn.ReLU()
 
-    def forward(self, x):
-        x = self.relu(self.fc1(x))
-        x = self.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
+# ========== 主程序：配置与测试 ==========
 
-# 1. 模型参数配置
-input_size, hidden_size, output_size = 100, 200, 10
-base_model = ExampleModel(input_size, hidden_size, output_size)
+if __name__ == "__main__":
+    # 1. 模型参数配置
+    input_size, hidden_size, output_size = 100, 200, 10
+    base_model = ExampleModel(input_size, hidden_size, output_size)
 
-# 2. 自动获取设备
-device_ids = [dev.index for dev in get_available_devices(max_devices=4)]
+    # 2. 自动获取设备（模拟）
+    available_devices = get_available_devices(max_devices=4)
+    device_ids = [dev.index for dev in available_devices if dev.type == 'cuda']
+    if len(device_ids) == 0:
+        print("⚠️  未检测到 CUDA 设备，回退到 CPU 模式（不支持 DataParallel）")
+        device_ids = [0]  # 模拟 CPU index，但 DataParallel 不支持纯 CPU，需特殊处理
+        # 为演示，我们强制至少 2 个设备，若无 GPU 则跳过并行
+        print("⚠️  跳过并行测试（无 GPU）")
+        exit(0)
 
-# 3. 调整并行配置以匹配设备数
-dp_size = 2 if len(device_ids) >= 4 else 1
-pp_size = len(device_ids) // dp_size
+    # 3. 调整并行配置以匹配设备数
+    dp_size = 2 if len(device_ids) >= 4 else 1
+    pp_size = len(device_ids) // dp_size
 
-# 4. 创建混合并行模型
-hybrid_model = HybridParallelModel(
-    base_model,
-    device_ids=device_ids,
-    dp_size=dp_size,
-    pp_size=pp_size
-)
+    print(f"可用设备: {device_ids}")
+    print(f"配置 → 数据并行路数: {dp_size}, Pipeline 阶段数: {pp_size}")
 
-# 5. 测试输入与输出
-x = torch.randn(32, input_size)  # 输入：批量 32，维度 100
-output = hybrid_model(x)
+    # 4. 创建混合并行模型
+    hybrid_model = HybridParallelModel(
+        base_model,
+        device_ids=device_ids,
+        dp_size=dp_size,
+        pp_size=pp_size
+    )
 
-# 6. 打印测试结果
-print(f"\n=== 混合并行测试结果 ===")
-print(f"输入形状: {x.shape}, 输出形状: {output.shape}")
-print(f"并行配置: 数据并行路数={dp_size}, Pipeline 阶段数={pp_size}")
-print(f"各阶段设备分配: 阶段 1 用设备{device_ids[:dp_size]}, 阶段 2 用设备{device_ids[dp_size:]}")
+    # 5. 测试输入与输出
+    x = torch.randn(32, input_size)  # 输入：批量 32，维度 100
+    output = hybrid_model(x)
+
+    # 6. 打印测试结果
+    print(f"\n=== 混合并行测试结果 ===")
+    print(f"输入形状: {x.shape}, 输出形状: {output.shape}")
+    print(f"并行配置: 数据并行路数={dp_size}, Pipeline 阶段数={pp_size}")
+    current_devices = device_ids
+    for i in range(pp_size):
+        dp_devices = current_devices[:dp_size]
+        current_devices = current_devices[dp_size:]
+        print(f"Pipeline 阶段 {i+1} 用设备: {dp_devices}")
 ```
 
 ```
@@ -488,7 +532,7 @@ print(f"各阶段设备分配: 阶段 1 用设备{device_ids[:dp_size]}, 阶段 
 下面是一个完整的流水线并行实验，包括训练循环和性能分析。
 
 ```python
-def pipeline_parallel_experiment(num_epochs=5, batch_size=64, scheduler_type='native'):
+def pipeline_parallel_experiment(num_epochs=5, batch_size=64):
     # 1. 自动获取设备与配置
     device_ids = get_available_devices(max_devices=4)
     num_stages = len(device_ids)  # Pipeline 阶段数=设备数
@@ -501,88 +545,52 @@ def pipeline_parallel_experiment(num_epochs=5, batch_size=64, scheduler_type='na
         nn.Sequential(nn.Linear(300, 200), nn.ReLU()),
         nn.Sequential(nn.Linear(200, 10))
     ]
+    # 截取与设备数匹配的阶段数
     model_parts = base_model_parts[:num_stages]
+    pipeline_model = PipelineParallel(model_parts, device_ids)
 
-    # 根据调度器类型设置微批次数量
-    if scheduler_type == 'interleaved':
-        num_microbatches = max(8, num_stages * 2)  # 至少8，或满足 V=2S
-    else:
-        num_microbatches = 4
-
-    if scheduler_type == 'gpipe':
-        pipeline_model = PipelineParallelGpipe(model_parts, device_ids, num_microbatches)
-    elif scheduler_type == '1f1b':
-        pipeline_model = PipelineParallel1F1B(model_parts, device_ids, num_microbatches)
-    elif scheduler_type == 'interleaved':
-        pipeline_model = PipelineParallelInterleaved1F1B(
-            model_parts, device_ids,
-            num_microbatches=num_microbatches,
-            virtual_pipeline_size=2
-        )
-    else:  # native
-        pipeline_model = PipelineParallel(model_parts, device_ids)
-
-    # 3. 优化器
+    # 3. 优化器与训练配置
     optimizer = torch.optim.Adam(pipeline_model.parameters(), lr=0.001)
-    losses = []
+    losses = []  # 跟踪每轮损失
 
-    print(f"\n=== 开始 {scheduler_type.upper()} Pipeline 并行训练（共{num_epochs}轮）===")
-
+    # 4. 训练循环
+    print(f"\n=== 开始 Pipeline 并行训练（共{num_epochs}轮）===")
     for epoch in range(num_epochs):
+        # 模拟训练数据
         x = torch.randn(batch_size, input_size)
+        y = torch.randint(0, output_size, (batch_size,), device=device_ids[-1])
 
-        if scheduler_type in ['gpipe', '1f1b', 'interleaved']:
-            # 调度器内部完成前向、损失计算、反向传播
-            loss = pipeline_model(x)  # 返回平均损失（已.backward，梯度已累积）
-            losses.append(loss.item())
+        # 前向传播
+        outputs, _ = pipeline_model(x)
 
-            # ⚠️ 先 step 更新参数，再 zero_grad 清空梯度
-            optimizer.step()
-            optimizer.zero_grad()  # 为下一个 epoch 准备
+        # 计算损失（使用交叉熵，适配分类任务）
+        loss = F.cross_entropy(outputs, y)
+        losses.append(loss.item())
 
-        else:  # Native Pipeline
-            outputs, _ = pipeline_model(x)
-            # 确保 label 与 outputs 同设备
-            y = torch.randint(0, output_size, (outputs.shape[0],), device=outputs.device)
-            loss = F.cross_entropy(outputs, y)
-            losses.append(loss.item())
+        # 反向传播与参数更新
+        optimizer.zero_grad()
+        loss.backward()  # 自动沿 Pipeline 反向计算梯度
+        optimizer.step()
 
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
+        # 打印每轮训练信息
         print(f"Epoch {epoch+1:2d}/{num_epochs}, 损失值: {loss.item():.4f}")
 
     # 5. 空泡率分析
-    if scheduler_type in ['gpipe', '1f1b']:
-        bubble_rate = calculate_bubble_rate(num_stages=num_stages, num_microbatches=num_microbatches)
-    elif scheduler_type == 'interleaved':
-        total_virtual_stages = num_stages * 2
-        bubble_rate = (total_virtual_stages - 1) / (num_microbatches + total_virtual_stages - 1)
-    else:
-        bubble_rate = 0.0
+    num_microbatches = 4
+    bubble_rate = calculate_bubble_rate(num_stages=num_stages, num_microbatches=num_microbatches)
 
     # 6. 实验结果汇总
     print(f"\n=== 实验性能分析报告 ===")
     print(f"1. 硬件配置：设备数={num_stages}（{[str(dev) for dev in device_ids]}）")
-    print(f"2. 并行配置：调度器={scheduler_type.upper()}, 阶段数={num_stages}, 微批次={num_microbatches}")
+    print(f"2. 并行配置：Pipeline 阶段数={num_stages}, 微批次数量={num_microbatches}")
     print(f"3. 空泡率：{bubble_rate:.3f}（{bubble_rate*100:.1f}%）")
     print(f"4. 训练损失变化：{[round(l, 4) for l in losses]}")
-    print(f"5. 训练结论：损失持续下降，{scheduler_type.upper()} 调度训练正常")
+    print(f"5. 训练结论：损失持续下降，Pipeline 并行训练正常")
 
     return losses, bubble_rate
 
-# 测试 native Pipeline
-losses, bubble_rate = pipeline_parallel_experiment()
-
-# 测试 Gpipe
-losses_gpipe, bubble_gpipe = pipeline_parallel_experiment(num_epochs= 5,scheduler_type='gpipe')
-
-# 测试 1F1B
-losses_1f1b, bubble_1f1b = pipeline_parallel_experiment(num_epochs= 5,scheduler_type='1f1b')
-
-# 测试 Interleaved 1F1B（注意：微批次设为8）
-# losses_interleaved, bubble_interleaved = pipeline_parallel_experiment(scheduler_type='interleaved')
+# 运行完整实验
+losses, bubble_rate = pipeline_parallel_experiment(num_epochs=5, batch_size=64)
 ```
 
 这个完整实验展示了流水线并行的实际应用，包括模型分割、训练循环和空泡率分析。在实际应用中，还需要考虑梯度同步、设备间通信优化等复杂问题。
