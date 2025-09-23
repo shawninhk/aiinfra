@@ -2,19 +2,18 @@
 
 # 大模型微调 SFT
 
-本次大纲内容主要围绕......
+大模型微调正从“全参训练”的粗放模式，快速演进为“高效、可控、任务自适应”的精细化工程体系。2024年以来，以LoRA为代表的参数高效微调（PEFT）已成工业标配，而QLoRA、DoRA、PiSSA等新方法进一步突破显存与表达力瓶颈，使70B级模型可在消费级GPU上微调。数据层面，合成指令（如Evol-Instruct、Self-Rewarding）与课程学习策略大幅提升样本质量与训练稳定性。训练策略上，多阶段渐进微调、损失函数定制、梯度裁剪优化等技巧显著提升收敛效率与泛化能力。更重要的是，微调不再孤立，它正与RLHF、DPO、模型编辑等对齐技术深度融合，构建“训练-对齐-评估”闭环。微调，成为释放大模型垂直领域的核心钥匙。
 
-## 课程位置
+## 详细内容
 
-xxx
+> 建议优先下载 PDF 版本，PPT 版本会因为字体缺失等原因导致版本很丑哦~
 
-## 课程简介
-
-xxx
-
-## 课程知识
-
-xxx
+| 大纲 | 小节 | 链接 | 状态 |
+|:--- |:---- |:-------------------- |:---:|
+|  |  | [PPT](), [文章](), [视频]() |  |
+|:sparkling_heart:|:star2:|:sparkling_heart:| |
+| SFT 实践 :computer: | CODE 01: Qwen3-4B 模型微调 | [Markdown](./Code01Qwen3SFT.md), [Jupyter](./Code01Qwen3SFT.ipynb), [文章](https://infrasys-ai.github.io/aiinfra-docs/04Train05FineTune/Code01Qwen3SFT.html) | :white_check_mark: |
+| SFT 实践 :computer: | CODE 02: LoRA 微调 SD | [Markdown](./Code02SDLoRA.md), [Jupyter](./Code02SDLoRA.ipynb), [文章](https://infrasys-ai.github.io/aiinfra-docs/04Train05FineTune/Code02SDLoRA.html) | :white_check_mark: |
 
 ## 备注
 
@@ -22,4 +21,3 @@ xxx
 
 > 非常希望您参与到这个开源课程中，B 站给 ZOMI 留言哦！
 >
-> 欢迎发现 bug 或者勘误直接提交代码 PR 到社区哦！
