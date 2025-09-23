@@ -112,7 +112,7 @@ $$
 
 当 $p=4$ 时，设备利用率仅 25%，大部分时间处于空转。为降低空泡、提升利用率，需基于公式增大 $m$。Google 提出的 GPipe 正是通过“切分 micro-batch + 前向-反向交错调度”，在有限显存下实现 $m \gg p$，显著降低空泡率并提升吞吐，其原理如图（b）所示：
 
-![Gpipeline 原理](./images/08PPGpipe01.png)
+![Gpipeline 原理](./images/08PPGpipe02.png)
 
 ### 3.2 对比朴素 PP
 

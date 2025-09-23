@@ -1,7 +1,8 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
-# 10. 流水并行 1F1B/1F1B Interleaved 原理
 
-Author by：高亮
+# 09. 流水并行 1F1B/1F1B Interleaved 原理
+
+> Author by：高亮
 
 ## PipeDream 基本原理
 
