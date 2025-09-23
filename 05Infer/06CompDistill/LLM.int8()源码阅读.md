@@ -11,13 +11,11 @@ model_int8 = AutoModelForCausalLM.from_pretrained(
     device_map="auto"
 )
 ```
-之后究竟发生了什么，我摘出了LLM.int8()的源码来简要阅读，本篇适合那些对于LLM.int8()量化想有更深入了解的同学。
+之后究竟发生了什么，我摘出了LLM.int8()的源码来简要阅读，本篇适合那些对于LLM.int8()量化想有更深入了解的同学。首先我们先准备一下源码：
 
 ```bash
-#我已经以子模块的形式clone进 third-party了，你可以直接init
-cd AIInfra/05Infer/06CompDistill
-git submodule init
-git submodule update
+#源码准备
+git clone git@github.com:bitsandbytes-foundation/bitsandbytes.git
 ```
 ## bnb_linear的替换
 
