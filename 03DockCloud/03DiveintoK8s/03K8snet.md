@@ -23,7 +23,7 @@
 
 提到 Overlay 网络，首先对比一下 Overlay 网络与 Underlay 网络的区别
 
-![Overlay 网络与 Underlay 网络](images/03overlay.png)
+![Overlay 网络与 Underlay 网络](./images/03overlay.png)
 
 Overlay 使用 Underlay 网络进行数据包进行数据传输，Overlay 通过在 Underlay 网络上部署虚拟化设备，实现对网络流量的控制和管理。
 
@@ -66,7 +66,7 @@ Flannel 部署在每个节点上，具备以下功能：
 相反，flanel 进程向 flanel0 发送一个 IP 包，IP 包会出现在宿主机的网络栈中，然后根据宿主机的路由表进行下一步处理（用户态->内核态）
 当 IP 包从容器经过 docker0 出现在宿主机，又根据路由表进入 flanel0 设备后，宿主机上的 flanneld 进程就会收到这个 IP 包
 
-![Overlay 网络与 Underlay 网络](images/03flanneludp.png)
+![Overlay 网络与 Underlay 网络](./images/03flanneludp.png)
 
 ### VXLAN 模式（默认 性能较好）
 
@@ -76,7 +76,7 @@ VXLAN 的设计思想是在现有三层网络之上，构建一层虚拟的，�
 
 为了实现这个隧道，VXLAN 会在宿主机设置一个特俗的网络设备作为隧道的两端，叫做 VTEP，原理图如下：
 
-![Flannel 网络](images/03flannel_vxlan.png)
+![Flannel 网络](./images/03flannel_vxlan.png)
 
 flanel.1 设备，就是 VXLAN 的 VTEP，即有 IP 地址，也有 MAC 地址
 
@@ -92,7 +92,7 @@ host-gw 工作原理就是将每个 Flannel 子网下一跳设置成该子网对
 
 下图展示了使用 host-gw 后端实现的 Flannel 网络架构。
 
-![Flannel 网络](images/03flannel.png)
+![Flannel 网络](./images/03flannel.png)
 
 ## BCP 路由网络 Calico
 
@@ -100,7 +100,7 @@ Calico 提供的解决方案与 host-gw 模式非常相似，其会在每台宿�
 
 该方案是一个纯三层的方法，使用虚拟路由代替虚拟交换，每一台虚拟路由通过 BGP 协议传播可达信息到剩余数据中心。
 
-![Flannel 网络](images/03calico.png)
+![Flannel 网络](./images/03calico.png)
 
 Calico 的 CNI 插件会为每个容器设置一个 Veth Pair 设备，将其中一端放在宿主机上。于是容器发出的 IP 包就会经过 Veth Pair 设备出现在宿主机上，然后根据路由规则的下一跳 IP 地址，转发给正确的网关。
 
@@ -120,13 +120,13 @@ Calico 使用的 tunl0 设备是一个 IP 隧道设备，IP 包进入 IP 隧道�
 
 因此使用 IPIP 模式的时候，集群网络性能会因为额外的封包解包而下降。
 
-![Flannel 网络](images/03calico_ipip.png)
+![Flannel 网络](./images/03calico_ipip.png)
 
 ## 基于 eBPF 的网络 Cilium
 
 Cilium 是一个开源的容器网络插件，基于 eBPF 实现高性能、可扩展的网络和安全工呢个。支持微服务间细粒度的流量控制，能够在 L3/L4/L7 层提供网络策略。
 
-![Cilium 架构](images/03cilium.png)
+![Cilium 架构](./images/03cilium.png)
 
 Cilium 的优势有哪些？
 
@@ -135,7 +135,7 @@ Cilium 的优势有哪些？
 - 中断处理：频繁的切换中断会导致较高的性能开销，从而会产生时延。
 - 内存拷贝：通过 DMA 将网络数据拷贝到内核缓冲区，再拷贝到用户控件，这个耗时占到了整个数据包处理流程的一半以上。
 - 局部性失效：目前主流处理器都是多个 CPU 核心的，如果一个数据包的处理跨多个 CPU 核心，就可能造成缓存失效。
-![Cilium 对比图](images/03cilium_bpf.png)
+![Cilium 对比图](./images/03cilium_bpf.png)
 
 适用场景：
 

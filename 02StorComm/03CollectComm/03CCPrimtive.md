@@ -16,14 +16,14 @@ Author by: SingularityKChen
 
 下图总结了 MPI 中实现了的常见集合通信算子以及该论文发表时 NCCL、MSCCL、Gloo、oneCCL 和 ACCL 对上述集合通信算子的支持度。我们可以看到，并不是所有 MPI 的通信算子都在 XCCL 中实现。这是因为 MPI 主要针对传统的超算和 HPC，而 XCCL 着重对 AI 计算过程中涉及的通信操作做优化。
 
-![03CCPrimtive02](images/03CCPrimtive02.png)
+![03CCPrimtive02](./images/03CCPrimtive02.png)
 
 !!!!!!!!!!!
 文章来源
 
 下图总结了常见的集合通信算子、其实现算法及其适用场景。
 
-![03CCPrimtive03](images/03CCPrimtive03.png)
+![03CCPrimtive03](./images/03CCPrimtive03.png)
 
 在 NCCL 中，通信操作被分为集合通信与点对点通信两大类。
 
@@ -43,7 +43,7 @@ Author by: SingularityKChen
   - All-to-All
   - Neighbor exchange
 
-![03CCPrimtive04](images/03CCPrimtive04.png)
+![03CCPrimtive04](./images/03CCPrimtive04.png)
 
 !!!!!!!!!!!
 技术点，不要太口语化
@@ -61,7 +61,7 @@ Author by: SingularityKChen
 
 Broadcast 操作将单个 Rank 把自身的数据发送到集群中的其他 Rank。
 
-![03CCPrimtive05](images/03CCPrimtive05.png)
+![03CCPrimtive05](./images/03CCPrimtive05.png)
 
 大模型训练和推理过程中，涉及到 Broadcast 的操作有：
 
@@ -74,7 +74,7 @@ Broadcast 操作将单个 Rank 把自身的数据发送到集群中的其他 Ran
 
 Scatter 操作将主节点的数据进行划分并散布至其他指定的 Rank。
 
-![03CCPrimtive06](images/03CCPrimtive06.png)
+![03CCPrimtive06](./images/03CCPrimtive06.png)
 
 大模型训练和推理过程中，涉及到 Scatter 的操作有：
 
@@ -92,7 +92,7 @@ Reduce 操作是把多个 Rank 的数据规约运算到一个 Rank 上。
 
 Reduce 的**规约**操作包含：SUM、MIN、MAX、PROD、LOR 等类型的规约操作。Reduce Sum 操作示意如下。
 
-![03CCPrimtive07](images/03CCPrimtive07.png)
+![03CCPrimtive07](./images/03CCPrimtive07.png)
 
 大模型训练和推理过程中，涉及到 Reduce 的操作有：
 
@@ -103,7 +103,7 @@ Reduce 的**规约**操作包含：SUM、MIN、MAX、PROD、LOR 等类型的规�
 
 Gather 操作是将多个 Rank 上的数据收集到 Rank 上。Gather 可以理解为反向的 Scatter。
 
-![03CCPrimtive08](images/03CCPrimtive08.png)
+![03CCPrimtive08](./images/03CCPrimtive08.png)
 
 大模型训练和推理过程中，涉及到 Gather 的操作相对较少。
 
@@ -115,7 +115,7 @@ Gather 操作是将多个 Rank 上的数据收集到 Rank 上。Gather 可以理
 
 All-Reduce 操作是在所有 Rank 执行相同 Reduce 操作，然后将所有 Rank 数据规约运算得到的结果发送到所有 Rank。
 
-![03CCPrimtive09](images/03CCPrimtive09.png)
+![03CCPrimtive09](./images/03CCPrimtive09.png)
 
 大模型训练和推理过程中，涉及到 All-Reduce 的操作有：
 
@@ -126,7 +126,7 @@ All-Reduce 操作是在所有 Rank 执行相同 Reduce 操作，然后将所有 
 
 All-Gather 操作是从所有 Rank 收集数据并分发所有 Rank 上。
 
-![03CCPrimtive10](images/03CCPrimtive10.png)
+![03CCPrimtive10](./images/03CCPrimtive10.png)
 
 大模型训练和推理过程中，涉及到 All-Gather 的操作有：
 
@@ -137,7 +137,7 @@ All-Gather 操作是从所有 Rank 收集数据并分发所有 Rank 上。
 
 Reduce-Scatter 操作是在所有 Rank 上都按维度执行相同的 Reduce 规约操作，再将结果发散到集群内所有的节点上。
 
-![03CCPrimtive11](images/03CCPrimtive11.png)
+![03CCPrimtive11](./images/03CCPrimtive11.png)
 
 大模型训练和推理过程中，涉及到 Reduce-Scatter 的操作有：
 
@@ -149,7 +149,7 @@ Reduce-Scatter 操作是在所有 Rank 上都按维度执行相同的 Reduce 规
 
 All to All 操作是对 All-Gather 的扩展，但不同的节点向某一节点收集到的数据是不同的。
 
-![03CCPrimtive12](images/03CCPrimtive12.png)
+![03CCPrimtive12](./images/03CCPrimtive12.png)
 
 大模型训练和推理过程中，涉及到 All2All 的操作有：
 
@@ -166,11 +166,11 @@ All to All 操作是对 All-Gather 的扩展，但不同的节点向某一节点
 
 如下图所示，All-Reduce 可以由 Reduce-Scatter 和 All-Gather 两个操作组合完成。在 Reduce-Scatter 操作完成后，每个 Rank 中规约了所有 Rank 中一个部分的结果。在 All-Gather 操作中，每个 Rank 将其数据广播到所有 Rank，最终每个 Rank 都获得所有 Rank 规约的结果。
 
-![03CCPrimtive13](images/03CCPrimtive13.png)
+![03CCPrimtive13](./images/03CCPrimtive13.png)
 
 ## 典型通讯模型
 
-![03CCPrimtive14](images/03CCPrimtive14.png)
+![03CCPrimtive14](./images/03CCPrimtive14.png)
 
 下表展示了典型并行类型、涉及的主要通信操作、节点规模及数据量。
 

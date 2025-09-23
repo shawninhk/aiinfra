@@ -1,9 +1,10 @@
 import os
+import shutil
 from PIL import Image
 
-watermark_path = "/Users/a1-6/Workspaces/AIInfer/static/watermark.png" # 水印图片的路径
-source_folder = "/Users/a1-6/Workspaces/AIInfer/01AICluster/01Roadmap/images_src" # 原始图片的文件夹
-output_folder = "/Users/a1-6/Workspaces/AIInfer/01AICluster/01Roadmap/watermark" # 输出图片的文件夹
+watermark_path = "/Users/a1-6/Workspaces/AIInfra/static/watermark.png" # 水印图片的路径
+source_folder = "/Users/a1-6/Workspaces/AIInfra/00Summary/images_src" # 原始图片的文件夹
+output_folder = "/Users/a1-6/Workspaces/AIInfra/00Summary/watermark" # 输出图片的文件夹
 
 
 def check_image(img_path):
@@ -12,6 +13,18 @@ def check_image(img_path):
     else:
         return False
 
+def del_dir_byname(path):
+	if os.path.exists(path):
+		shutil.rmtree(path)
+		print("文件夹已删除！", path)
+	else:
+		print("文件夹不存在！", path)
+
+
+def create_dir(path):
+	del_dir_byname(path)
+	os.makedirs(path)
+	return path
 
 def resize_image(input_image, limit_w=1200, limit_h=680):
     """
@@ -58,6 +71,8 @@ def pastic_watermask(input_image, output_path=None):
     input_image.paste(new_watermark, (watermark_x, watermark_y), new_watermark) # 将水印图片合成到原始图片上
     return input_image
 
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+create_dir(output_folder)
 
 for filename in os.listdir(source_folder): # 遍历原始图片的文件夹
     if check_image(filename): # 判断是否是图片文件
