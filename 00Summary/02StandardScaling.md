@@ -143,7 +143,7 @@ Kaplan et al.发现模型在域外数据上的性能相比于训练集会出现�
 为了验证这一结论，作者用更多的训练数据训练了一个参数量更小的模型 Chinchilla (70B)。尽管 Chinchilla 的模型规模远小于 Gopher (280B)、GPT-3 (175B)、Jurassic-1 (178B) 和 Megatron-Turing NLG (530B) 等模型，但实验结果表明，它在众多下游任务中的表现反而更胜一筹。
 
 ![叠加预测](./images/01ScalingLaw06.png)
-![叠加预测](./images/01ScalingLaw13.png)
+
 
 ### 3.1 训练曲线包络
 
