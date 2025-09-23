@@ -387,12 +387,12 @@ Token Parallel 则针对**长序列推理瓶颈**：传统单卡处理长序列�
 - [26] OWASP. *AI Security and Privacy Guide*. 2024. https://owasp.org/www-project-ai-security
 - [27] Apple. *A18 Pro Neural Engine: On-Device AI Performance*. 2024. https://www.apple.com/ios/ios-18
 - [28] OpenAI. *Streaming and Sampling Strategies for GPT Models*. 2023. https://platform.openai.com/docs/guides/text-generation
-- [C-1] 人工智能数据工程中心.《李飞飞团队年度报告揭底大模型成本：Gemini Ultra是GPT-4的2.5倍》. 2024-04-17. https://aidc.shisu.edu.cn/c2/c1/c13626a180929/page.htm  
+- [C-1] 人工智能数据工程中心.《李飞飞团队年度报告揭底大模型成本：Gemini Ultra 是 GPT-4 的 2.5 倍》. 2024-04-17. https://aidc.shisu.edu.cn/c2/c1/c13626a180929/page.htm  
 - [C-2] 知乎专栏.《大模型的成本和效率》. 2025-03-18. https://zhuanlan.zhihu.com/p/31033488927  
-- [C-3] AIbase.《AI成本结构极端分化：训练烧钱与推理低价的商业困局》. 2025-08-23. https://www.aibase.com/zh/news/18660  
-- [C-4] 搜狐科技.《打破效率与成本的权衡：数据中心中AI推理的未来》. 2025-02-13. https://www.sohu.com/a/858654161_121902920  
-- [C-5] CSDN博客.《AI大模型训练成本到底有多大？》. 2024-06-06. https://blog.csdn.net/giszz/article/details/139506830  
-- [C-6] AI工具箱.《AI成本结构极端分化：训练烧钱与推理低价的商业困局》. 2025-06-06. https://ai-kit.cn/14668.html
+- [C-3] AIbase.《AI 成本结构极端分化：训练烧钱与推理低价的商业困局》. 2025-08-23. https://www.aibase.com/zh/news/18660  
+- [C-4] 搜狐科技.《打破效率与成本的权衡：数据中心中 AI 推理的未来》. 2025-02-13. https://www.sohu.com/a/858654161_121902920  
+- [C-5] CSDN 博客.《AI 大模型训练成本到底有多大？》. 2024-06-06. https://blog.csdn.net/giszz/article/details/139506830  
+- [C-6] AI 工具箱.《AI 成本结构极端分化：训练烧钱与推理低价的商业困局》. 2025-06-06. https://ai-kit.cn/14668.html
 
 ## 视频
 

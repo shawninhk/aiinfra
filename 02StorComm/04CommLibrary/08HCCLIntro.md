@@ -1,14 +1,14 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# 08.华为HCCL架构介绍
+# 08.华为 HCCL 架构介绍
 
 作者：陈彦伯
 
 本节简单介绍**华为的 HCCL 架构**，包括：
 
-1) HCCL的基本介绍；
-2) HCCL通信的基础概念；
-3) HCCL开发流程。
+1) HCCL 的基本介绍；
+2) HCCL 通信的基础概念；
+3) HCCL 开发流程。
 
 这几部分。
 
@@ -17,15 +17,15 @@
 注意，本节以前置课程[NCCL 基本介绍](./04NCCLIntro.md)与[NCCL API 解读](./05NCCLAPI.md)为基础。建议读者在阅读本节之前，先大致了解 NCCL，以便更好地体会 HCCL 与 NCCL 的异同。
 
 
-## HCCL的基本介绍
+## HCCL 的基本介绍
 
-HCCL（Huawei Collective Communication Library）是华为自研的基于昇腾 AI 处理器的高性能集合通信库，支持AllReduce、Broadcast、AllGather、ReduceScatter、AlltoAll等通信原语，Ring、Mesh、Halving-Doubling（HD）等通信算法，基于HCCS、RoCE和PCIe高速链路实现集合通信。
+HCCL（Huawei Collective Communication Library）是华为自研的基于昇腾 AI 处理器的高性能集合通信库，支持 AllReduce、Broadcast、AllGather、ReduceScatter、AlltoAll 等通信原语，Ring、Mesh、Halving-Doubling（HD）等通信算法，基于 HCCS、RoCE 和 PCIe 高速链路实现集合通信。
 HCCL 可以被归类为前置教程[XCCL 通信库](./02XCCL.md)中提到过的“围绕 NCCL 衍生出的通信库”，在核心算法与接口的诸多层面上都体现出与 NCCL 的相似性。
 本节主要关注 HCCL 相较 NCCL 的特色之处。
 
 ### HCCL 在 AI 系统中的位置
 
-就像 NCCL 之于英伟达 GPU，HCCL 与昇腾 NPU 及其配套软硬件也是高度耦合的。HCCL 赋能昇腾 NPU 之间的直接通信：由于省去了数据在 device-host 间搬运以及经 host 侧处理这两个环节，因此性能极高。这种 NPU 间直接通信的特性需要硬件层面的支持，因此 HCCL 只兼容某些特定型号的昇腾 NPU。目前 HCCL 支持大部分 Atlas 训练系列产品，但对推理和边缘设备（如 310P 和 310B 系列芯片）的支持尚不全面。软件层面，HCCL 的定位是昇腾 AI 训练加速库（即 CANN）的底层通信库，属于 CANN 的核心组件。下图展示了 CANN 的架构，HCCL 位于 Runtime 与 Driver 之上，AI框架之下。
+就像 NCCL 之于英伟达 GPU，HCCL 与昇腾 NPU 及其配套软硬件也是高度耦合的。HCCL 赋能昇腾 NPU 之间的直接通信：由于省去了数据在 device-host 间搬运以及经 host 侧处理这两个环节，因此性能极高。这种 NPU 间直接通信的特性需要硬件层面的支持，因此 HCCL 只兼容某些特定型号的昇腾 NPU。目前 HCCL 支持大部分 Atlas 训练系列产品，但对推理和边缘设备（如 310P 和 310B 系列芯片）的支持尚不全面。软件层面，HCCL 的定位是昇腾 AI 训练加速库（即 CANN）的底层通信库，属于 CANN 的核心组件。下图展示了 CANN 的架构，HCCL 位于 Runtime 与 Driver 之上，AI 框架之下。
 
 ![CANN 架构](./images/08HCCLIntro02.png "CANN 架构")
 
@@ -66,22 +66,22 @@ HCCL 可以被归类为前置教程[XCCL 通信库](./02XCCL.md)中提到过的�
 
 ![HCCL 流示意图](./images/08HCCLIntro05.png "HCCL 流示意图")
 
-通信域对应上述水流比喻中不同的容器与管道。下图展示了一个由4机16卡组成的 4*4 通信域，其中一个虚线方框表示一个节点（Server），一个灰色椭圆表示一个 Rank （AI 加速卡）。每个节点内部包含四个 Rank，构成一个子通信域。注意，下图中未画出网络拓扑，真实场景也会比这复杂很多。
+通信域对应上述水流比喻中不同的容器与管道。下图展示了一个由 4 机 16 卡组成的 4*4 通信域，其中一个虚线方框表示一个节点（Server），一个灰色椭圆表示一个 Rank （AI 加速卡）。每个节点内部包含四个 Rank，构成一个子通信域。注意，下图中未画出网络拓扑，真实场景也会比这复杂很多。
 
 基于上述流和通信域的概念，我们再来看一下集合通信的一般流程。在分布式场景中，集合通信往往需要经历以下几个阶段：
 
 1. 在任务开始之前，根据设备信息配置通信参数并初始化通信域。
 2. 基于集群信息与网络拓扑实现 NPU 建链。如果建链超时则报错并退出进程。
-3. 执行通信算法：HCCL会将通信算法编排、内存访问等任务通过 Runtime 下发给昇腾设备的任务调度器，设备根据编排信息调度并执行具体的通信算法。在此阶段，通信域中的不同 Rank 执行不同的任务。
+3. 执行通信算法：HCCL 会将通信算法编排、内存访问等任务通过 Runtime 下发给昇腾设备的任务调度器，设备根据编排信息调度并执行具体的通信算法。在此阶段，通信域中的不同 Rank 执行不同的任务。
 4. 所有通信任务执行完成后，销毁通信域，释放资源。
 
 ![HCCL 通信域示意图](./images/08HCCLIntro06.png "HCCL 通信域示意图")
 
 最后，我们以 2 层 Ring AllReduce 为例来看一下通信算法的执行过程。下图展示了不同 Rank 在 Ring AllReduce 过程中的数据流动情况。首先，同一节点内执行 Reduce 操作，各 Rank 将数据发送到节点的主 Rank 上（对应图中第 3、6、9、12 个 Rank）。然后，主 Rank 将执行一个 Ring AllReduce 操作，使得每一个节点都有一份完整的数据备份。最后，每个节点的主 Rank 再执行一次 Boardcast 操作，将数据广播给其他 Rank，完成一次完整的 AllReduce 操作。
 
-![HCCL 2 层 Ring AllReduce 示意图1](./images/08HCCLIntro07.png "HCCL 2 层 Ring AllReduce 示意图1")
-![HCCL 2 层 Ring AllReduce 示意图2](./images/08HCCLIntro08.png "HCCL 2 层 Ring AllReduce 示意图2")
-![HCCL 2 层 Ring AllReduce 示意图3](./images/08HCCLIntro09.png "HCCL 2 层 Ring AllReduce 示意图3")
+![HCCL 2 层 Ring AllReduce 示意图 1](./images/08HCCLIntro07.png "HCCL 2 层 Ring AllReduce 示意图 1")
+![HCCL 2 层 Ring AllReduce 示意图 2](./images/08HCCLIntro08.png "HCCL 2 层 Ring AllReduce 示意图 2")
+![HCCL 2 层 Ring AllReduce 示意图 3](./images/08HCCLIntro09.png "HCCL 2 层 Ring AllReduce 示意图 3")
 
 ## HCCL 开发流程
 
