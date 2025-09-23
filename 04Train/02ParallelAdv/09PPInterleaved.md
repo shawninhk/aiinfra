@@ -20,7 +20,7 @@ $$
 - **微批切分的边际收益递减**。增大 $m$ 还会引入更密的启动/同步开销与更小的 per-kernel 批量，可能抵消部分吞吐收益。综合来看，“两段式”PP 的瓶颈是：要效率就要大 $m$，但大 $m$ 又受激活显存与系统长尾约束——这正是后续更先进调度试图突破的根因。
 
 <a id="fig1"></a>
-![两段式流水原理](images/10pipeline01.png)
+![两段式流水原理](./images/10pipeline01.png)
 **图 1** 两段式流水原理
 
 ### 流水并行1F1B：PipeDream
@@ -82,7 +82,7 @@ $$
 即1F1B 改善的是内存，而非空泡大小本身。1F1B 把反向尽早折返并与后续前向交错，使单份激活的驻留距离从 $O(m)$（需等全前向）降到 $O(p)$（只等反向折返），从而将峰值激活显存从 $\mathcal{O}(m)$ 压到 $\mathcal{O}(p)$。这并不会改变上式中的 $(p-1)$ 头尾时隙，也就不改变空泡率；但它显著降低峰值显存，允许在相同显存预算下把 $m$ 开得更大，于是 $ bubble\ radio$ 可以通过更大的 $m$ 被进一步压低——这是 1F1B 间接降低空泡占比、提升稳态吞吐的根本机制。
 
 <a id="fig2"></a>
-![PipeDream原理](images/10pipeline02.png)
+![PipeDream原理](./images/10pipeline02.png)
 **图 2** 1F1B流水原理
 
 ## Virtual pipeline基本原理
@@ -93,7 +93,7 @@ $$
 如[图 3](#fig3)所示，不同于之前的Pipeline方案，一台GPU设备只承担一个或几个连续流水线阶段的计算任务，这导致了其它GPU存在等待数据的情况，因此采用了虚拟化的方法将多个不相邻阶段的流水线计算由同一GPU来承担，并通过多个并行线程或CUDA流在同一GPU上交错进行不同阶段的前向、反向计算，这样就实现了GPU 在等待上/下游数据的空隙中能切换到本卡的其他虚拟阶段继续计算，充分利用了原本的空等（idle）时间。
 
 <a id="fig3"></a>
-![VirtualPP原理](images/10pipeline04.png)
+![VirtualPP原理](./images/10pipeline04.png)
 **图 3** VPP原理
 
 ### 虚拟化的理解
@@ -113,7 +113,7 @@ $$
 虚拟化的对象为流水阶段，因此同一 GPU 负责 $v$ 个不相邻的阶段（跨步映射）。执行时，为 $\mathcal{S}_d$ 中的每个虚拟阶段各开一条CUDA流，在 1F1B 语义下交错推进这些更小的前/反片段：当某虚拟阶段因 P2P 传输/上游依赖而空等时，GPU 立即切换到本卡的另一虚拟阶段计算，以此填充原本等待的时隙。
 
 <a id="fig4"></a>
-![原理](images/10pipeline03.png)
+![原理](./images/10pipeline03.png)
 **图 4** 虚拟化解释
 
 
@@ -171,7 +171,7 @@ VPP 的“虚拟化”不是把多张 GPU 合并，而是在每张 GPU 内开出
 
 ### PipeDream-2BW
 
-![PipeDream-2BW原理](images/10pipeline05.png)
+![PipeDream-2BW原理](./images/10pipeline05.png)
 
 
 #### 核心思想：
@@ -215,7 +215,7 @@ VPP 的“虚拟化”不是把多张 GPU 合并，而是在每张 GPU 内开出
 
 ### ZB-V schedule
 
-![ZB-V schedule原理](images/10pipeline06.png)
+![ZB-V schedule原理](./images/10pipeline06.png)
 
 #### 核心思想：
 
@@ -255,7 +255,7 @@ ZB 系列的关键创新是把反向传播拆成两部分：B<sub>in</sub>：对
 
 ### Hanayo wave-like pipeline
 
-![Hanayo wave-like原理](images/10pipeline07.png)
+![Hanayo wave-like原理](./images/10pipeline07.png)
 
 
 #### 核心思路：

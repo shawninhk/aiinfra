@@ -30,12 +30,12 @@ Author by: SingularityKChen
 
 当时，硬件基本上都是围绕 Intel x86 CPU 进行构建。为了能让计算机内部能够更好地传输数据，Intel 牵头设计了PCIe总线，在 2003 年推出 PCI Express (PCIe 1.0)，作为 PCI/AGP 的继任者。它采用高速串行点对点架构，可横向扩展 lane 数，逐渐成为统一的互联标准。
 
-![PCIe Platform View](images/07CCCluster_PCIe_Platform_View.png)
+![PCIe Platform View](./images/07CCCluster_PCIe_Platform_View.png)
 (image from [PCI-SIG®](https://pcisig.com/sites/default/files/files/30%20Years%20of%20PCI-SIG%20Innovation%20Webinar_Final%20Slides.pdf))
 
 从 2003 年至今（2025 年），PCIe 已经发布了 7 个版本，带宽每三年增长一倍，已从 PCIe 1.0 最高双向 8 GB/s 跃升为 PCIe 7.0 512 GB/s。
 
-![PCI-SIG History Graphic](images/07CCCluster_PCI-SIG_History_Graphic_Wide_RGB_0533.jpg)
+![PCI-SIG History Graphic](./images/07CCCluster_PCI-SIG_History_Graphic_Wide_RGB_0533.jpg)
 (image from [PCI-SIG®](https://pcisig.com/sites/default/files/files/PCI-SIG%2025%20Anniversary%20Infographic.pdf))
 
 按照这个趋势，PCIe 8.0/9.0/10.0 标准将会在 2028 年、2031 年和 2034 年公布，其带宽将会增加到最高 4 TB/s。
@@ -61,33 +61,33 @@ Author by: SingularityKChen
 
 2016 年，Pascal P100 首次把 NVLink 带到量产平台，支持多条链路成组以叠加带宽，这一做法直接奠定了后续各代 NVLink 以更多链路和更快带宽扩展规模的路线图。
 
-![NVLink at P100](images/07CCCluster_NVLink_P100.png)
+![NVLink at P100](./images/07CCCluster_NVLink_P100.png)
 
 Volta 实现与 IBM POWER9 做到 GPU 与 CPU 直连，在当时的 Power 系统里绕开了 GPU 与 CPU 间的 PCIe 限速。
 
-![NVLink DGX-1](images/07CCCluster_NVLink_DGX-1_topology.png)
+![NVLink DGX-1](./images/07CCCluster_NVLink_DGX-1_topology.png)
 
 同时，首次亮相的 NVLink Switch 把多条 NVLink 聚合成非阻塞交叉互联，让 16 卡 V100 的 DGX-2 能在单机内实现全互联，这是 NVLink 从点对点走向交换网络的关键转折。
 
-![DGX-2 with NVLink Switch](images/07CCCluster_NVLink_DGX-2_nvswitch_topology.png)
+![DGX-2 with NVLink Switch](./images/07CCCluster_NVLink_DGX-2_nvswitch_topology.png)
 
 Ampere 时代引入第三代 NVLink，DGX A100 机内用 6 颗第二代 NVSwitch 把 8 卡 A100 做成全互联拓扑；这一代的变化不在更大的 GPU 域，而在更干净的机内全互联与更高端口速率的工程化落地。
 
-![NVLink DGX A100 with NVSwitch](images/07CCCluster_NVLink_DGX_A100_topology.png)
+![NVLink DGX A100 with NVSwitch](./images/07CCCluster_NVLink_DGX_A100_topology.png)
 
 NVLink 原本只用于机箱内部通信。2022 年，Hopper 实现跨机箱的域：推出 **NVLink Switch System**，把 NVLink 从机内/机箱级扩展到跨节点、跨机箱的域，可将多达 256 块 H100 组成一个 NVLink HBD（High Bandwidth Domain，超带宽域）。 英伟达将这种以超大带宽互联 16 卡以上 GPU-GPU 的 Scale Up系统，称为超节点（SuperPod）。
 
-![NVLink Switch System](images/07CCCluster_NVLink-Switch-System-hopper.png)
+![NVLink Switch System](./images/07CCCluster_NVLink-Switch-System-hopper.png)
 
 与此同时，NVIDIA 也推出了**NVLink-C2C**，作为片间（die/package）一致性互联用于 Grace-Hopper 等超芯片（SuperChip）形态，把 CPU 大容量内存纳入可寻址空间，这两项共同把 NVLink 从机内总线升级为“机柜-级域内网络”的角色。
 
-![NVLink-C2C](images/07CCCluster_NVLink-C2C.png)
+![NVLink-C2C](./images/07CCCluster_NVLink-C2C.png)
 
 Blackwell 进入第五代 NVLink，NVL72 单柜把 72×Blackwell 组成一个超高带宽 NVLink 域、GPU 与 GPU 互通总带宽达 130 TB/s；单一 NVLink 域可扩展到 576 GPU 的上限。
 
 2025 年，NVIDIA 面向产业推出“半定制”开放计划 NVLink Fusion，其将已量产的 NVLink 规模化 fabric 与参考设计、IP 及认证生态开放给第三方 CPU/ASIC/XPU，使其能原生接入 NVLink 的 Scale-Up 域并与 Spectrum-X 等以太 Scale-Out 方案协同，构建异构混合 AI 基础设施。
 
-![NVLink Fusion](images/07CCCluster_NVLink-Fusion-Rack.jpg)
+![NVLink Fusion](./images/07CCCluster_NVLink-Fusion-Rack.jpg)
 
 > NVLink 从“多链路点对点”的板间直连开始，经由 **NVSwitch** 完成机内全互联，再以 **NVLink Switch System** 扩展到跨机箱的 **域内网络**；期间通过 **NVLink-C2C** 把 CPU 的大容量内存纳入可寻址空间，最终 Blackwell 把 NVLink 域做成“机柜为基本单元、可拼成数百 GPU 的统一加速器”。这也是其从单机 Scale-Up 向“机柜级 Scale-Up”的关键跨越。
 
