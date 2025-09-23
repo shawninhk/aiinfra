@@ -16,11 +16,11 @@
 把下面每一层的计算单独分开一个三级标题，单独用公式呈现，不要大模型的了列表方式
 
 !!!!!!!!!
-除了通用的GPT 模型结构以外，把当前经典的几个模型 LLAMA4、DeepSeek3、Qwen3、Grok4 的模型结构和参数量计算拿出来看，去深入到模型结构的真正计算。
+除了通用的 GPT 模型结构以外，把当前经典的几个模型 LLAMA4、DeepSeek3、Qwen3、Grok4 的模型结构和参数量计算拿出来看，去深入到模型结构的真正计算。
 
 ### Embedding 层参数
 
-**Token Embedding**：矩阵$W_t \in \mathbb{R}^{vocab\_size \times hidden\_size}$，参数量为：
+**Token Embedding**：矩阵 $W_t \in \mathbb{R}^{vocab\_size \times hidden\_size}$，参数量为：
 
 $$P_{TE} = vocab\_size \times hidden\_size$$
 
@@ -29,7 +29,7 @@ $$P_{TE} = vocab\_size \times hidden\_size$$
 - **Transformer Block（每层）** 每个 Block 主要由一个带残差连接的注意力模块和一个带残差连接的前馈网络（FFN）模块组成，每个模块前都配有 LayerNorm。
     - **LayerNorm**：对特征进行标准化：$y = \frac{x - \mathbb{E}[x]}{\sqrt{\mathbb{V}ar[x] + \epsilon}} \cdot \gamma + \beta$。包含两个可训练向量：增益 $\gamma$ 和偏置 $\beta$，形状均为 $[hidden\_size]$。每层有两个 LayerNorm（Attn 和 FFN 前各一个），因此参数量为： $P_{LN} = 2 \times 2 \times hidden\_size = 4 \cdot hidden\_size$ （通常因其占比较小，在估算总量时可忽略不计）
     - **注意力模块 (Attention Module)**：
-	    - 一个最简单的Single-Head Attention模块前向计算过程如下： 
+	    - 一个最简单的 Single-Head Attention 模块前向计算过程如下： 
 			    ![](./images/05TrainingMemory02.png)
 			* 输入： $X \in \mathbb R^{batch\_ size \times seq\_len \times hidden\_size}$ 
 			* Linear Proj： $W_{Q,K,V} \in \mathbb R^{hidden\_size \times 3 hidden\_size}$ $[Q,K,V] = XW_{Q,K,V} \in \mathbb R^{batch\_size \times seq\_len \times 3hidden\_size}$
@@ -44,8 +44,8 @@ $$P_{TE} = vocab\_size \times hidden\_size$$
 	    - 计算流程如下：
 		    - 输入：$X \in \mathbb R^{batch\_ size \times seq\_len \times hidden\_size}$
 		    - 第一层：$W_1 \in \mathbb R^{hidden\_size \times h'}$
-		    - 第二层： $W_2 \in \mathbb R^{h' \times hidden\_size}$,通常 $h'$取 $4hidden\_size$ 
-		    - 输出：$GELU(XW_1)W_2$ 其中GeLU 不贡献参数
+		    - 第二层： $W_2 \in \mathbb R^{h' \times hidden\_size}$,通常 $h'$ 取 $4hidden\_size$ 
+		    - 输出：$GELU(XW_1)W_2$ 其中 GeLU 不贡献参数
         - **Dropout**：同样，FFN 中的 Dropout **不引入可训练参数**。 因此，FFN 参数量为： 
 	$$\begin{align}
 		P_{FFN} \nonumber\\
@@ -70,7 +70,7 @@ $$
 !!!!!!!!
 现在都用 FP8/FP6 混合精度训练了，了解最新的技术，然后补充详细内容
 
-计算机中的浮点数遵循 IEEE 754 标准，由符号位 $S$、指数位$E$和尾数位$M$组成，下图是FP16的IEEE 754表示。
+计算机中的浮点数遵循 IEEE 754 标准，由符号位 $S$、指数位 $E$ 和尾数位 $M$ 组成，下图是 FP16 的 IEEE 754 表示。
 
 ![](./images/05TrainingMemory03.png)
 
@@ -80,7 +80,7 @@ $$
 (-1)^{\text{符号位}} \times (1.\text{尾数}) \times 2^{(\text{指数} - \text{偏置})}
 $$
 
-其中，记指数位的bit数为$k$, 偏置值：$2^{k-1}-1$。
+其中，记指数位的 bit 数为 $k$, 偏置值：$2^{k-1}-1$。
 
 **指数位**决定了数值的**动态范围**（能表示的最大最小值），**尾数位**决定了数值的**精度**（有效数字位数）。更多的指数位意味着能表示更大或更小的数值，更多的尾数位意味着更高的精度。
 现代深度学习中常用的数值精度格式如下：
@@ -100,7 +100,7 @@ $$
 !!!!!!!
 大模型要做性能优化，优化哪部分？深度学习了解
 
-模型训练中，GPU显存的消耗远不止模型参数本身。对于一个拥有 ϕ 个参数的模型，一次完整的训练迭代（Step）所产生的显存占用可以系统地分为以下几个核心部分。理解这些组成有助于进行有效的显存优化和模型部署。
+模型训练中，GPU 显存的消耗远不止模型参数本身。对于一个拥有 ϕ 个参数的模型，一次完整的训练迭代（Step）所产生的显存占用可以系统地分为以下几个核心部分。理解这些组成有助于进行有效的显存优化和模型部署。
 
 ### 静态显存占用分析
 
@@ -113,20 +113,20 @@ $$
 	- **参数内存**：$2\phi$ 字节
 2. 梯度显存 (Gradients)
 	反向传播过程中，需要为每个参数计算并存储一个梯度值 $g_t = \frac{\partial \mathcal{L}}{\partial \theta}$：
-	- 每个参数对应1个梯度值：共 $\phi$ 个梯度值
-	- 梯度精度：通常使用FP32
+	- 每个参数对应 1 个梯度值：共 $\phi$ 个梯度值
+	- 梯度精度：通常使用 FP32
 	- 梯度内存：$2\phi$ 字节
 3. 优化器状态显存 (Optimizer States)
-	Adam优化器为每个参数维护两个指数移动平均量：
+	Adam 优化器为每个参数维护两个指数移动平均量：
 	- **一阶动量 $m_t^{(i)}$**：存储该参数梯度的指数移动平均
 	    - 初始化：$m_0^{(i)} = 0$
 	    - 更新公式：$m_t^{(i)} = \beta_1 m_{t-1}^{(i)} + (1-\beta_1) g_t^{(i)}$
-	    - 数据类型：FP32（4字节）
+	    - 数据类型：FP32（4 字节）
 	    - 作用：提供动量，帮助优化器在梯度方向上保持惯性
 	- **二阶动量 $v_t^{(i)}$**：存储该参数梯度平方的指数移动平均
 	    - 初始化：$v_0^{(i)} = 0$
 	    - 更新公式：$v_t^{(i)} = \beta_2 v_{t-1}^{(i)} + (1-\beta_2) (g_t^{(i)})^2$
-	    - 数据类型：FP32（4字节）
+	    - 数据类型：FP32（4 字节）
 	    - 作用：自适应调整学习率，对频繁更新的参数使用较小学习率
 	- 优化器内存：$8\phi$ 字节
 
@@ -151,7 +151,7 @@ Mem\_{static} \nonumber\\
 
    * 残差连接的结果不属于必须存储的激活值，因其梯度计算仅依赖于该分支内的中间结果。例如，对于 $y = x + f_\theta(x)$，在计算 $\partial y / \partial \theta$ 时，仅需 $f_\theta(x)$ 内部的前向缓存。
 
-   *  Dropout 所使用的掩码矩阵（Mask Matrix）属于激活值，需在前向时保存。通常掩码矩阵以 Byte 类型存储（1字节），而中间激活值若为 FP16/BF16 则占用 2 字节。
+   *  Dropout 所使用的掩码矩阵（Mask Matrix）属于激活值，需在前向时保存。通常掩码矩阵以 Byte 类型存储（1 字节），而中间激活值若为 FP16/BF16 则占用 2 字节。
 
 	下图中紫色图标标识出了需要存储的激活张量（不考虑 Embedding 层，并忽略 LayerNorm 的均值与方差所占的约 $2bs$ 字节）：
 			![](./images/05TrainingMemory04.png)
@@ -166,9 +166,9 @@ $$\begin{align}
 		
 2. 其他显存开销
 	包括各种临时内存分配：
-   - 通信缓冲区：分布式训练中的all-reduce操作
-   - 内存碎片：GPU内存分配产生的碎片
-   - CUDA上下文：CUDA运行时的开销
+   - 通信缓冲区：分布式训练中的 all-reduce 操作
+   - 内存碎片：GPU 内存分配产生的碎片
+   - CUDA 上下文：CUDA 运行时的开销
 根据经验，这类额外显存占用可大致估算为模型参数内存的 $1.X$ 倍，即 $2.X\phi$ 字节
 
 ## 总结与思考

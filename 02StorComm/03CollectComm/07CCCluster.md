@@ -14,7 +14,7 @@ Author by: SingularityKChen
 
 大模型训练需要数万算力芯片紧密协同，并行处理海量数据，这些算力卡间必须持续高速交换梯度、参数等数据；没有高性能互联架构，算力卡会因网络瓶颈而无法线性扩展性能。
 
-为突破通信瓶颈，Scale-Up 与 Scale-Out 两种体系架构被结合运用： **Scale-Up（纵向扩展）** 指在单个超级节点/服务器内集成尽可能多的加速器，通过高速互联总线使其看似“一台机器”，减少节点内通信延迟； **Scale-Out（横向扩展）** 则通过集群网络将多台服务器相连，实现大规模扩容。传统上，HPC 领域更多采用Scale-Out 的集群方式，但在大模型训练中，单节点内部署更多算力卡（Scale-Up）可以显著降低部分通信开销，从而提升整体效率。
+为突破通信瓶颈，Scale-Up 与 Scale-Out 两种体系架构被结合运用： **Scale-Up（纵向扩展）** 指在单个超级节点/服务器内集成尽可能多的加速器，通过高速互联总线使其看似“一台机器”，减少节点内通信延迟； **Scale-Out（横向扩展）** 则通过集群网络将多台服务器相连，实现大规模扩容。传统上，HPC 领域更多采用 Scale-Out 的集群方式，但在大模型训练中，单节点内部署更多算力卡（Scale-Up）可以显著降低部分通信开销，从而提升整体效率。
 
 因此，大模型训练集群往往由多算力卡超级节点（SuperPod）（如华为 CloudMatrix 384 超节点由 384 张 910C 芯片构成）通过高速网络互联组成，两种架构优势互补。
 
@@ -24,11 +24,11 @@ Author by: SingularityKChen
 
 ### PCIe 诞生的背景
 
-在上世纪90 年代末，计算机 I/O 总线的发展遇到了瓶颈：传统 PCI（Peripheral Component Interconnect）总线采用并行架构，带宽在多设备共享下容易发生争用，而且随着频率提升，时钟同步和布线的复杂度急剧增加，PCI 2.0 最高 66 MHz 的频率仅能提供 533 MB/s 的带宽；与此同时，AGP（Accelerated Graphics Port）虽然为显卡带来了更高带宽，但它只服务于 GPU，无法统一所有 I/O 需求。
+在上世纪 90 年代末，计算机 I/O 总线的发展遇到了瓶颈：传统 PCI（Peripheral Component Interconnect）总线采用并行架构，带宽在多设备共享下容易发生争用，而且随着频率提升，时钟同步和布线的复杂度急剧增加，PCI 2.0 最高 66 MHz 的频率仅能提供 533 MB/s 的带宽；与此同时，AGP（Accelerated Graphics Port）虽然为显卡带来了更高带宽，但它只服务于 GPU，无法统一所有 I/O 需求。
 
 那时，行业亟需一种统一的高速点对点互联方式，为每个设备提供独立链路，避免带宽争用，同时利用串行化（SerDes）替代并行总线以便提升速率，并支持热插拔和可扩展的 lane 设计（x1/x4/x8/x16），从而在灵活性和扩展性上满足未来的发展需求。
 
-当时，硬件基本上都是围绕 Intel x86 CPU 进行构建。为了能让计算机内部能够更好地传输数据，Intel 牵头设计了PCIe总线，在 2003 年推出 PCI Express (PCIe 1.0)，作为 PCI/AGP 的继任者。它采用高速串行点对点架构，可横向扩展 lane 数，逐渐成为统一的互联标准。
+当时，硬件基本上都是围绕 Intel x86 CPU 进行构建。为了能让计算机内部能够更好地传输数据，Intel 牵头设计了 PCIe 总线，在 2003 年推出 PCI Express (PCIe 1.0)，作为 PCI/AGP 的继任者。它采用高速串行点对点架构，可横向扩展 lane 数，逐渐成为统一的互联标准。
 
 ![PCIe Platform View](./images/07CCCluster_PCIe_Platform_View.png)
 (image from [PCI-SIG®](https://pcisig.com/sites/default/files/files/30%20Years%20of%20PCI-SIG%20Innovation%20Webinar_Final%20Slides.pdf))
@@ -75,7 +75,7 @@ Ampere 时代引入第三代 NVLink，DGX A100 机内用 6 颗第二代 NVSwitch
 
 ![NVLink DGX A100 with NVSwitch](./images/07CCCluster_NVLink_DGX_A100_topology.png)
 
-NVLink 原本只用于机箱内部通信。2022 年，Hopper 实现跨机箱的域：推出 **NVLink Switch System**，把 NVLink 从机内/机箱级扩展到跨节点、跨机箱的域，可将多达 256 块 H100 组成一个 NVLink HBD（High Bandwidth Domain，超带宽域）。 英伟达将这种以超大带宽互联 16 卡以上 GPU-GPU 的 Scale Up系统，称为超节点（SuperPod）。
+NVLink 原本只用于机箱内部通信。2022 年，Hopper 实现跨机箱的域：推出 **NVLink Switch System**，把 NVLink 从机内/机箱级扩展到跨节点、跨机箱的域，可将多达 256 块 H100 组成一个 NVLink HBD（High Bandwidth Domain，超带宽域）。 英伟达将这种以超大带宽互联 16 卡以上 GPU-GPU 的 Scale Up 系统，称为超节点（SuperPod）。
 
 ![NVLink Switch System](./images/07CCCluster_NVLink-Switch-System-hopper.png)
 
@@ -107,11 +107,11 @@ Blackwell 进入第五代 NVLink，NVL72 单柜把 72×Blackwell 组成一个超
 
 ### Scale-Up fabric 与其他 Scale-Up 协议
 
-Scale-Up 的 fabric 首先要在一个受限物理域里，把几十到上千个加速器组织成统一的计算与内存池。这要求链路具备内存语义（load/store、原子操作）以支撑直接访存，而不是仅靠消息传递；并要求在端到端极低时延下提供有序或可选无序的可靠传输与无损链路（链路层重传或PFC/CBFC），以保证同步与集合通信的确定性。
+Scale-Up 的 fabric 首先要在一个受限物理域里，把几十到上千个加速器组织成统一的计算与内存池。这要求链路具备内存语义（load/store、原子操作）以支撑直接访存，而不是仅靠消息传递；并要求在端到端极低时延下提供有序或可选无序的可靠传输与无损链路（链路层重传或 PFC/CBFC），以保证同步与集合通信的确定性。
 
 除了 NVLink 之前，目前业内还有 ETH-X、OISA、SUE、UALink、UB 等协议。
 
-Broadcom 在 2025 年 4 月的 OCP 全球峰会上发布了SUE，以解决标准以太网在横向扩展方面的问题。
+Broadcom 在 2025 年 4 月的 OCP 全球峰会上发布了 SUE，以解决标准以太网在横向扩展方面的问题。
 
 UALink 1.0 将内存语义作为核心能力，规定读、写与原子事务，由软件维持一致性，同时支持 1024 个端点的单域扩展；其物理与链路层基于 200G/lane（212.5 GT/s 信令）SerDes。
 
@@ -128,5 +128,5 @@ UALink 1.0 将内存语义作为核心能力，规定读、写与原子事务，
 - [NVLink - NVIDIA - WikiChip](https://en.wikichip.org/wiki/nvidia/nvlink)
 - [Scale-up fabrics](https://blog.apnic.net/2025/06/03/scale-up-fabrics/)
 - [Integrating Semi-Custom Compute into Rack-Scale Architecture with NVIDIA NVLink Fusion](https://developer.nvidia.com/blog/integrating-custom-compute-into-rack-scale-architecture-with-nvidia-nvlink-fusion)
-- [一文看懂英伟达的NVLink技术, 鲜枣课堂, 20250520](https://mp.weixin.qq.com/s/gkm23FxWCTR4UFZYJ3onEw?poc_token=HGKQLmijVfsZp_r8vUDpiC8N_5C0mhuAhZV9LXx2)
+- [一文看懂英伟达的 NVLink 技术, 鲜枣课堂, 20250520](https://mp.weixin.qq.com/s/gkm23FxWCTR4UFZYJ3onEw?poc_token=HGKQLmijVfsZp_r8vUDpiC8N_5C0mhuAhZV9LXx2)
 - [The Path Is Set For PCI-Express 7.0 In 2025](https://www.nextplatform.com/2022/06/23/the-path-is-set-for-pci-express-7-0-in-2025/)
