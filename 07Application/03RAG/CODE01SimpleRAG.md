@@ -1,6 +1,6 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# Qwen3-0.7B进行RAG代码实践
+# CODE01:Qwen3-0.7B进行RAG代码实践
 
 > Author by:
 
