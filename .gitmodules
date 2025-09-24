@@ -1,0 +1,3 @@
+[submodule "05Infer/06CompDistill/third-party/bitsandbytes"]
+	path = 05Infer/06CompDistill/third-party/bitsandbytes
+	url = git@github.com:bitsandbytes-foundation/bitsandbytes.git
