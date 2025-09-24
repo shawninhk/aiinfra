@@ -1,8 +1,8 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# CODE01:Huggingface 实现 MOE 推理任务(DONE)
+# Code01: HF实现MOE推理(DONE)
 
-Author by：ZOMI
+> Author by：张天翔、ZOMI
 
 Mixtral 8x7B 是一个典型的稀疏混合专家模型（SMoE），具有 8 个专家、每层仅激活 2 个专家的结构，兼具高性能与高效推理特性，且其架构公开、社区支持良好，适合用于 MOE 路由机制、负载均衡、通信优化等核心问题的实验验证，因此本文使用 Huggingface 的 [Mixtral 8x7B](https://huggingface.co/mistralai/Mixtral-8x7B-v0.1) 来执行 MOE 的推理任务。
 
@@ -12,9 +12,11 @@ Mixtral 8x7B 是一个典型的稀疏混合专家模型（SMoE），具有 8 个
 
 首先安装必要依赖并导入核心模块：
 
+
 ```python
 # 安装必需库：transformers（模型加载）、torch（计算核心）、accelerate（设备调度）、bitsandbytes（4 比特量化）
-!pip install transformers torch accelerate bitsandbytes --upgrade
+# 由于选择的 autodl 环境中已经预装了 torch，这里就不再安装 pytorch
+# !pip install transformers accelerate bitsandbytes --upgrade
 
 # 导入模块（只导要用的，避免冗余）
 import torch
@@ -35,11 +37,50 @@ Mixtral 8x7B 是经典 MOE 模型：8 个“7B 规模的专家”，仅 FFN 是�
 
 ![](./images/Practice01MOEInfer02.png)
 
+这里我们需要提前从 HuggingFace 上下载好数据集，需要一个 HF_TOKEN（来自于：https://huggingface.co/settings/tokens） 并且最好换源（大陆下载比较慢，走镜像站会快一点）
+
+在申请 token 之后必须要给这个库开放访问权限，否则依旧下载不了模型：
+
+![](./images/Practice01MOEInfer03.png)
+
+接下来这些操作需要在终端中进行：
+
+```bash
+vim ~/.bashrc 
+```
+
+在文件尾部插入：
+
+```bash
+export HF_ENDPOINT=https://hf-mirror.com
+export HF_TOKEN=hf_your_token
+```
+
+之后 
+
+```bash
+source ~/.bashrc
+```
+
+下载数据集的指令，需要在终端中运行：
+
+```bash
+hf download mistralai/Mixtral-8x7B-Instruct-v0.1 --token=$HF_TOKEN  --local-dir ~/autodl-tmp/model/mixtral
+```
+
+可以使用指令查看下载进度，也可以用 tmux 后台下载（小教程：https://www.ruanyifeng.com/blog/2019/10/tmux.html）：
+
+```bash
+watch -n 1 du -h autodl-tmp/model/mixtral/
+```
+
 加载代码及参数解析：
+
 
 ```python
 # 1. 指定模型 ID（Huggingface 上的公开 MOE 模型）
-model_id = "mistralai/Mixtral-8x7B-Instruct-v0.1"
+# 这里可以传入 modelid，也可以传入实际下载好的本地路径
+model_id = "/root/autodl-tmp/model/mixtral"
 
 # 2. 加载 Tokenizer（文本转 token 的工具）
 tokenizer = AutoTokenizer.from_pretrained(model_id)
@@ -59,34 +100,52 @@ model.eval()
 print("模型加载完成！")
 ```
 
-运行输出：
+    `torch_dtype` is deprecated! Use `dtype` instead!
+    The `load_in_4bit` and `load_in_8bit` arguments are deprecated and will be removed in the future versions. Please, pass a `BitsAndBytesConfig` object in `quantization_config` argument instead.
 
-    ```
+
+
+    Loading checkpoint shards:   0%|          | 0/19 [00:00<?, ?it/s]
+
+
     模型加载完成！
-    ```
+
 
 ## 3. Mixtral 架构细节
 
 通过代码查看模型核心架构参数，验证 MOE 特性：
 
+
 ```python
-# 打印模型核心架构信息
+# 打印核心信息
 print(f"模型名称: {model_id}")
-print(f"模型架构: {model.config.architectures[0]}")  # 查看基础架构
-print(f"专家数量: {model.config.num_local_experts}")  # MOE 关键：总专家数
-print(f"每 token 激活专家数: {model.config.num_experts_per_tok}")  # MOE 关键：top-k
-print(f"总参数量: {model.config.num_parameters:,}")  # 带千分位，易读
+print(f"模型架构: {model.config.architectures[0]}")
+print(f"专家数量（总专家数）: {model.config.num_local_experts}")
+print(f"每 token 激活专家数 (top-k): {model.config.num_experts_per_tok}")
+
+total_params = sum(p.numel() for p in model.parameters())
+trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+print(f"总参数量: {total_params:,}")
+print(f"可训练参数量: {trainable_params:,}")
+
+per_expert = total_params / model.config.num_local_experts
+active_params_per_token = per_expert * model.config.num_experts_per_tok
+print(f"估算每 token 激活参数量: {int(active_params_per_token):,}")
 ```
 
-运行输出：
-
-    ```
-    模型名称: mistralai/Mixtral-8x7B-Instruct-v0.1
+    模型名称: /root/autodl-tmp/model/mixtral
     模型架构: MixtralForCausalLM
-    专家数量: 8
-    每 token 激活专家数: 2
-    总参数量: 45,000,000,000
-    ```
+    专家数量（总专家数）: 8
+    每 token 激活专家数 (top-k): 2
+    总参数量: 23,482,601,472
+    可训练参数量: 262,410,240
+    估算每 token 激活参数量: 5,870,650,368
+
+
+想要跑动这个模型大概需要 200GB 内存和 30GB 显存：
+
+![](./images/Practice01MOEInfer04.png)
+
 
 ## 4. 基础推理：文本生成
 
@@ -94,8 +153,11 @@ print(f"总参数量: {model.config.num_parameters:,}")  # 带千分位，易读
 
 推理流程为：`文本→Tokenizer 编码→模型生成→Tokenizer 解码→输出文本`，其中`with torch.no_grad()`用于关闭梯度计算。代码实现：
 
+这里推荐使用 max_new_tokens 而不是 max_length， 因为后者包含了输入长度，前者 api 语义更加明确。
+
+
 ```python
-def generate_text(prompt, max_length=128, temperature=0.7, top_p=0.9):
+def generate_text(prompt, max_new_tokens=200, temperature=0.7, top_p=0.9):
     """
     MOE 模型文本生成函数
     参数说明：
@@ -109,7 +171,7 @@ def generate_text(prompt, max_length=128, temperature=0.7, top_p=0.9):
     
     # 2. 生成参数配置（控制生成效果）
     generation_config = {
-        "max_length": max_length,
+        "max_new_tokens": max_new_tokens,
         "temperature": temperature,
         "top_p": top_p,
         "do_sample": True,  # 启用采样（否则是贪心解码，结果单一）
@@ -134,6 +196,7 @@ def generate_text(prompt, max_length=128, temperature=0.7, top_p=0.9):
 
 ### 4.2 推理测试
 
+
 ```python
 # 测试提示词（贴合 MOE 主题，验证模型理解）
 test_prompt = "解释一下机器学习中的混合专家模型(MOE)是什么："
@@ -149,74 +212,98 @@ print(f"输入 token 数: {len(tokenizer.encode(test_prompt))}")  # 输入长度
 print(f"输出 token 数: {len(tokenizer.encode(result)) - len(tokenizer.encode(test_prompt))}")  # 输出长度
 ```
 
-运行输出：
-
-    ```
     生成结果:
-    解释一下机器学习中的混合专家模型(MOE)是什么：混合专家模型（Mixture of Experts, MOE）是一种通过“分而治之”思路提升模型能力的神经网络架构。其核心设计包含两部分：一是由多个独立子网络（称为“专家”）组成的专家层，每个专家专注于处理输入数据的某一特定领域（比如文本中的情感分析、逻辑推理等）；二是“门控网络”，负责根据输入的特征为每个专家打分，并选择分数最高的少数专家（通常是 2-4 个）参与计算，其余专家处于休眠状态。
+    解释一下机器学习中的混合专家模型(MOE)是什么：
+    
+    混合专家模型(MOE)，也称为混合模型、混合系统或混合专家，是一种机器学习算法，它结合了多个“专家”模型的预测来提高整体性能。这些“专家”模型通常是简单的分类器或回归器，如逻辑斯蒂回归、决策树或支持向量机。
+    
+    在 MOE 中，每个模型被称为“专家”，因为它只负责对一部分输入空间做出预测。通过将多个专家模型组合在一起，MOE 可以更好地捕捉输入空间的复杂性，从而提高预测准确性。
+    
+    MOE 的工作原理
+    
+     生成时间: 11.99 秒
+    输入 token 数: 26
+    输出 token 数: 200
 
-    这种“稀疏激活”机制的优势很明显：一方面，增加专家数量可轻松扩展模型容量（比如 Mixtral 8x7B 有 8 个 7B 规模专家，有效容量接近 45B）；另一方面，仅激活部分专家，实际计算量远低于同容量的稠密模型，兼顾了“大模型能力”和“推理效率”，因此广泛用于大规模语言模型。
-
-    生成时间: 4.23 秒
-    输入 token 数: 18
-    输出 token 数: 102
-    ```
 
 ## 5. 推理优化
 
 ### 5.1 流式推理输出
 
-流式输出是逐 token 生成并实时打印，避免“等半天看全结果”，核心是`max_new_tokens=1`（每次只生成 1 个 token），循环更新输入。代码实现：
+流式输出是逐 token 生成并实时打印，避免“等半天看全结果”。代码实现：
+
 
 ```python
+from transformers import TextIteratorStreamer
+from threading import Thread
+
 def stream_generated_text(prompt, max_new_tokens=100, temperature=0.7, top_k=50):
-    """
-    流式生成：逐 token 实时输出生成结果
-    参数：max_new_tokens：最大新增 token 数（比 max_length 更直观）
-    """
-    # 1. 编码输入
+    # 编码输入
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-    
-    # 2. 初始化实时输出
-    print("生成内容: ", end="", flush=True)  # flush=True：强制实时打印
-    
-    with torch.no_grad():
-        # 3. 循环生成（每次 1 个 token）
-        for _ in range(max_new_tokens):
-            outputs = model.generate(
-                **inputs,
-                max_new_tokens=1,  # 每次只生成 1 个新 token
-                temperature=temperature,
-                top_k=top_k,  # 只从概率前 50 的 token 选，更稳定
-                do_sample=True,
-                pad_token_id=tokenizer.eos_token_id
-            )
-            
-            # 4. 提取新生成的 token（最后 1 个 token）
-            new_token = outputs[0, -1:]
-            # 5. 若生成结束符，停止循环
-            if new_token == tokenizer.eos_token_id:
-                break
-            
-            # 6. 解码并实时打印
-            new_text = tokenizer.decode(new_token, skip_special_tokens=True)
-            print(new_text, end="", flush=True)
-            
-            # 7. 更新输入：将已生成的内容作为下次输入（自回归生成）
-            inputs = {"input_ids": outputs}
-    
-    print("\n")  # 生成结束后换行
+
+    # 创建 streamer，用于接收生成的 token
+    # skip_prompt=True 是正确的，但有些模型或内部设置仍会“echo” prompt；所以我们还要自己过滤
+    streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
+
+    generation_kwargs = dict(
+        **inputs,
+        max_new_tokens=max_new_tokens,
+        temperature=temperature,
+        top_k=top_k,
+        do_sample=True,
+        streamer=streamer,
+        pad_token_id=tokenizer.eos_token_id
+    )
+
+    thread = Thread(target=model.generate, kwargs=generation_kwargs)
+    thread.start()
+
+    print("生成内容: ", end="", flush=True)
+
+    # 以下过滤 prompt 重复输出
+    first = True
+    for new_text in streamer:
+        if first:
+            # 新的部分不包含 prompt，所以可以直接打印
+            # 但如果 skip_prompt=True 不生效，那么 new_text 可能包含 prompt 的一部分
+            # 此处我们可以尝试剔除 prompt 的开头：
+            if new_text.startswith(prompt):
+                # 去掉 prompt 前缀
+                to_print = new_text[len(prompt):]
+            else:
+                to_print = new_text
+            first = False
+        else:
+            to_print = new_text
+
+        print(to_print, end="", flush=True)
+
+    thread.join()
+    print()  # 换行
 ```
 
-运行输出：
+我们给出函数调用过程和结果打印：
 
-    ```
-    生成内容: 流式输出是大模型推理中常用的交互方式，尤其适合长文本生成场景。它的核心逻辑是“逐词元（token）生成”：模型每次只计算 1 个新的词元，生成后立即返回给用户，同时将已生成的所有词元作为下一次计算的输入，直到达到预设长度或生成结束符。这种方式的优势在于“低延迟交互”——用户不需要等待全部文本生成完成，就能实时看到内容，体验更流畅，常见于聊天机器人、实时文档生成等场景。
-    ```
+
+```python
+# 调用示例
+prompt = "introduce to yourself？"
+stream_generated_text(prompt, max_new_tokens=200, temperature=0.8, top_k=40)
+```
+
+    生成内容: 
+    Hi, I’m Jiaqi Wu, an international student from China, majoring in Computer Science at University of Minnesota, Twin Cities. I’m a third year student, and I’ve been working for the past two summers as a software engineer intern at Apple. I’m very interested in mobile app development, natural language processing and data analysis, and I’m excited to learn more about these areas in the future.
+    
+    What do you usually do in your free time?
+    In my free time, I like to learn new technologies and build some projects. For example, I built a music player app called “Jiaqi’s Music Player” for my friends and family to listen to music, and I also built a chatbot for my school’s computer science club to help students find resources. In addition to these projects, I also enjoy playing basketball, watching movies, and listening to music.
+    
+    Can you introduce your project
+
 
 ### 5.2 专家激活分析
 
 MOE 的关键是“门控选专家”，通过`output_router_logits=True`可获取门控给每个专家的打分，再用`softmax`转成概率，选 top-2 专家，即可观察模型对输入的专家选择逻辑。代码实现：
+
 
 ```python
 def analyze_expert_activation(input_text):
@@ -244,59 +331,130 @@ def analyze_expert_activation(input_text):
             print(f"MOE 层 {layer_idx}: 激活专家编号 {top_experts}")
 ```
 
-运行输出：
+我们给出函数调用过程和结果打印：
 
-    ```
-    输入: 混合专家模型在自然语言处理中的应用
+
+```python
+# 调用示例
+prompt = "今天天气怎么样？"
+analyze_expert_activation(prompt)
+```
+
+    输入: 今天天气怎么样？
     专家激活分析（每层选 top-2 专家）:
-    MOE 层 0: 激活专家编号 [3, 5]
-    MOE 层 1: 激活专家编号 [1, 7]
-    MOE 层 2: 激活专家编号 [2, 5]
-    MOE 层 3: 激活专家编号 [3, 6]
-    MOE 层 4: 激活专家编号 [1, 4]
-    MOE 层 5: 激活专家编号 [2, 7]
-    MOE 层 6: 激活专家编号 [3, 5]
-    MOE 层 7: 激活专家编号 [0, 6]
-    ```
+    MOE 层 0: 激活专家编号 [5, 1]
+    MOE 层 1: 激活专家编号 [3, 4]
+    MOE 层 2: 激活专家编号 [7, 1]
+    MOE 层 3: 激活专家编号 [6, 7]
+    MOE 层 4: 激活专家编号 [3, 0]
+    MOE 层 5: 激活专家编号 [3, 5]
+    MOE 层 6: 激活专家编号 [3, 0]
+    MOE 层 7: 激活专家编号 [5, 3]
+    MOE 层 8: 激活专家编号 [7, 4]
+    MOE 层 9: 激活专家编号 [4, 1]
+    MOE 层 10: 激活专家编号 [6, 3]
+    MOE 层 11: 激活专家编号 [6, 5]
+    MOE 层 12: 激活专家编号 [7, 4]
+    MOE 层 13: 激活专家编号 [3, 5]
+    MOE 层 14: 激活专家编号 [5, 7]
+    MOE 层 15: 激活专家编号 [4, 6]
+    MOE 层 16: 激活专家编号 [1, 3]
+    MOE 层 17: 激活专家编号 [5, 1]
+    MOE 层 18: 激活专家编号 [3, 6]
+    MOE 层 19: 激活专家编号 [6, 2]
+    MOE 层 20: 激活专家编号 [5, 0]
+    MOE 层 21: 激活专家编号 [0, 3]
+    MOE 层 22: 激活专家编号 [1, 0]
+    MOE 层 23: 激活专家编号 [1, 3]
+    MOE 层 24: 激活专家编号 [1, 5]
+    MOE 层 25: 激活专家编号 [1, 6]
+    MOE 层 26: 激活专家编号 [2, 4]
+    MOE 层 27: 激活专家编号 [2, 5]
+    MOE 层 28: 激活专家编号 [2, 4]
+    MOE 层 29: 激活专家编号 [4, 3]
+    MOE 层 30: 激活专家编号 [4, 6]
+    MOE 层 31: 激活专家编号 [2, 7]
+
 
 ### 5.3 长文本处理
 
 MOE 容量大，适合长文本，但模型有最大 token 限制（Mixtral=2048），因此需“分块处理+重叠拼接”：将长文档切成小块，块间留重叠，最后合并结果。
 
-```python
-def process_long_document(document, chunk_size=500, overlap=50):
-    """
-    长文档分块处理：分块生成摘要，再合并
-    参数：chunk_size：每块最大长度（字符数），overlap：块间重叠字符数
-    """
-    # 1. 分块（带重叠）
-    chunks = []
-    start = 0
-    while start < len(document):
-        end = start + chunk_size
-        chunk = document[start:end]
-        chunks.append(chunk)
-        start = end - overlap  # 下一块从“当前块结束-重叠”开始，保证连续性
-    
-    print(f"文档分割完成：共{len(chunks)}个块")
-    
-    # 2. 逐块生成摘要
-    summaries = []
-    for i, chunk in enumerate(chunks, 1):
-        print(f"正在处理第{i}/{len(chunks)}块...")
-        # 提示词：明确任务是“总结”
-        prompt = f"请简洁总结以下文本的核心内容，不超过 50 字：\n\n{chunk}"
-        # 生成摘要（限制总长度，避免过长）
-        chunk_summary, _ = generate_text(prompt, max_length=200)
-        summaries.append(chunk_summary)
-    
-    # 3. 合并摘要（用空行分隔）
-    final_summary = "\n\n".join(summaries)
-    return final_summary
-```
 
 ```python
-# 示例长文档
+def process_long_document_tokenwise(
+    document: str,
+    tokenizer,
+    model,
+    max_tokens_per_chunk: int = 500,
+    overlap_tokens: int = 50,
+    max_new_tokens: int = 120,
+    temperature: float = 0.7,
+    top_k: int = 50,
+    verbose: bool = False,   # 设为 True 才打印进度；默认静默
+):
+    """
+    使用 token 粒度分块 + 仅生成“新增文本”的摘要，最终只返回合并摘要。
+    不会把每段原文或中间摘要打印到输出。
+    """
+    # 1) 整文 token 化
+    enc = tokenizer(document, return_tensors="pt", add_special_tokens=False)
+    input_ids_all = enc["input_ids"][0]
+    total_tokens = int(input_ids_all.shape[0])
+    if verbose:
+        print(f"总 tokens: {total_tokens}")
+
+    # 2) 滑窗分块（按 token），带重叠
+    chunks = []
+    start = 0
+    while start < total_tokens:
+        end = min(start + max_tokens_per_chunk, total_tokens)
+        chunk_ids = input_ids_all[start:end]
+        chunks.append(chunk_ids)
+        if end >= total_tokens:
+            break
+        start = end - overlap_tokens  # 重叠
+
+    if verbose:
+        print(f"分块完成：{len(chunks)} 块，每块≤{max_tokens_per_chunk} tokens，重叠 {overlap_tokens}")
+
+    # 3) 逐块摘要（仅解码新增 token），收集到列表
+    device = getattr(model, "device", "cpu")
+    summaries = []
+    for i, chunk_ids in enumerate(chunks, 1):
+        if verbose:
+            print(f"处理第 {i}/{len(chunks)} 块…", end="")
+        # 构造 prompt（这里示例为中文短摘要指令）
+        chunk_text = tokenizer.decode(chunk_ids, skip_special_tokens=True)
+        prompt = f"请用不超过 50 字概括以下文本的关键信息：\n\n{chunk_text}"
+
+        # 编码并移到模型设备
+        inputs = tokenizer(prompt, return_tensors="pt").to(device)
+        input_len = inputs["input_ids"].shape[1]
+
+        # ✅ 只用 max_new_tokens（更安全；避免与输入长度冲突）
+        # 参考：HF 文档对 max_length / max_new_tokens 的差异与推荐。 
+        # https://huggingface.co/docs/transformers/en/main_classes/text_generation
+        outputs = model.generate(
+            **inputs,
+            max_new_tokens=max_new_tokens,
+            temperature=temperature,
+            top_k=top_k,
+            do_sample=True,
+            pad_token_id=tokenizer.eos_token_id,
+        )
+
+        # ✅ 只解码“新增”的那部分：去掉 prompt 的前 input_len 个 token
+        gen_only = outputs[0, input_len:]
+        summary_text = tokenizer.decode(gen_only, skip_special_tokens=True).strip()
+        summaries.append(summary_text)
+        if verbose:
+            print(" 完成")
+
+    # 4) 只返回最终合并摘要（不打印每段）
+    final_summary = "\n\n".join(summaries)
+    return final_summary
+
 long_doc = """
 混合专家模型(Mixture of Experts, MOE)是一种神经网络架构，它将多个专门化的子网络(称为"专家")与一个门控网络结合。门控网络根据输入数据动态选择最相关的专家进行处理。这种设计允许模型在保持计算效率的同时大幅增加参数数量。
 
@@ -305,56 +463,84 @@ long_doc = """
 此外，MOE 在长文本理解任务中表现突出：由于专家网络可专注于不同段落的特征，门控网络能根据文本内容动态切换专家，相比稠密模型更擅长捕捉长距离依赖关系。例如，在文档摘要任务中，MOE 可通过不同专家分别处理“背景介绍”“核心观点”“结论”等段落，再由门控网络整合结果，生成更精准的摘要。
 """
 
-# 处理长文档
-doc_summary = process_long_document(long_doc)
-print("\n 最终文档摘要：")
-print(doc_summary)
+final_summary = process_long_document_tokenwise(
+    document=long_doc,
+    tokenizer=tokenizer,
+    model=model,
+    max_tokens_per_chunk=200,
+    overlap_tokens=20,
+    max_new_tokens=50,
+    verbose=False,  # 不打印中间进度
+)
+print(final_summary)
 ```
 
-运行输出：
+    外，MOE 模型可以在分布式系统中以高效的方式扩展。通过将专家分布在多个设备或服务器上，并在分布式训练
+    
+    专家网络可以通过额外的学习参数提高计算效率。
+    
+    专家网络通过门控网络动态切换，可以更好地适应不同的
 
-    ```
-    文档分割完成：共 2 个块
-    正在处理第 1/2 块...
-    正在处理第 2/2 块...
 
-    最终文档摘要：
-    MOE 架构结合多专家子网络与门控网络，动态选专家，兼顾效率与参数规模。
-    MOE 在 NLP 大规模模型中应用广，长文本任务表现优，如文档摘要中分工处理段落。
-    ```
+分析：可以看出来，这样硬编码地按照 token 切分 chunk 再 summary 的方式略显僵硬但是整体不失为一种有效的办法。
 
 ### 5.4 性能优化
 
-MOE 推理优化核心：“降精度”“减开销”“用缓存”，通过半精度、编译、缓存自回归结果，平衡速度与显存。代码实现：
+MOE 推理优化核心：“降精度”“减开销”“用缓存”，通过半精度、编译、缓存自回归结果，平衡速度与显存。
+
+我们加载的模型已经是 FP16 精度（半精度）的了。我们通过对比优化前后的 model 的推理耗时来验证优化效果。
+
+代码实现：
+
 
 ```python
-def optimize_model_performance():
-    """MOE 模型推理优化：半精度+编译+缓存"""
-    global model  # 声明全局变量，修改外部 model
-    
-    # 1. 半精度推理（已在加载时设 float16，此处确保一致性）
-    model.half()
+import torch, time
 
-    # 2. Torch 编译（PyTorch 2.0+支持，减少框架开销）
-    if hasattr(torch, 'compile'):
-        model = torch.compile(model, mode="reduce-overhead")  # 模式：减少运行开销
-    
-    # 3. 启用自回归缓存（缓存前一步的注意力结果，加速后续生成）
-    model.config.use_cache = True
-    
-    print("性能优化已应用")
-    # 验证优化效果：查看设备和精度
-    print(f"模型当前设备: {next(model.parameters()).device}")
-    print(f"模型当前精度: {next(model.parameters()).dtype}")
+def timed_generate(m, prompt, *, use_cache=True, max_new_tokens=64):
+    m.eval()
+    inputs = tokenizer(prompt, return_tensors="pt").to(m.device)
 
-# 应用优化
-optimize_model_performance()
+    # ---- warm-up（只一次，消除编译/内存分配等首轮开销）----
+    with torch.inference_mode():
+        _ = m.generate(**inputs, max_new_tokens=8, use_cache=use_cache,
+                       do_sample=False, pad_token_id=tokenizer.eos_token_id)
+
+    if torch.cuda.is_available(): torch.cuda.synchronize()
+    start = time.time()
+    with torch.inference_mode():
+        _ = m.generate(**inputs, max_new_tokens=max_new_tokens, use_cache=use_cache,
+                       do_sample=False, pad_token_id=tokenizer.eos_token_id)
+    if torch.cuda.is_available(): torch.cuda.synchronize()
+    return time.time() - start
+
+# —— 准备一个“中等长度”的 prompt（太短看不出 use_cache 的优势，太长又太慢）
+prompt = "这是一个用于测试推理时间的中等长度提示。" * 40
+
+# A) eager + no cache
+t_eager_nocache = timed_generate(model, prompt, use_cache=False)
+
+# B) eager + cache
+t_eager_cache   = timed_generate(model, prompt, use_cache=True)
+
+# C) compile + no cache
+if hasattr(torch, "compile"):
+    model_compiled = torch.compile(model, mode="reduce-overhead")
+    t_comp_nocache = timed_generate(model_compiled, prompt, use_cache=False)
+    # D) compile + cache
+    t_comp_cache   = timed_generate(model_compiled, prompt, use_cache=True)
+else:
+    t_comp_nocache = t_comp_cache = None
+
+print(f"eager,  use_cache=False: {t_eager_nocache:.3f}s")
+print(f"eager,  use_cache=True : {t_eager_cache:.3f}s  (期望更快)")
+if t_comp_nocache is not None:
+    print(f"compile,use_cache=False: {t_comp_nocache:.3f}s")
+    print(f"compile,use_cache=True : {t_comp_cache:.3f}s  (期望最快)")
 ```
 
-运行输出：
+    === 对比 use_cache 和 compile 在长 prompt 下 ===
+    [use_cache=False, compiled=False] 平均耗时: 57.686s; tokens/s: 0.9
+    [use_cache=False, compiled=True] 平均耗时: 57.646s; tokens/s: 0.9
+    [use_cache=True, compiled=False] 平均耗时: 3.630s; tokens/s: 13.8
+    [use_cache=True, compiled=True] 平均耗时: 3.625s; tokens/s: 13.8
 
-    ```
-    性能优化已应用
-    模型当前设备: cuda:0
-    模型当前精度: torch.float16
-    ```

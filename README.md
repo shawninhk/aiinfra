@@ -245,10 +245,10 @@ AI 集群云原生篇：容器技术、K8S 编排、AI 云平台与任务调度�
 | 手撕 MOE 代码 | 12 单机多卡 MoE  | [PPT](./06AlgoData/02MoE/11MOECode.pdf), [视频](https://www.bilibili.com/video/BV1JaR5YSEMN) | :white_check_mark: |
 | 视觉 MoE | 13 视觉 MoE 模型  | [PPT](./06AlgoData/02MoE/12MOEFuture.pdf), [视频](https://www.bilibili.com/video/BV1JNQVYBEq7), [文章](./06AlgoData/02MoE/12MOEFuture.md) | :white_check_mark: |
 |:sparkling_heart:|:star2:|:sparkling_heart:| |
-| MOE 实践 :computer: | 01 基于 Huggingface 实现 MOE 推理任务 | [Markdown](./06AlgoData/02MoE/Practice01MOEInfer.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice01MOEInfer.ipynb) | :white_check_mark: |
-| MOE 实践 :computer: | 02 从零开始手撕 MoE | [Markdown](./06AlgoData/02MoE/Practice02SignalMOE.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice02SignalMOE.ipynb) | :white_check_mark: |
-| MOE 实践 :computer: | 03 MoE 从原理到分布式实现 | [Markdown](./06AlgoData/02MoE/Practice03IntrtaMOE.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice03IntrtaMOE.ipynb) | :white_check_mark: |
-| MOE 实践 :computer: | 04 MoE 分布式性能分析 | [Markdown](./06AlgoData/02MoE/Practice04MOEAnalysize.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice04MOEAnalysize.ipynb) | :white_check_mark: |
+| MOE 实践 :computer: | 01 基于 HF 实现 MOE 推理 | [Markdown](./06AlgoData/02MoE/CODE01MOEInfer.md), [Jupyter](./06AlgoData/02MoE/notebook/CODE01MOEInfer.ipynb) | :white_check_mark: |
+| MOE 实践 :computer: | 02 从零开始手撕 MoE | [Markdown](./06AlgoData/02MoE/CODE02SignalMOE.md), [Jupyter](./06AlgoData/02MoE/notebook/CODE02SignalMOE.ipynb) | :white_check_mark: |
+| MOE 实践 :computer: | 03 MoE 从原理到分布式实现 | [Markdown](./06AlgoData/02MoE/CODE03IntrtaMOE.md), [Jupyter](./06AlgoData/02MoE/notebook/CODE03IntrtaMOE.ipynb) | :white_check_mark: |
+| MOE 实践 :computer: | 04 MoE 分布式性能分析 | [Markdown](./06AlgoData/02MoE/CODE04MOEAnalysize.md), [Jupyter](./06AlgoData/02MoE/notebook/CODE04MOEAnalysize.ipynb) | :white_check_mark: |
 
 ---
 
