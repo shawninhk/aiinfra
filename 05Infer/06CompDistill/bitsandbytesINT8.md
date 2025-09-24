@@ -1,5 +1,6 @@
-# LLM.int8()源码阅读
-authored by:汪袁烁、ZOMI
+# bitsandbytes LLM.int8()源码阅读
+
+authored by:汪袁烁
 
 ## 调用的时候发生了什么
 为了更深入的了解INT8量化中的LLM.int8()，以及当我们调用：
