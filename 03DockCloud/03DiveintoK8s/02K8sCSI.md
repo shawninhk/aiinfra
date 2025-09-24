@@ -11,7 +11,7 @@ Author by: 何晨阳，ZOMI
 ## 核心概念与架构
 首先了解容器持久化相关的基础概念，主要包括一些概念的抽象。
 ### 存储抽象层
-Kubernetes的存储抽象层是解耦应用与底层存储基础设施的核心设计，其核心组件与逻辑关系如下：
+Kubernetes 的存储抽象层是解耦应用与底层存储基础设施的核心设计，其核心组件与逻辑关系如下：
 ![CRI 架构](./images/02storagedfi.png)
 
 ### 核心组件关系
@@ -27,7 +27,7 @@ Kubernetes的存储抽象层是解耦应用与底层存储基础设施的核心�
 为了支持不同存储介质，支持了多种不同的卷类型。
 
 ### 卷类型比较
-Kubernetes中主要存储卷类型的对比分析，主要特点、适用场景如下所示：
+Kubernetes 中主要存储卷类型的对比分析，主要特点、适用场景如下所示：
 
 | 类型 | 特点 | 适用场景 | 示例 |
 |------|------|----------|----------|
@@ -37,7 +37,7 @@ Kubernetes中主要存储卷类型的对比分析，主要特点、适用场景�
 | 分布式存储 | 可扩展性强 | 大数据平台 | GlusterFS, Ceph RBD |
 
 ### 访问模式
-Kubernetes中存储卷的访问模式（Access Modes）定义了存储介质如何被节点（Node）或Pod挂载和使用。以下是核心访问模式的详细说明及适用场景：
+Kubernetes 中存储卷的访问模式（Access Modes）定义了存储介质如何被节点（Node）或 Pod 挂载和使用。以下是核心访问模式的详细说明及适用场景：
 
 | 类型 | 特点 | 适用场景 | 
 |------|------|----------|
@@ -66,7 +66,7 @@ Volume（存储卷） 是用于在容器之间或容器重启后持久化数据�
 | secret	 | 类似 ConfigMap，但用于存储敏感数据（如密码、证书），数据会 base64 编码	 | 数据库密码、API 密钥挂载 | 
 | downwardAPI	 | 将 Pod 或容器的元数据（如名称、IP）挂载为文件	 | 应用获取自身运行时信息 | 
 
-### 持久化存储类（跨Pod生命周期）
+### 持久化存储类（跨 Pod 生命周期）
 以下是持久化存储类型及场景示例：
 
 | 类型                          | 说明                                                                 | 场景示例                     |
@@ -158,7 +158,7 @@ parameters:
 
 ## 关键配置详解
 
-### StorageClass示例
+### StorageClass 示例
 
 StorageClass 为管理员提供了描述和管理存储资源的标准化方法，使用示例如下：
 
@@ -179,7 +179,7 @@ volumeBindingMode: WaitForFirstConsumer
 ```
 
 ### PV/PVC 状态机
-PV的状态转换规则如下：
+PV 的状态转换规则如下：
 - Available → Bound：PVC 与 PV 的 storageClassName、accessModes、容量 匹配，且 PV 处于可用状态。
 - Bound → Released：绑定的 PVC 被删除，且 PV 的 persistentVolumeReclaimPolicy 为 Retain。
 触发操作：kubectl delete pvc <name>。
@@ -187,13 +187,13 @@ PV的状态转换规则如下：
 - Released → Failed：PV 回收策略为 Delete，但存储后端删除卷失败（如权限不足、网络故障）。
 - Failed → 删除：管理员手动删除 PV。
 
-![pv状态机](./images/02pv_state.png)
+![pv 状态机](./images/02pv_state.png)
 
-PVC的状态转换规则如下：
+PVC 的状态转换规则如下：
 - Pending → Bound：找到匹配的 Available PV；StorageClass 的 Provisioner 成功创建 PV；PV 控制器完成绑定。
 - Bound → Lost：条件：绑定的 PV 被手动删除或存储后端故障导致 PV 不可用。
 
-![pvc状态机](./images/02pvc_state.png)
+![pvc 状态机](./images/02pvc_state.png)
 
 ## 高级特性
 
@@ -224,7 +224,7 @@ kubectl edit pvc my-pvc # 修改 storage 请求大小
 存储配额：限制命名空间存储用量
 
 ## 总结与思考
-Kubernetes存储系统通过抽象层设计与插件化架构，已成为云原生生态的核心支柱。其当前设计在灵活性、扩展性上表现突出，但面临性能优化、多租户安全等挑战。未来发展方向将聚焦于高性能（如PMEM、NVMe-oF）、生态融合和安全合规。
+Kubernetes 存储系统通过抽象层设计与插件化架构，已成为云原生生态的核心支柱。其当前设计在灵活性、扩展性上表现突出，但面临性能优化、多租户安全等挑战。未来发展方向将聚焦于高性能（如 PMEM、NVMe-oF）、生态融合和安全合规。
 
 ## 参考与引用
 
