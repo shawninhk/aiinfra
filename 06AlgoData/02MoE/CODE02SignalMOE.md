@@ -191,7 +191,7 @@ Tips：
     - 特点：适合流水线结构（如线性层 + 激活函数），但灵活度不如 ModuleList。
 
 
-### 4. 性能分析
+## 4. 性能分析
 
 下面我们设计一个 Tiny-Train 实验跑通 MoE 训练任务，同时使用 torch.profiler 对它做性能监控（后面会做详细说明）：
 
@@ -277,7 +277,7 @@ def train_tiny_moe_steps_with_profile(
         print("[eval] sample values:", y_hat[0, :5].detach().cpu().numpy())
 ```
 
-### 5. 实验结果分析
+## 5. 实验结果分析
 
 
 ```python
@@ -368,7 +368,7 @@ moe_forward 出现了两次：
 
 ## 补充知识
 
-### **什么是 [Torch Profiler](https://docs.pytorch.org/docs/stable/profiler)？**
+### **什么是 [Torch Profiler](https://docs.pytorch.org/docs/stable/profiler)**
 
 超链接是 Pytorch 官方 API，这里还有一篇[中文官方教程](https://docs.pytorch.ac.cn/tutorials/recipes/recipes/profiler_recipe.html)解释了下面几个概念：
 
@@ -419,13 +419,8 @@ ProfilerStep* 是 PyTorch Profiler 自动插入的步骤标识。每当你在 pr
 [Pytorch Tutorial](https://docs.pytorch.org/tutorials/intermediate/tensorboard_profiler_tutorial.html?ajs_aid=c7c23a62-9ca8-4068-8c60-f453de94f392)
 
 
-### 什么是IR ———— Pytorch 框架知识补充
+### 什么是 IR
 
 AtenIR 可以简单看作是更加贴近 pytorch python 接口的 IR（中间表示）。Aten 是 PyTorch 内部的张量核心库，包含了 PyTorch 用户日常使用的所有算子，比如 aten::add、aten::mm 等。在编译过程的早期阶段，torch.compile 首先会将用户代码转换成 AtenIR。
 
 与之联合的是 PrimIR （Primitive IR）是一种不可分割的、最底层最原子化的表示，它是更加贴近编译器的一种概念。它将一个复杂的 PyTorch 算子（比如 torch.nn.Linear 模块）分解成最基本、最原始的数学运算，例如矩阵乘法、加法、乘法等。PrimIR 本身不直接与特定硬件或后端绑定，为不同的后端（如 CUDA、ROCm 等）提供了统一的优化基础。
-
-读者有兴趣还可以做：
-
-1. 可视化 Profile分析 ———— 使用 Pytorch Profiler + Tensorboard 或者使用 Nsight Systems
-2. 如何提高 MoE 的训练/推理吞吐性能？还有哪些可以优化的点？
