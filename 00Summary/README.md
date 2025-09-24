@@ -6,11 +6,14 @@
 
 ## 课程简介
 
-[01](./01ScalingLaw.md)、[02](./02StandardScaling.md) 是对 Scaling Law 的解读，涉及经典 Scaling Law 在不同场景下的应用，如 Standard Scaling、Inference Time Scaling、Parallel Scaling 和 Diffusion Scaling 等相关研究。
-
-[03](./03TTScaling.md)、[04](./05InferStack.md) 是大模型训练推理全流程，涵盖了训练业务流与训练软硬件栈，包括并行、加速，数据、模型结构、预训练、后训练，微调，评估等环节，以及推理业务流与推理软硬件栈，像加速、优化、长序列、输出采样、压缩、量化等方面。包括 AI 系统与大模型系统的区别，从通用性、资源需求（计算、网络、存储）以及软件栈变化（芯片使能、框架、分布式并行、三方套件）三个维度进行了阐述。
-
-[05](./05InferStack.md) 是大模型系统未来发展趋势，探讨了大模型时代的现状与意义，如 Scaling Law 突破、全球竞争格局、产业价值等，分析了技术演进趋势，包含智能体崛起、多模态深度融合、轻量化与高效架构等，展望了应用场景爆发，如生成式重构、工业、医疗、教育等领域，还提到了算力底座持续升级（分布式智算中心发展）以及生态持续构建升级（国产大模型、国产软硬件栈）等情况。
+| 编号  | 名称       | 具体内容      | 状态 |
+|:---:|:--- |:--- |:---:|
+| 1      | [Scaling Law 解读](./00Summary/01ScalingLaw.md) | Scaling Law 在不同场景下的应用与演进  | :o: |
+| 2      | [训练推理全流程](./00Summary/02StandardScaling.md) | 大模型训练与推理全流程及软硬件优化  | :white_check_mark: |
+| 3      | [与 AI 系统区别](./00Summary/03TTScaling.md) | AI 系统与大模型系统的通用性、资源与软件栈差异  | :o: |
+| 4      | [大模型系统发展](./00Summary/04TrainingStack.md) | 大模型训练与 AI Infra 的关系分析  | :white_check_mark: |
+| 5      | [大模型系统发展](./00Summary/05InferStack.md) | 大模型推理与 AI Infra 的关系分析 | :white_check_mark: |
+| 6      | [大模型系统发展](./00Summary/06Future.md) | AI Infra 核心逻辑与行业趋势  | :white_check_mark: |
 
 ## 备注
 

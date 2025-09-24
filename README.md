@@ -35,14 +35,16 @@
 
 ### **[00. 大模型系统概述](./00Summary/)**
 
-大模型系统概述、Scaling Law 解读、训练推理流程、系统区别及未来趋势。
+系统梳理了大模型关键技术点，涵盖 Scaling Law 的多场景应用、训练与推理全流程技术栈、AI 系统与大模型系统的差异，以及未来趋势如智能体、多模态、轻量化架构和算力升级。
 
-| 编号  | 名称       | 具体内容      |
-|:---:|:--- |:--- |
-| 1      | [Scaling Law 解读](./00Summary/01ScalingLaw) | Scaling Law 在不同场景下的应用与演进  |
-| 2      | [训练推理全流程](./00Summary/02TrainInfer) | 大模型训练与推理全流程及软硬件优化  |
-| 3      | [与 AI 系统区别](./00Summary/03Different) | AI 系统与大模型系统的通用性、资源与软件栈差异  |
-| 3      | [大模型系统发展](./00Summary/04Develop) | 大模型系统未来趋势：技术演进、场景应用与算力生态升级  |
+| 编号  | 名称       | 具体内容      | 状态 |
+|:---:|:--- |:--- |:---:|
+| 1      | [Scaling Law 解读](./00Summary/01ScalingLaw.md) | Scaling Law 在不同场景下的应用与演进  | :o: |
+| 2      | [训练推理全流程](./00Summary/02StandardScaling.md) | 大模型训练与推理全流程及软硬件优化  | :white_check_mark: |
+| 3      | [与 AI 系统区别](./00Summary/03TTScaling.md) | AI 系统与大模型系统的通用性、资源与软件栈差异  | :o: |
+| 4      | [大模型系统发展](./00Summary/04TrainingStack.md) | 大模型训练与 AI Infra 的关系分析  | :white_check_mark: |
+| 5      | [大模型系统发展](./00Summary/05InferStack.md) | 大模型推理与 AI Infra 的关系分析 | :white_check_mark: |
+| 6      | [大模型系统发展](./00Summary/06Future.md) | AI Infra 核心逻辑与行业趋势  | :white_check_mark: |
 
 ---
 
@@ -51,7 +53,7 @@
 AI 集群架构演进、万卡集群方案、性能建模与优化，GPU/NPU 精度差异及定位方法。
 
 | 编号  | 名称       | 具体内容      | 状态 |
-|:---:|:--- |:--- |:--- |
+|:---:|:--- |:--- |:---:|
 | 1      | [计算集群之路](./01AICluster/01Roadmap/) |  高性能计算集群发展与万卡 AI 集群建设及机房基础设施挑战  | :white_check_mark: |
 | 2      | [L0/L1 AI 集群基建](./01AICluster/02L0L1Base/)   | 服务器节点的基础知识、散热技术的发展与实践       | :white_check_mark: |
 | 3      | [万卡 AI 集群](./01AICluster/03SuperPod/)  | 围绕万卡 AI 集群从存算网络协同、快速交付与紧张工期等挑战   | :white_check_mark: |
