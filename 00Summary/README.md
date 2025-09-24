@@ -8,12 +8,12 @@
 
 | 大纲  | 小结       | 链接      | 状态 |
 |:---:|:--- |:--- |:---:|
-| 概述      | 01. [Scaling Law 整体解读](./01ScalingLaw.md) | [Scaling Law 整体解读](./01ScalingLaw.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/01ScalingLaw.html)  | :o: |
-| 概述      | 02. [Standard Scaling Law](./02StandardScaling.md) | [Standard Scaling Law](./02StandardScaling.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/02StandardScaling.html)  | :white_check_mark: |
-| 概述      | 03. [Inference Time Scaling Law](./03TTScaling.md) | [Inference Time Scaling Law](./03TTScaling.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/03TTScaling.html)  | :o: |
-| 概述      | 04. [大模型训练与 AI Infra 的关系分析](./04TrainingStack.md) | [大模型训练与 AI Infra 的关系分析](./04TrainingStack.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/04TrainingStack.html)  | :white_check_mark: |
-| 概述      | 05. [大模型推理与 AI Infra 的关系分析](./05InferStack.md) | [大模型推理与 AI Infra 的关系分析](./05InferStack.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/05InferStack.html) | :white_check_mark: |
-| 概述      | 06. [AI Infra 核心逻辑与行业趋势](./06Future.md) | [AI Infra 核心逻辑与行业趋势](./06Future.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/06Future.html)  | :white_check_mark: |
+| 概述      | 01. [Scaling Law 整体解读](./01ScalingLaw.md) | [Markdown](./01ScalingLaw.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/01ScalingLaw.html)  | :o: |
+| 概述      | 02. [Standard Scaling Law](./02StandardScaling.md) | [Markdown](./02StandardScaling.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/02StandardScaling.html)  | :white_check_mark: |
+| 概述      | 03. [Inference Time Scaling Law](./03TTScaling.md) | [Markdown](./03TTScaling.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/03TTScaling.html)  | :o: |
+| 概述      | 04. [大模型训练与 AI Infra 的关系分析](./04TrainingStack.md) | [Markdown](./04TrainingStack.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/04TrainingStack.html)  | :white_check_mark: |
+| 概述      | 05. [大模型推理与 AI Infra 的关系分析](./05InferStack.md) | [Markdown](./05InferStack.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/05InferStack.html) | :white_check_mark: |
+| 概述      | 06. [AI Infra 核心逻辑与行业趋势](./06Future.md) | [Markdown](./06Future.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/06Future.html)  | :white_check_mark: |
 
 ## 备注
 
