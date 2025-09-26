@@ -1,826 +1,281 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# PP 并行：1F1B/1F1B Interleaved
+# 09. 流水并行衍生算法
 
-Author by: 高亮
+> Author by：高亮
 
-abstract：先前介绍的 Gpipe 存在硬件利用率低，动态内存压力大的问题，本篇介绍新的流水线技术来规避
+在大模型训练中，并行技术是突破硬件算力与显存瓶颈的核心手段，而**流水并行（Pipeline Parallelism，简称PP）** 凭借对模型层的纵向切分能力，成为大规模训练的关键支柱。传统GPipe虽通过micro-batch（微批）切分摊薄气泡，但面临尾部气泡先天存在、激活显存随**micro-batch数量（记为m）** 线性增长的难题；当m受硬件显存限制时，流水线深度增加反而会降低吞吐效率。
 
-## PipeDream 基本原理
+为突破这一困境，**One-Forward-One-Backward（1F1B，即PipeDream）** 应运而生：通过让micro-batch的反向计算尽早折返并与后续前向计算交错，将激活驻留时间从$O(m)$压缩至$O(p)$（$p$为流水线深度，即切分后的stage数量），大幅降低显存压力。在此基础上，**虚拟流水并行（Virtual Pipeline Parallelism，简称VPP）**、PipeDream-2BW、Zero-Bubble PP（简称ZB-V）等衍生技术进一步优化气泡率与通信开销。本文将从原理出发，拆解这些主流流水并行技术的设计逻辑与优势，为大模型高效并行训练提供技术参考。
 
-!!!!!!!!!
-对Gpipe问题的描述稍显笼统；1F1B的调度细节和内存管理机制深度不足。
+## PipeDream 算法
 
-回顾一下 Gpipe 流水并行存在动态峰值内存大的问题，如图所示：若输入 batch 被划分为 n 个 micro-batch，则对于任意 device，需要缓存 n 份前向激活值（图中 n=8）.
+### 两段式问题
 
-![Gpipeline 原理](./images/10pipeline01.png)
+先全前向、再全反向的两段式调度流水线技术，以朴素流水和GPipe为代表。
 
-PipeDream 流水线并行采取了**1FIB**的策略，很好的规避了硬件内存有限的问题。
+![两段式流水原理](./images/10pipeline01.png)
 
-在流水线并行（pipeline parallel）中，每次前向计算产生的 activation 只有在对应的反向计算完成之后才能释放（即使使用了 Checkpointing 技术）。因此，要尽可能地节省 activation 占用的显存，就需要尽量缩短每份 activation 在内存中停留的时间，也就是让它们尽早被释放。要做到这一点，关键便是让每 micro-batch 的反向计算尽早开始并完成。
+朴素流水相当于$m{=}1$（即不切分micro-batch），GPipe则把mini-batch（迷你批）切成$m$个micro-batch，并在前向、反向两个阶段内各自形成流水。两段式流水调度的核心问题在于**结构性气泡不可消除**，只能通过增大$m$摊薄；当$m$因硬件内存有限而受限时，即使加深流水线深度$p$，头尾气泡的相对占比也会上升，导致吞吐不增反降。此外，两段式流水调度还存在以下问题：
 
-具体做法是，将反向计算的优先级调高，使得编号较小的 micro-batch 的反向步骤，能在编号较大的 micro-batch 的前向步骤之前执行。以一个多阶段（stage）流水线为例：如果我们让最后一个 stage 在完成当前 micro-batch 的前向计算后，立刻启动该 micro-batch 的反向计算，那么后续的各个 stage 就能更早地收到反向计算的数据，进而开始它们自己的反向计算。
+- **尾部气泡先天存在**：由于前向、反向两个阶段被硬性分隔，反向计算无法与后续前向计算交错，流程收尾阶段（cooldown）的尾部气泡完全暴露，最多只能通过增大$m$来“摊薄”气泡占比。
+- **通信-计算重叠受限**：前向或反向阶段内部，可将激活/梯度传输与算子计算重叠，但跨阶段无法把反向计算“藏进”下一轮前向计算；整体关键路径仍包含两段流程各自的启动（warmup）、收尾（cooldown）开销，单步时延为$(m+p-1)(t_f) + (m+p-1)(t_b)$（$t_f$为单个micro-batch在单个stage的前向时间，$t_b$为反向时间）。
+- **显存与$m$线性冲突**：为等待反向传输，每个stage必须长期保留本段的$m$份前向激活；激活峰值近似为$M^{(i)}_{\text{act,peak}}\!\approx m\,L_i A_{\text{layer}}$（$L_i$为第$i$段包含的模型层数，$A_{\text{layer}}$为单一层的激活张量大小），这直接限制了$m$的上限。
 
-通过“前向做一批、反向紧跟一批”（1F1B one-forward-one-backward）的调度策略，不仅能够减少 activation 在显存中的滞留时间，还能平衡各个 stage 的计算负载，最终最大化显存利用效率并降低整体训练时的内存峰值需求。
-
-因此我们实现了将激活值数量上限从 micro-batch 数量 **m** 变成 pipeline stage 阶段 **p**，但只是降低了设备的峰值内存，并没有降低气泡大小，因此空泡率与 Gpipe 保持一致：
+整体峰值显存公式可表示为：
 
 $$
-\begin{equation}
-bubble ration=\frac{t_{bubble}}{t_{ideal}}=\frac{p-1}{m}
-\end{equation}
+ M_{\text{peak}} \;\approx\; \underbrace{P_{\max}}_{\text{参数系（单段最大参数占用）}} \;+\; \underbrace{\max_i \big(m L_i A_{\text{layer}}\big)}_{\text{激活系（各段激活峰值最大值）}}\;\;\propto\;\; \text{Params（参数总量）} + \text{Activations（单段激活量）}\times m.
 $$
 
-![PipeDream 原理](./images/10pipeline02.png)
+- **微批切分的边际收益递减**：增大$m$会引入更密集的启动/同步开销，同时减小单个计算核（per-kernel）的批量，可能抵消部分吞吐收益。综合来看，“两段式”PP的瓶颈在于：要提升效率需增大$m$，但大$m$又受激活显存与系统长尾开销约束——这正是后续更先进调度方案试图突破的根本原因。
 
-## Virtual pipeline 基本原理
+### 核心思想
 
-!!!!!!!!
-VPP的通信开销分析不足；“虚拟化”的本质解释不够透彻；气泡率公式缺乏推导和直观解释。
+1F1B的核心是**让每个micro-batch的反向计算尽早折返，并与后续micro-batch的前向计算交错**。与两段式“先全前向、再全反向”的调度过程不同，1F1B在warmup完成后直接进入稳态：末段stage一旦完成某个micro-batch的前向计算，就立即启动该micro-batch的反向计算（因此得名1F1B）；与此同时，前端stage继续为后续micro-batch执行前向计算，如下所示。
 
-后续 Megatron-LM 在 1F1B 的基础上做了 Interleaved 1F1B 的优化，减少了流水线气泡，也就是本篇介绍的虚拟流水并行（Virtual Pipeline Parallelism，简称 VPP）。
+![1F1B 流水原理](./images/10pipeline02.png)
 
-VPP 的核心在于，让一个物理层面的 device 虚拟成为 v 个 devices，device 从计算 1 个或连续 layer 段到计算 v 个不相邻的 layer，如图所示：GPU1 之前只负责 layer1 或 layer1+layer2 层的计算，经过虚拟化流水线后，负责 layer0 和 layer5 层的计算，使得 layer1 层计算完成后无需等待 layer2 的计算，可以直接进入 GPU2 进行计算，从而减少等待空泡时间，此处 v 被称为虚拟流水线阶段（virtual pipeline stage）。
+在这一机制下，反向梯度沿流水线向前回传，各stage在时间线上呈现“F（前向）→ B（反向）→ F → B…”的交替节奏，仅在流程开头/结尾保留不可避免的warmup/cooldown气泡。由于反向计算被尽早触发，同一份激活“从产生到被消耗”的时间距离，由GPipe的$O(m)$（需等所有micro-batch前向完成）降至$O(p)$（只需等反向计算折返到当前stage），显著缩短激活驻留时间。
 
-![原理](./images/10pipeline03.png)
+末段stage对第$j$个micro-batch完成前向计算后，立即启动该micro-batch的反向计算，无需等待其他micro-batch；反向计算仅需沿流水线深度$p$折返到第$i$段。等待时隙近似为：
 
-假设模型总层数为 16，张量并行大小 tp=1，流水线并行大小 pp=4，虚拟流水线并行大小 v=2，则模型将被划分为 4 * 2 = 8 个阶段，每个阶段包含 16 / 8 = 2 个层。前向的顺序为 GPU 1 -> GPU 2 -> GPU 3 -> GPU 4 -> GPU 1 -> GPU 2 -> GPU 3 -> GPU 4。
+$$
+\Delta t_{\text{1F1B}}(i,j)\;\approx\;
+\underbrace{(p-1)}_{\text{等末段拿到该micro-batch}}
++\underbrace{(p-1-i)}_{\text{反向回传到第 }i\text{ 段}}
+\;-\;\underbrace{i}_{\text{激活产生时刻的相位}}
+\;=\;\mathcal{O}(p).
+$$
 
-在设备数量不变的情况下，分出更多的流水线阶段，这样可以让流水线中每个 stage 更小，因而下个 stage 的等待时间更短，气泡更小。需要注意的是，m 需要是 p 的整数倍。
+无“等完全部$m$个micro-batch”的项，等待时长仅与流水线深度$p$相关，与$m$无关。
+
+若不启用重计算，GPipe的第$i$段stage在前向结束时需同时保留$m$份可反向激活，峰值近似$m\,L_i A_{\text{layer}}$；而1F1B在稳态交错下，每段stage同时“挂起”的在途micro-batch数量受$p$限制（记常数$k_i\!\sim\!O(p)$），激活峰值近似为：
+
+$$
+M^{(i)}_{\text{act, peak}} \approx k_i \cdot L_i \cdot A_{\text{layer}}
+\quad\text{（无重算）},
+$$
+
+若启用重计算，激活峰值近似为：
+
+$$
+M^{(i)}_{\text{act, peak}} \approx k_i \cdot A_{\text{boundary}} + \alpha\,L_i A_{\text{layer}}
+\quad\text{（有重算）},
+$$
+
+其中$A_{\text{boundary}}$为stage边界的激活张量大小，$\alpha$为重计算引入的激活系数（$\alpha<1$）。
+
+对比可见，1F1B将激活峰值从$\mathcal{O}(m)$压至$\mathcal{O}(p)$，这是其“先天降低显存压力”的核心原因：即使在相同$m$下，1F1B更省显存；或在相同显存预算下，1F1B允许将$m$调得更大，从而进一步摊薄气泡、提升吞吐。
+
+但需注意：1F1B不直接减少气泡大小本身。定义气泡时间$t_{\text{bubble}}=(p-1)(t_f+t_b)$、理想计算时间$t_{\text{ideal}}=m(t_f+t_b)$，则气泡率（bubble ratio）保持不变：
+
+$$
+\mathit{bubble\ ratio}
+=\frac{t_{\text{bubble}}}{t_{\text{bubble}}+t_{\text{ideal}}}
+=\frac{p-1}{m+p-1}.
+$$
+
+其中$p$为流水线深度（stage数量），$m$为micro-batch数量，$t_f/t_b$为单个micro-batch在单个stage的前/反向时间。关键在于：$t_{\text{bubble}}$的来源与调度方式无关——无论是两段式（GPipe）还是交错式（1F1B），都必须经历$(p−1)$个“warmup/cooldown”的结构性头尾时延，这是由有限流水线深度决定的不可消除开销。
+
+因此，1F1B的核心改善是**显存占用**，而非气泡大小；但它通过降低显存压力，允许在相同显存预算下增大$m$，进而通过更大的$m$压低气泡率（$\frac{p-1}{m+p-1}$随$m$增大而减小）——这是1F1B间接降低气泡占比、提升稳态吞吐的根本机制。
+
+## Virtual Pipeline 算法
+
+后续Megatron-LM在1F1B基础上，提出**Interleaved 1F1B（交错式1F1B）**，即**虚拟流水并行（Virtual Pipeline Parallelism，VPP）**，用于进一步削减流水线气泡。其核心并非“通过增大$m$细化流水划分”，而是**在每张物理GPU上引入$v$个“虚拟流水阶段（virtual pipeline stages）”，并通过交错调度（interleaving）填充空闲时间**。
+
+具体机制如下图所示：不同于1F1B“单张GPU仅承担1个或多个连续stage计算”的方案——该方案会导致未执行计算的GPU因等待数据而空闲，VPP采用虚拟化设计：将多个**不相邻**的流水线阶段计算任务，分配给同一张GPU承担；同时通过多个并行线程或CUDA流，在同一张GPU上交错执行不同虚拟阶段的前向/反向计算。这样，GPU在等待上/下游数据的空隙中，可切换到本卡的其他虚拟阶段继续计算，充分利用原本的空闲（idle）时间。
 
 ![VirtualPP 原理](./images/10pipeline04.png)
 
-𝑚 为 micro-batch，𝑝为 pipeline stages，v 为 virtual pipeline stage,完成 v 个 layer 段中一个的前向、后向时间分别为 $t_f/v$ 和 $t_b/v$,流水线气泡的耗时 $t_{pd}^{int}$:
+### 虚拟化理解
+
+给定模型总层数$L_{\text{total}}$、流水线并行度$p$（物理GPU设备数）、虚拟并行度$v$（每张GPU的虚拟阶段数），VPP将模型划分为$p\times v$个连续、等长的层段，每个层段的长度为：
 
 $$
-\begin{equation}
-t_{pd}^{int}=\frac{(p-1)*(t_f+t_b)}{v}
-\end{equation}
+L_{\text{seg}}=\frac{L_{\text{total}}}{p\,v}.
 $$
 
-因此可得出 VPP 的空泡率：
+对第$d\in\{0,\dots,p-1\}$张GPU，分配的虚拟阶段索引集合为：
 
 $$
-\begin{equation}
-bubble ration=\frac{1}{v}*\frac{p-1}{m}
-\end{equation}
+\mathcal{S}_d=\{\,s\mid s\equiv d \ (\mathrm{mod}\ p),\ s\in[0,pv-1]\}.
 $$
 
-空泡率除了跟 micro batch 成反比，与 v 也成反比。
+即虚拟化的对象是“流水阶段”，因此同一张GPU负责$v$个不相邻的虚拟阶段（跨步映射）。执行时，为$\mathcal{S}_d$中的每个虚拟阶段各开启一条CUDA流，在1F1B语义下交错推进这些更小的前/反向计算片段：当某虚拟阶段因P2P传输（跨GPU数据传输）或上游依赖而空等时，GPU立即切换到本卡的另一虚拟阶段执行计算，以此填充原本的空闲时隙。
 
-需要注意的是，VPP 是以增加通信量为代价，换取更低的空泡比率，相比于 1FB 现在的气泡占比就减少到了 1/v。但是流水线之间的通信量也增加了 v 倍。对于一个 pipeline stage，里面包括多个 Transformer layer，所以现在相当于流水线的 stage 增加了，通信量也会增加。特别是当 global 的 batch 越来越大的时候，这个通信开销就会更显著。
+### 降低气泡率
 
-## 新兴 PP 技术
+在1F1B中，warmup/cooldown过程需要跨越$(p-1)$个固定的流水线阶段（因$p$恒定，即模型纵向切分的stage总数固定）。VPP不减少流水线阶段总数，而是将“每次跨越单张GPU对应的流水线阶段时长”按$1/v$缩短——例如，非VPP场景下跨越单张GPU需执行4个流水线阶段的计算，VPP仅需执行1个虚拟阶段的计算（因单张GPU承担$v=4$个虚拟阶段），即可进入下一张GPU执行下一阶段计算（如图4）。
 
-!!!!!!!!!
-原理分析太简单，缺乏深度，需要进一步深度理解。
+![原理](./images/10pipeline03.png)
 
-### PipeDream-2BW
+若设非VPP场景下，单个stage的前/反向时间分别为$t_f、t_b$，则开启VPP后，单个虚拟阶段的前/反向时间缩短为：
 
-PipeDream-2BW 是一种面向超大模型的异步流水线并行方法：它将模型切分为多个阶段并复制多路流水线，在 1F1B 调度下通过“双缓冲”权重更新和梯度合并技术，大幅降低显存占用与通信开销；内置的自动化 Planner 根据设备内存和互联拓扑搜索最优阶段划分与复制宽度，并可选激活重计算；在多卡集群上训练大规模 Transformer 模型时，相较于传统流水线并行，吞吐量可提升数倍，同时保留与数据并行一致的权重更新语义。
+$$
+t_f^{(v)}=\frac{t_f}{v},\qquad t_b^{(v)}=\frac{t_b}{v}.
+$$
+
+由此，同样需要跨越$(p-1)$次的气泡时间被压缩为：
+
+$$
+t_{\text{bubble}}^{\text{VPP}}
+=(p-1)\Bigl(t_f^{(v)}+t_b^{(v)}\Bigr)
+=\frac{(p-1)(t_f+t_b)}{v}.
+$$
+
+理想计算工作量不变（$t_{\text{ideal}}=m(t_f+t_b)$），因此VPP的气泡率为：
+
+$$
+\text{bubble ratio}^{\text{VPP}}
+=\frac{t_{\text{bubble}}^{\text{VPP}}}{t_{\text{ideal}}}
+=\frac{\frac{(p-1)(t_f+t_b)}{v}}{m(t_f+t_b)}
+=\frac{1}{v}\cdot\frac{p-1}{m}.
+$$
+
+> 直观解释：VPP中，流水线仍需经历$(p-1)$次跨GPU阶段切换，但每次切换仅需推进$1/v$的前/反向计算片段，因此总等待时隙宽度按$1/v$缩减；理想计算量不变，故气泡率与虚拟并行度$v$成反比。
+
+VPP的“虚拟化”并非合并多张GPU，而是在每张GPU内拆分出$v$个虚拟流水阶段，通过并行/交错推进更小的前/反向片段填补空闲时隙。其最终效果是：在不改变总算量与1F1B低激活驻留优势的前提下，将气泡时间缩小为1F1B的$\tfrac{1}{v}$倍（$\text{bubble ratio}^{\text{VPP}}=\tfrac{1}{v}\cdot\tfrac{p-1}{m}$），但代价是通信频率与通信量均提升$v$倍。
+
+### VPP 通信开销
+
+VPP的通信开销体现在**通信频率提升**与**通信容量提升**两个方面：
+
+相比于非VPP流水线技术（如1F1B），由于每张GPU承载$v$个虚拟阶段，单个micro-batch需以1F1B的方式穿过$p\times v$个虚拟流水线阶段，而非仅穿过$p$个物理阶段。这导致跨GPU跃迁次数大幅增加：
+
+- 非VPP场景（$v=1$）：前向/反向过程的跨GPU跃迁次数均为$p-1$次；
+- VPP场景（$v>1$）：前向/反向过程的跨GPU跃迁次数均为$p\,v-1$次（近似$v(p-1)$次）。
+
+若设单次跨GPU通信的激活量为$S$字节（梯度大小与激活量同阶），则两类场景的通信量对比为：
+
+!!!!!!!!
+1）看能不能通过画图来表示出来，丑没关系，重要是方便理解。
+2）将 VPP 通信开销的 “文字列表” 改为 “对比表格”，更符合博客阅读习惯：
+
+* **非VPP（$v=1$）**：
+  * 前向全路径通信字节：$(p-1)\,S$
+  * 反向全路径通信字节：$(p-1)\,S$
+  * 单个micro-batch合计通信字节：$(p-1)\times 2S$
+
+* **VPP（$v>1$）**：
+  * 前向全路径通信字节：$(p\,v-1)\,S \approx v(p-1)S$
+  * 反向全路径通信字节：同上（$(p\,v-1)\,S$）
+  * 单个micro-batch合计通信字节：$v\,(p-1)\times 2S$
+
+与非VPP（$v{=}1$）相比，VPP的通信频率提升$v$倍，总通信字节量也提升$v$倍——即VPP以“通信开销×$v$”为代价，换取“气泡率÷$v$”的收益。
+
+## PipeDream-2BW 算法
+
+### 核心思想
+
+在不执行周期性flush（流程中断）的前提下，兼顾高吞吐与低显存，同时尽量贴近数据并行的权重更新语义。将1F1B调度与**双缓冲权重（2-Buffered Weights，简称2BW）**、**梯度合并（coalescing）** 结合：
+
+1. 每个stage仅保留两份权重版本——`current`（当前正在使用的权重版本）与`shadow`（待更新的权重版本），而非原始PipeDream可能需要的最多$p$份（$p$为流水线深度）；
+2. 对同一micro-batch的前向/反向计算，严格使用同一份权重（消除“权重版本不一致”问题）；
+3. 权重更新采用“1-stale语义”（即更新时使用上一批次的梯度），避免flush引起的流程停顿。
 
 ![PipeDream-2BW 原理](./images/10pipeline05.png)
 
-### ZB-V schedule
+### 调度机制
 
-ZB-V schedule 是一种面向流水线并行的内存高效零气泡调度策略：它将 p 个阶段划分为 2p 个模型块，并给每个 worker 分配两个模型块，按照从首到尾再返回首的 V 型顺序进行分配，以确保每个微批次的前向和对权重的后向都在同一 worker 上执行，从而利用后向权重计算填充流水线空隙；在与 1F1B 相同的显存约束下，可在正向、后向输入与权重后向计算时间相等时实现近零气泡；同时，该调度保持各 worker 峰值激活内存均衡，兼顾吞吐与显存效率。
+* 基础调度逻辑：仍遵循1F1B规则，各stage交替执行不同micro-batch的前向/反向计算；
+* 权重版本滚动：每处理完$m$个micro-batch（梯度在$m$个micro-batch内合并），生成1个新权重版本（`shadow`升级为`current`，旧`current`丢弃）；且要求$m\ge p$（确保流水线内的在途micro-batch均能使用对应版本权重），常见简化设定为$m=p$；
+* 版本兼容性：新权重版本仅供“新进入流水线的micro-batch”使用，流水线中已在执行的在途micro-batch，继续使用其前向计算时的旧版本权重完成反向——因此每个stage最多只需保留2份权重（`current`+`shadow`），无额外版本冗余。
+
+> 直观理解：权重版本的推进以“$m$个micro-batch为1批”滚动；一旦旧版本权重对应的所有在途micro-batch完成反向计算，该旧版本即可立即丢弃，因此内存占用上限被固定为“2份权重”，避免原始PipeDream中“多版本权重占用大量显存”的问题。
+
+### 更新 1-stale 与优化器
+
+设批级权重为$W(t)$（$t$为批索引），批平均梯度为$\nabla f(W)$（基于权重$W$计算的梯度）：
+
+* **标准小批SGD**：权重更新依赖当前批梯度，即$W(t{+}1)=W(t)-\nu\,\nabla f(W(t))$（$\nu$为学习率）；
+* **PipeDream-2BW（1-stale语义）**：权重更新依赖上一批梯度，即$\boxed{W(t{+}1)=W(t)-\nu\,\nabla f\big(W(t{-}1)\big)}$。
+
+其中“1-stale”表示“梯度延迟1个批次”，且该延迟对所有stage一致。实验表明，1-stale语义与标准小批SGD的收敛效果相当；对于动量（Momentum）、Adam等优化器，也可直接平移至“1-stale梯度”场景，无需额外引入影子变量。
+
+### 显存与吞吐优势
+
+* **显存优化**：
+  1. 权重版本：仅2份（2BW），远少于原始PipeDream的最多$p$份，权重显存占用大幅下降；
+  2. 激活显存：仅需缓存“在途micro-batch”的激活，量级随1F1B保持$\mathcal{O}(p)$，远低于两段式（GPipe）在大$m$下的$\mathcal{O}(m)$。
+* **吞吐优势**：
+  无flush导致的结构性空转，稳态效率显著高于GPipe；据相关论文报告，对GPT/BERT类模型，PipeDream-2BW可比传统优化基线加速1.3×–20×，较GPipe加速可达3.2×。
+
+PipeDream-2BW = 1F1B调度 + 双缓冲权重 + 批内梯度合并 + 1-stale更新。其核心价值是将原始PipeDream的“多版本权重、不均匀梯度延迟”，收敛为“每stage最多2份权重、全stage统一1-stale延迟”，最终在不中断流程（无flush）的前提下，实现“高吞吐、低显存、收敛效果贴近数据并行”的目标。
+
+## Zero-Bubble 算法
+
+!!!!!!!!
+1）自己去画画图，把 ZB 算法warmup 和 cooldown 阶段标识出来，算法步骤呈现出来；2）下面的公式 markdown 格式错了。
 
 ![ZB-V schedule 原理](./images/10pipeline06.png)
 
-### Hanayo wave-like pipeline
+### 核心思想
 
-Hanayo 是一种波浪式流水线并行策略：它将模型划分为 S 个阶段并将micro-batch分成 W 个波（wave），以波浪形的顺序在各阶段交错执行前向和后向计算，能够将流水线气泡比例降低至原来的 1/(2W) 且无需复制模型，从而保持与主流方法一致的权重和激活内存占用；同时，其轻量级运行时引擎将调度逻辑与执行和通信优化解耦，支持在多卡集群上灵活部署；在对 GPT 和 BERT 类模型、最多 32 块 GPU 的测试中，Hanayo 相较最先进方案实现了最高 30.4%的吞吐量提升
+ZB（Zero-Bubble）系列的关键创新是**将反向传播拆分为两个独立子过程**：
 
-![Hanayo wave-like 原理](./images/10pipeline07.png)
+1. **B_in（Input Gradient Calculation，输入梯度计算）**：计算“需向上游stage传输的输入梯度”，即把梯度往上游传递；
+2. **B_w（Weight Gradient Calculation，权重梯度计算）**：计算“当前stage局部权重的梯度（dW）”，仅用于本地权重更新。
 
-## 分布式框架里的 PP 实现
+通过拆分反向过程，ZB可将B_in、B_w作为“可自由插入的子片段”，填充流水线中原本不可避免的空闲时隙，从而在同步训练语义下将气泡压至接近0。其中ZB-V（V-Shaped ZB）是一类手工设计的调度方案：每张GPU负责2个模型分块（chunk，即拆分后的子模型段），前向计算与两段反向子过程（B_in、B_w）的依赖关系在时间轴上呈“V”字形，因此得名ZB-V。
 
-!!!!!!!!!!!
-代码太多了，需要精简成伪代码，不要直接贴，看不过来
+### V 字形调度机制
 
-- 模型运行入口与 PP 配置：
+* 模型分块与执行逻辑：将每个物理stage进一步拆分为2个chunk，安排它们在时间线上以“F → B_in / B_w”的交错方式执行；相邻物理GPU上的2个chunk彼此错位，使“一个chunk的B_w计算”能精准填充“另一个chunk的空闲时隙”。
 
-pretrain_gpt.py main 函数调用 pretrain->get_model,get_model 函数判断 pipeline 的划分策略
-```
+* 稳态特征：前向计算（F）与两段反向子过程（B_in、B_w）交替推进，将1F1B中“尾部cooldown暴露的空隙”用B_w完全塞满。因此“零气泡”的实现条件是：单chunk的F时长 ≈ B_in时长 ≈ B_w时长；若三者时长不匹配，仍会留下少量残余空隙（需通过贪心调度或自动调度策略补偿）。
 
-Megatron-LM/pretrain_gpt.py
+> 直观理解：相比1F1B仅用“F、B”两种计算片段拼合时间轴，ZB-V新增了“B_in、B_w”两种子片段，可在更细粒度上“填补时间缝隙”。当F、B_in、B_w的时长接近时，子片段能恰好填满所有空闲时隙，实现“气泡≈0”；若某一子片段时长过短/过长，仍会出现微小空隙，但远小于1F1B的气泡。
 
-if __name__ == "__main__":
+### 何时能实现 ZB？
 
-    # Temporary for transition to core datasets
-    train_valid_test_datasets_provider.is_distributed = True
+* **理想条件**：若单chunk的F时长 = B_in时长 = B_w时长，ZB-V可在同步训练语义下实现严格“零气泡”。实际模型中，三者时长难以完全相等，需引入贪心调度（如动态调整子片段执行顺序）或搜索式调度（如基于模型结构预计算最优时序），尽可能靠近零气泡。
+* **工程优化要点**：ZB-V论文还提出“绕过优化器步的同步屏障”——传统同步训练中，所有stage需等待全局优化器更新完成才能推进，这会引入尾部屏障气泡；ZB-V通过“局部权重更新与全局同步解耦”，进一步消除该屏障，是达成“真正零气泡”的关键工程手段。
 
-    # Optionally enable inprocess restart on pretrain
-    pretrain, store = inprocess_restart.maybe_wrap_for_inprocess_restart(pretrain)
+### 通信/内存代价
 
-    pretrain(
-        train_valid_test_datasets_provider,
-        model_provider,
-        ModelType.encoder_or_decoder,
-        forward_step,
-        args_defaults={'tokenizer_type': 'GPT2BPETokenizer'},
-        extra_args_provider=add_modelopt_args if has_nvidia_modelopt else None,
-        store=store,
-    )
-```
+* **激活峰值控制**：ZB-V的设计可在“不抬升1F1B激活峰值”的前提下显著减泡；若将“零气泡”作为硬性约束，通常需提升激活显存预算（文献报告“接近零气泡”的现实设定下，激活显存约为1F1B的2×）；而在“F≈B_in≈B_w”的理想均衡下，激活显存最低可降至“参数-激活校准内存的1/2”（即参数与激活的显存占比更均衡）。
 
-pretrain 函数内部调用 setup_model_and_optimizer 函数，该函数内部调用 get_model
+* **权重与版本**：ZB-V无需像原始PipeDream那样存储多份权重版本，其核心优化在于“B_in/B_w的算子级时序切分”，在1F1B的低激活驻留量级（≈O(p)）基础上，做更精细的时间编排——因此权重显存仍保持低占用。
 
-```
-Megatron-LM/megatron/training/training.py/def pretrain
+**通信条数增加**：与VPP类似，更细粒度的子片段（F、B_in、B_w）意味着更多stage边界的通信消息；同时B_in、B_w的交错执行会引入额外的依赖关系与消息序列，需通过“多CUDA流 + NCCL多通道 + 分块通信”等技术隐藏通信延迟（即让通信与计算重叠）。
 
-# Model, optimizer, and learning rate.
-timers('model-and-optimizer-setup', log_level=0).start(barrier=True)
-app_metrics['app_build_optimizer_start_time'] = one_logger_utils.get_timestamp_in_ms()
-model, optimizer, opt_param_scheduler = setup_model_and_optimizer(
-    model_provider, model_type, checkpointing_context=checkpointing_context
-)
+**调度复杂度提升**：需开发专用调度器，管理“F/B_in/B_w”三类片段的事件依赖（如“B_in需在F之后执行”“B_w可与其他chunk的F并行”）与“何时插入子片段”的策略；目前ZB-V的官方实现已在Megatron-LM分支开源，包含通用运行时与不同ZB族调度方案（[GitHub][4]）。
 
-Megatron-LM/megatron/training/training.py/def setup_model_and_optimizer
+ZB-V通过“拆分反向为B_in/B_w”与“V字形双chunk/卡调度”，让前向/反向子片段更细粒度地占满时间轴；在“F≈B_in≈B_w”的理想条件下可实现近乎零气泡，同时维持接近1F1B的激活驻留量级，但需承担“更复杂的调度逻辑”与“更多的通信消息”。落地时需依赖成熟的开源实现（如Megatron-LM的ZB分支）与“通信-计算重叠”优化。据文献数据，在类似内存预算下，ZB-V相对1F1B的吞吐提升可达15–23%；若放宽内存预算（允许2×激活占用），吞吐提升可至30%，体现其“以细粒度时序填补空隙”的核心优势。
 
-def setup_model_and_optimizer(
-    model_provider_func,
-    model_type,
-    no_wd_decay_cond=None,
-    scale_lr_cond=None,
-    lr_mult=1.0,
-    checkpointing_context=None,
-):
-    """Setup model and optimizer."""
-    args = get_args()
-    timers = get_timers()
-    one_logger = get_one_logger()
+## 近年 PP 算法总结
 
-    model = get_model(model_provider_func, model_type)
-    unwrapped_model = unwrap_model(model)
-```
+### PP 算法优化点与演进
 
-get_model 通过 get_args 函数拿到启动脚本设置的超参，参数设置如图所示：
+!!!!!!
+自己理解为核心
 
-![args 超参设置](./images/10pipeline08.png)
+### 衍生 PP 算法对比
 
-```
-Megatron-LM/megatron/training/training.py/def get_model
-
-def get_model(model_provider_func, model_type=ModelType.encoder_or_decoder, wrap_with_ddp=True):
-    """Build the model."""
-    args = get_args()
-    args.model_type = model_type
-
-    # Build model.
-```
-
-此处分为两种情况讨论，以下是启用虚拟管道(VPP)的模型构建，判断条件如第一个 if 所示。判定逻辑标记了：只有第一个 rank 做输入，最后一个 rank 做输出，利用 model_provider_func 函数计算当前 Rank 该“切”哪一段 Transformer 层并实例化，最终把所有 Rank 按顺序放入 model 列表，供后面的流水线调度器循环调用。
-
-```
-Megatron-LM/megatron/training/training.py/def get_model
- 
-  if (
-            mpu.get_pipeline_model_parallel_world_size() > 1
-            and args.virtual_pipeline_model_parallel_size is not None
-        ):
-            if model_type == ModelType.encoder_and_decoder:
-                assert (
-                    args.encoder_pipeline_model_parallel_size == 0
-                ), "Interleaved schedule not supported for model with encoder on separate PP rank"
-            model = []
-            for i in range(args.virtual_pipeline_model_parallel_size):
-                # Set pre_process and post_process only after virtual rank is set.
-                pre_process = mpu.is_pipeline_first_stage(ignore_virtual=False, vp_stage=i)
-                post_process = mpu.is_pipeline_last_stage(ignore_virtual=False, vp_stage=i)
-                this_model = model_provider_func(
-                    pre_process=pre_process, post_process=post_process, vp_stage=i)
-                this_model.model_type = model_type
-                this_model.vp_stage = i
-                model.append(this_model)
-```
-
-否则启用 PipeDream 流水线并行，根据模型类型和并行度，将编码器和解码器模块合理地拆分到不同 GPU，保证前向/反向传递的正确性与高效性。
-
-```
-Megatron-LM/megatron/training/training.py/def get_model
-
-else:
-            pre_process = mpu.is_pipeline_first_stage()
-            post_process = mpu.is_pipeline_last_stage()
-            add_encoder = True
-            add_decoder = True
-            if model_type == ModelType.encoder_and_decoder:
-                if mpu.get_pipeline_model_parallel_world_size() > 1:
-                    rank = mpu.get_pipeline_model_parallel_rank()
-                    first_decoder_rank = args.encoder_pipeline_model_parallel_size
-                    world_size = mpu.get_pipeline_model_parallel_world_size()
-                    pre_process = rank == 0 or rank == first_decoder_rank
-                    post_process = (rank == (first_decoder_rank - 1)) or (rank == (world_size - 1))
-                    add_encoder = mpu.is_inside_encoder(rank)
-                    add_decoder = mpu.is_inside_decoder(rank)
-                model = model_provider_func(
-                    pre_process=pre_process,
-                    post_process=post_process,
-                    add_encoder=add_encoder,
-                    add_decoder=add_decoder,
-                )
-            else:
-                model = model_provider_func(pre_process=pre_process, post_process=post_process)
-            model.model_type = model_type
-        return model
-```
-
-- PP 模型实例化：（没找全）
-
-通过上述 get_model 函数里的 model_provider_func 函数构建模型实例，model_provider_func 并不是 Megatron-Core 库里一个单独的全局函数，而是由各个预训练脚本(如 pretrain_gpt.py)定义并传入核心训练流程的回调。
-
-```
-Megatron-LM/pretrain_gpt.py
-
-def model_provider(
-    pre_process=True, post_process=True, vp_stage: Optional[int] = None
-) -> Union[GPTModel, megatron.legacy.model.GPTModel]:
-```
-
-构建 GPTModel 实例，
-
-```
-Megatron-LM/megatron/core/models/gpt/gpt_model.py
-
-class GPTModel(LanguageModule):
-    def __init__(...):
-
-        # Transformer.
-        self.decoder = TransformerBlock(
-            config=self.config,
-            spec=transformer_layer_spec,
-            pre_process=self.pre_process,
-            post_process=self.post_process,
-            vp_stage=vp_stage,
-        )
-```
-
-- PP 获取需要执行的层数：（没看懂）
-
-TransformerBlock 注册通过 get_num_layers_to_build 计算当前 Stage 包含几个 Transformer Layer
-```
-Megatron-LM/megatron/core/transformer/transformer_block.py
-
-def get_num_layers_to_build(config: TransformerConfig, vp_stage: Optional[int] = None) -> int:
-    return num_layers_to_build
-
-class TransformerBlockSubmodules:
-
-    def _get_block_submodules(...):
-
-    if isinstance(spec, TransformerBlockSubmodules):
-            return spec
-
-        # ModuleSpec here is generally assumed to be for a transformer layer that
-        # is implemented in `transformer_layer.py` or if it subclasses
-        # `BaseTransformerLayer` from the `transformer_layer.py` file.
-        elif isinstance(spec, ModuleSpec):
-            if issubclass(spec.module, TransformerBlock):
-                return spec.submodules
-            elif issubclass(spec.module, BaseTransformerLayer):
-                num_layers = get_num_layers_to_build(config, vp_stage)
-                return TransformerBlockSubmodules(
-                    layer_specs=[spec] * num_layers, layer_norm=LayerNormImpl
-                )
-            else:
-                raise Exception(f"specialize for {spec.module.__name__}.")
-        else:
-            raise Exception(f"specialize for {type(spec).__name__}.")
-```
-
-在 GPT 模型运行示例中每个 Stage build_layer 的个数为 number_lyaer = L / PP_num
-
-```
-Megatron-LM/megatron/core/transformer/transformer_block.py
-
-class TransformerBlock(MegatronModule):
-    """Transformer class."""
-
-    def __init__（
-        self.num_layers_per_pipeline_rank = len(self.layers)
-
-    def _build_layers(self):
-        # Transformer layers.
-        # @jcasper can we improve how we deal with layer_number?
-        # currently it's only used in CoreAttention?
-        # if self.apply_query_key_layer_scaling:
-        #     coeff = self.layer_number
-        #     self.norm_factor *= coeff
-        def build_layer(layer_spec, layer_number):
-            global_layer_number = layer_number + get_transformer_layer_offset(
-                self.config, self.vp_stage
-            )  # 1-based index
-            if self.config.heterogeneous_block_specs:
-                layer_config = self.config.get_config_for_layer(global_layer_number)
-            else:
-                layer_config = self.config
-```
-
-- 执行 PP 训练：
-
-GPT 训练调用 pretrain -> train -> train_step，执行一个 iteration, train_step 函数通过 get_forward_backward_fun()函数进入 schedulers.py 模块，并根据当前的 PP 模式返回 forward_backward_pipelining_with_interleaving 执行前向和反向计算
-
-```
-Megatron-LM/megatron/training/training.py
-
-def train_step(forward_step_func, data_iterator, model, optimizer, opt_param_scheduler, config):
-    """Single training step."""
-            ...
-    # Forward pass.
-        forward_backward_func = get_forward_backward_func()
-        losses_reduced = forward_backward_func(
-            forward_step_func=forward_step_func,
-            data_iterator=data_iterator,
-            model=model,
-            num_microbatches=get_num_microbatches(),
-            seq_length=args.seq_length,
-            micro_batch_size=args.micro_batch_size,
-            decoder_seq_length=args.decoder_seq_length,
-            forward_only=False,
-            adjust_tensor_shapes_fn=adjust_tensor_shapes_fn,
-        )
-
-
-Megatron-LM/megatron/core/pipeline_parallel/schedules.py
-
-def get_forward_backward_func():
-    pipeline_model_parallel_size = parallel_state.get_pipeline_model_parallel_world_size()
-    if pipeline_model_parallel_size > 1:
-        if parallel_state.get_virtual_pipeline_model_parallel_world_size() is not None:
-            forward_backward_func = forward_backward_pipelining_with_interleaving
-        else:
-            forward_backward_func = forward_backward_pipelining_without_interleaving
-    else:
-        forward_backward_func = forward_backward_no_pipelining
-    return forward_backward_func
-```
-
-- NPU0 执行 stage0（不清晰）
-
-执行 Forward 计算，选择 forward_backward_pipelining_without_interleaving 模式
-(以 Pipeline 1F1B 为例，即 PipeDream) 先关闭梯度更新，等所有的 microbatch 执行完毕才更新梯度。过程如图所示：
-
-![args 超参设置](./images/10pipeline10.png)
-
-部分代码展示：
-
-其中：num_microbatches：总的 micro batch 个数。num_warmup_microbatches：当前 rank warmup 阶段需要计算，直到 1F1B 的 microbatch 的个数。
-
-num_microbatches_remaining：当前 rank 还剩下多少个 microbatch 执行才到 1F1B 阶段，即 num_microbatches - num_warmup_microbatches。
-
-```
-Megatron-LM/megatron/core/pipeline_parallel/schedules.py
-
-def forward_backward_pipelining_without_interleaving(
-    ...
-    micro_batch_size: int,
-    ...
-):
-    ...
-    disable_grad_sync()
-
-    # Compute number of warmup microbatches.
-    num_warmup_microbatches = (
-        parallel_state.get_pipeline_model_parallel_world_size()
-        - parallel_state.get_pipeline_model_parallel_rank()
-        - 1
-    )
-    num_warmup_microbatches = min(num_warmup_microbatches, num_microbatches)
-    num_microbatches_remaining = num_microbatches - num_warmup_microbatches
-```
-
-- NPU0 完成前向计算，如图所示：
-
-NPU0 在 stage0 阶段没有其它的 Stage 激活输入，因此忽略 recv_forward()函数，forward_step 调用 forward_step_func 真正调用模型执行：
-![NPU0 完成 FI](./images/10pipeline12.png)
-
-```python
-Megatron-LM/megatron/core/pipeline_parallel/schedules.py
-
- # Run warmup forward passes.
-    for i in range(num_warmup_microbatches):
-        # Decide to checkpoint all layers' activations of the current micro-batch
-        if max_outstanding_backprops is not None:
-            checkpoint_activations_microbatch = (
-                i % max_outstanding_backprops
-                >= config.num_microbatches_with_partial_activation_checkpoints
-            )
-        else:
-            checkpoint_activations_microbatch = None
-
-        input_tensor = recv_forward(
-            recv_tensor_shapes, config, parallel_state.is_pipeline_first_stage()
-        )
-        output_tensor, num_tokens = forward_step(
-            forward_step_func,
-            data_iterator,
-            model,
-            num_microbatches,
-            input_tensor,
-            forward_data_store,
-            config,
-            collect_non_loss_data,
-            checkpoint_activations_microbatch,
-            check_first_val_step(first_val_step, forward_only, i == 0),
-            current_microbatch=i,
-            encoder_decoder_xattn=encoder_decoder_xattn,
-        )
-
-        def forward_step(...)
-            ...
-            if config.enable_autocast:
-                context_manager = torch.autocast("cuda", dtype=config.autocast_dtype)
-            else:
-                context_manager = contextlib.nullcontext()
-            with context_manager:
-                if checkpoint_activations_microbatch is None:
-                    output_tensor, loss_func = forward_step_func(data_iterator, model)
-                else:
-                    output_tensor, loss_func = forward_step_func(
-                        data_iterator, model, checkpoint_activations_microbatch
-                    )
-```
-
-- NPU0 前向传递激活，如图所示：
-
-![NPU0 传递激活](./images/10pipeline13.png)
-
-NPU0 上输出 Stage0 output_tensor 后 send_forward 发送给下一个 Stage，通过 P2P_communication.send_forward 发送 output_tensor，通过 torch.distributed.P2POp 异步 send output_tensor，最后调用 torch.cuda.synchronize() 执行同步
-
-```python
-Megatron-LM/megatron/core/pipeline_parallel/schedules.py
-
-        send_forward(
-            output_tensor, send_tensor_shapes, config, parallel_state.is_pipeline_last_stage()
-        )
-
-        def send_forward(output_tensors, tensor_shapes, config, is_last_stage):
-    """Wrapper for p2p_communication.send_forward used with non-interleaving schedule."""
-    if not isinstance(output_tensors, list):
-        output_tensors = [output_tensors]
-    for output_tensor, tensor_shape in zip(output_tensors, tensor_shapes):
-        if tensor_shape is None:
-            continue
-        p2p_communication.send_forward(output_tensor, config, is_last_stage)
-
-Megatron-LM/megatron/core/pipeline_parallel/p2p_communication.py
-
-      if wait_on_reqs and len(reqs) > 0:
-        for req in reqs if isinstance(reqs, list) else reqs.values():
-            req.wait()
-        reqs = None
-
-    if (
-        (config.batch_p2p_comm and config.batch_p2p_sync)
-        # The lists below have a size > 1 only when ETP ≠ DTP,
-        # meaning this synchronization is required when ETP ≠ DTP.
-        or len(tensor_recv_prev_list) > 1
-        or len(tensor_recv_next_list) > 1
-    ):
-        # To protect against race condition when using batch_isend_irecv().
-        # User should assert that we have a modern enough PyTorch to not need this
-        torch.cuda.synchronize()    
-```
-
-- NPU0 继续计算：
-
-NPU0 继续执行 forward_step,Stage0 前向计算得到第二个 output_tensor,利用 sedn_forward_recv_backward 函数发送 output_tensor 等待 backward，进入 1F1B 状态，通过 send_backward_recv_backward 底层试下通过 P2PPp 异步，send output_tesnor，且异步 recv tensor_recv_next，最后调用 synchronize()等待 recv backward，NPU0 进入等待状态。
-
-![NPU0 计算 F2](./images/10pipeline17.png)
-
-```python
-Megatron-LM/megatron/core/pipeline_parallel/schedules.py
-
-def forward_backward_pipelining_without_interleaving(...):
- def enable_grad_sync():
-    # Run warmup forward passes.
-    for i in range(num_warmup_microbatches):
-        # Decide to checkpoint all layers' activations of the current micro-batch
-        if max_outstanding_backprops is not None:
-            checkpoint_activations_microbatch = (
-                i % max_outstanding_backprops
-                >= config.num_microbatches_with_partial_activation_checkpoints
-            )
-        else:
-            checkpoint_activations_microbatch = None
-
-        input_tensor = recv_forward(
-            recv_tensor_shapes, config, parallel_state.is_pipeline_first_stage()
-        )
-        output_tensor, num_tokens = forward_step(
-            forward_step_func,
-            data_iterator,
-            model,
-            num_microbatches,
-            input_tensor,
-            forward_data_store,
-            config,
-            collect_non_loss_data,
-            checkpoint_activations_microbatch,
-            check_first_val_step(first_val_step, forward_only, i == 0),
-            current_microbatch=i,
-            encoder_decoder_xattn=encoder_decoder_xattn,
-        )
-```
-
-- NPU1 进行前向计算：
-
-其过程同 GPU0 一致，如图所示：
-
-num_warmup_microbatches=0，进入 1F1B 状态，num_microbatches_remaining=3，recv_forward 调用 P2POp 异步 recv，NPU1 最后调用 synchronize() 执行同步等待 NPU0 Stage0 输出，从而保证 NPU0 to NPU1 的执行顺序。
-
-![NPU1 计算](./images/10pipeline14.png)
-
-NPU1 recv_forward 等待 NPU0 Stage0 发送 intput_tensor 后 NPU1 forward_step 设置 iNPUt_tensor，实现 NPU0&NPU1 交换输入输出 NPU1 进入 1F1B 循环，forward_step_func 调用 GPTModel 执行前向计算。NPU1 上 TransformerBlock 执行第一个 Stage，Pre_process=False，即不会把 iNPUt_embeddings 作为 ransformer 的输入，使用 NPU0 Stage0 输入的 iNPUt_tensor 作为输入执行得到 output tensor。
-
-![NPU1 计算](./images/10pipeline15.png)
-
-```python
-Megatron-LM/megatron/core/transformer/transformer_block.py
-
-class TransformerBlock(MegatronModule):
-    """Transformer class."""
-
-    def __init__(
-        self,
-        config: TransformerConfig,
-        spec: Union[TransformerBlockSubmodules, ModuleSpec],
-        post_layer_norm: bool = True,
-        pre_process: bool = False,
-        post_process: bool = True,
-        model_comm_pgs: ModelCommProcessGroups = None,
-        vp_stage: Optional[int] = None,
-    ):
-        super().__init__(config=config)
-
-        self.submodules = _get_block_submodules(config, spec, vp_stage)
-        self.post_layer_norm = post_layer_norm
-        self.pre_process = pre_process
-        self.post_process = post_process
-        self.vp_stage = vp_stage
-
-    def forward(...):
-        if not self.pre_process:
-            # See set_input_tensor()
-            hidden_states = self.input_tensor
-```
-
-示例中 NPU1 Stage1 是最后一层 Staege，因此 post_process=True,执行 is_pipeline_last_stage 计算 GPT 模型的 output_tensor 和 loss。
-
-![NPU1 计算](./images/10pipeline16.png)
-
-```python
-Megatron-LM/megatron/core/transformer/transformer_block.py
-
-class TransformerBlock(MegatronModule):
-    """Transformer class."""
-
-    def __init__(
-        self,
-        config: TransformerConfig,
-        spec: Union[TransformerBlockSubmodules, ModuleSpec],
-        post_layer_norm: bool = True,
-        pre_process: bool = True,
-        post_process: bool = True,
-        model_comm_pgs: ModelCommProcessGroups = None,
-        vp_stage: Optional[int] = None,
-    ):
-
-Megatron-LM/megatron/core/pipeline_parallel/schedules.py
-
-def forward_step(...)
-    ...
-   if parallel_state.is_pipeline_last_stage(ignore_virtual=False, vp_stage=vp_stage):
-        if not collect_non_loss_data:
-            outputs = loss_func(output_tensor)
-            if len(outputs) == 3:
-                output_tensor, num_tokens, loss_reduced = outputs
-                if not config.calculate_per_token_loss:
-                    output_tensor /= num_tokens
-                    output_tensor /= num_microbatches
-            else:
-                # preserve legacy loss averaging behavior (ie, over the number of microbatches)
-                assert len(outputs) == 2
-                output_tensor, loss_reduced = outputs
-                output_tensor *= parallel_state.get_context_parallel_world_size()
-                output_tensor /= num_microbatches
-            forward_data_store.append(loss_reduced)
-        else:
-            data = loss_func(output_tensor, non_loss_data=True)
-            forward_data_store.append(data)
-```
-
-- NPU1 反向执行 Stage1：
-
-执行完 forward_step 后执行 backward_step 得到 iNPUt_tensor_grad，并
-进入 1F1B 状态，执行 send_backward_recc_forward->_communication->异步发送 iNPUt_tensor_grad 给 NPU0 并等待 NPU0 发送下一个 MB forward 结果。
-
-![NPU1 反向计算](./images/10pipeline18.png)
-
-```python
-Megatron-LM/megatron/core/pipeline_parallel/schedules.py
-
-def forward_backward_pipelining_without_interleaving(...):
-    # Enable grad sync for the last microbatch in the batch if the full
-    # backward pass completes in the 1F1B stage.
-    if num_warmup_microbatches == 0 and last_iteration:
-        if config.grad_sync_func is None or rank == 0:
-            enable_grad_sync()
-
-    input_tensor_grad = backward_step(
-        input_tensor, output_tensor, output_tensor_grad, model_type, config
-    )
-
-    if last_iteration:
-        input_tensor = None
-        send_backward(
-            input_tensor_grad,
-            recv_tensor_shapes,
-            config,
-            parallel_state.is_pipeline_first_stage(),
-        )
-    else:
-        input_tensor = send_backward_recv_forward(
-            input_tensor_grad,
-            recv_tensor_shapes,
-            config,
-            parallel_state.is_pipeline_first_stage(),
-        ) 
-
-def send_backward_recv_forward(input_tensor_grads, tensor_shapes, config, is_first_stage):
-    """Wrapper for p2p_communication.send_backward_recv_forward used
-    with non-interleaving schedule."""
-    if not isinstance(input_tensor_grads, list):
-        input_tensor_grads = [input_tensor_grads]
-    input_tensors = []
-    for input_tensor_grad, tensor_shape in zip(input_tensor_grads, tensor_shapes):
-        if tensor_shape is None:
-            input_tensors.append(None)
-            continue
-        input_tensor = p2p_communication.send_backward_recv_forward(
-            input_tensor_grad, tensor_shape, config, is_first_stage
-        )
-        input_tensors.append(input_tensor)
-    return input_tensors
-```
-
-- NPU0 反向执行 Stage0：
-
-NPU0 Srage0 等待 send_backward_recv_forward 被唤醒后获得 NPU1 Staege1 发送的 output_tensor_grad，NPU0 Stage0 执行 backward_step 输出 intput_tensor_grad，NPU0 计入 1F1B 状态，NPU0 num_warmup_mbs=1, num_mbs_remaining=2，进入 1F1B 循环，执行 forward_step 执行 Starge1 前向计算得到 output_tensor(Forward 3)，执行 send_forward_recv_backward 发送 output_tensor 等待 backward，异步 recv tensor_recv_next，调用 synnchronize()同步等待 backward，NPU0 进入等待状态。
-
-![NPU0 反向传输](./images/10pipeline19.png)
-
-```python
-Megatron-LM/megatron/core/pipeline_parallel/schedules.py
-
- # Run 1F1B in steady state.
-    for i in range(num_microbatches_remaining):
-        last_iteration = i == (num_microbatches_remaining - 1)
-
-        # Decide to checkpoint all layers' activations of the current micro-batch
-        if max_outstanding_backprops is not None:
-            checkpoint_activations_microbatch = (
-                (i + num_warmup_microbatches) % max_outstanding_backprops
-            ) >= config.num_microbatches_with_partial_activation_checkpoints
-        else:
-            checkpoint_activations_microbatch = None
-
-        output_tensor, num_tokens = forward_step(...)
-        total_num_tokens += num_tokens
-
-        if forward_only:
-            send_forward(
-                output_tensor, send_tensor_shapes, config, parallel_state.is_pipeline_last_stage()
-            )
-
-            if not last_iteration:
-                input_tensor = recv_forward(
-                    recv_tensor_shapes, config, parallel_state.is_pipeline_first_stage()
-                )
-
-        else:
-            output_tensor_grad = send_forward_recv_backward(
-                output_tensor, send_tensor_shapes, config, parallel_state.is_pipeline_last_stage()
-            )
-
-
-Megatron-LM/megatron/core/pipeline_parallel/p2p_communication.py
-
-  if recv_prev:
-        if config.pipeline_dtype is None:
-            raise RuntimeError("pipeline_dtype must be provided if recv_prev is True")
-        if tensor_shape is None:
-            raise RuntimeError(
-                "tensor_shape must be specified if recv_prev is True. "
-                "Common tensor_shape is (seq_length, micro_batch_size, hidden_size)"
-            )
-        tensor_recv_prev_func = create_tensor_recv_prev
-
-    if recv_next:
-        if config.pipeline_dtype is None:
-            raise RuntimeError("dtype must be provided if recv_next is True")
-        if tensor_shape is None:
-            raise RuntimeError(
-                "tensor_shape must be specified if recv_next is True. "
-                "Common tensor_shape is (seq_length, micro_batch_size, hidden_size)"
-            )
-        tensor_recv_next_func = create_tensor_recv_next
-```
-
-- NPU1 反向执行 Stage1：
-
-同理，NPU1 Stage1 上执行 send_backward_recv_forward 同步等待收到 NPU0
-Stge0 发送 iNPUt_tensor（Forward 2）,NPU1 Stage1 将 iNPUt_tensor（Forward 2）作为 TransformerBlock 执行 forward_step,得到输出 output_tensor。
-![NPU1 反向传输](./images/10pipeline19.png)
-
-- NPU0 执行 Stage0
-
-NPU0 等待 send_forward_recv_backward 执行 NPU1 输出 output_grad(B2)，执行 backward_step 输出 iNPUt_tensor_grad（B2），NPU0 num_warmup_mbs=1, num_mbs_remaing=2, i=2，退出 1F1B，进入 cooldown backwrd pass enable_grad_sync 打开模型梯度更新，recv_backward 等待 NPU1 发送最后一个 mbs 的 backward（B3），NPU0 准备更新模型的梯度和参数。
-
-![NPU1 反向传输](./images/10pipeline20.png)
-
-- NPU1 执行 Stage1
-
-NPU1 Stage1 执行 send_backward_recv_forward 同步等待 iNPUt(F3),NPU1 num_warmup_mbs=0，num_mbs_remaining=3，进入 1F1B 循环,将 NPU0 Stage0 发送 iNPUt(F3)作为 TransformerBlock 的 iNPUt 计算前向,forward_step()输出 output (F3)执行 backward_step()得到 iNPUt_tensor_grad(B3),send_backward()异步发送 iNPUt_tesnor_grad(B3)给 NPU0。
-
-![NPU1 反向传输](./images/10pipeline21.png)
-
-- NPU0 执行 Stage0 后，执行完完整的 iteration
-
-NPU0 等待 cooldown backward 的 recv_backward()获得 NPU1 输出(B3)，执行 backward_step()输出 iNPUt_tensor_grad(B3)，forward_backward_func()返回 LOSS，enable_grad_sync()累加更新模型梯度，finalize_model_grads_func()更新模型参数。
-
-![NPU1 反向传输](./images/10pipeline22.png)
-
-```python
-Megatron-LM/megatron/core/pipeline_parallel/schedules.py
-
-def get_forward_backward_func():
-  pipeline_model_parallel_size = parallel_state.get_pipeline_model_parallel_world_size()
-    if pipeline_model_parallel_size > 1:
-        if parallel_state.get_virtual_pipeline_model_parallel_world_size() is not None:
-            forward_backward_func = forward_backward_pipelining_with_interleaving
-        else:
-            forward_backward_func = forward_backward_pipelining_without_interleaving
-    else:
-        forward_backward_func = forward_backward_no_pipelining
-    return forward_backward_func
-
-
-def forward_backward_pipelining_without_interleaving(...)
-    def enable_grad_sync():
-        output_tensor_grad = recv_backward(
-                        send_tensor_shapes, config, parallel_state.is_pipeline_last_stage()
-                    )
-
-                    input_tensor_grad = backward_step(
-                        input_tensor, output_tensor, output_tensor_grad, model_type, config
-                    )
-
-                    send_backward(
-                        input_tensor_grad,
-                        recv_tensor_shapes,
-                        config,
-                        parallel_state.is_pipeline_first_stage(),
-                    )
-
-                # Launch any remaining grad reductions.
-                if no_sync_context is not None:
-                    enable_grad_sync()
-                    if config.grad_sync_func is not None:
-                        config.grad_sync_func(model.parameters())
-
-            if config.finalize_model_grads_func is not None and not forward_only:
-
-                # If defer_embedding_wgrad_compute is enabled we need to do the
-                # weight gradient GEMM's here.
-                finish_embedding_wgrad_compute(config, embedding_module)
-
-                # Finalize model grads (perform full grad all-reduce / reduce-scatter for
-                # data parallelism, layernorm all-reduce for sequence parallelism, and
-                # embedding all-reduce for pipeline parallelism).
-                config.finalize_model_grads_func(
-                    [model], total_num_tokens if config.calculate_per_token_loss else None
-                )
-
-            if config.timers is not None:
-                config.timers('forward-backward').stop()
-
-            if hasattr(config, 'enable_cuda_graph') and config.enable_cuda_graph:
-                create_cudagraphs()
-
-            return forward_data_store
-```
+!!!!!!!
+可以用大模型，但是要自己理解，最好有图来描述
 
 ## 总结与思考
 
-!!!!!!!!
-补充内容
+1F1B调度（PipeDream）通过“前向与反向计算尽早交错”，显著降低激活峰值显存（从$\mathcal{O}(m)$至$\mathcal{O}(p)$），从而在相同硬件条件下支持更大规模模型或更深流水线。在此基础上，各衍生技术从不同维度优化：
+
+1. **Virtual Pipeline（VPP）**：通过“在每张物理GPU拆分$v$个虚拟阶段”，将气泡率降低至1F1B的$\tfrac{1}{v}$，但代价是通信量与通信频率均提升$v$倍，适合“通信带宽充足、追求低气泡”的场景；
+2. **PipeDream-2BW**：结合“双缓冲权重”与“1-stale更新语义”，将权重版本数量固定为2份，在保持1F1B高吞吐的同时进一步压缩权重显存，适合“显存紧张、需贴近数据并行收敛语义”的场景；
+3. **ZB-V（Zero-Bubble PP）**：通过“拆分反向为B_in/B_w”与“V字形调度”，在$\mathcal{O}(p)$激活量级下将气泡压至接近0，代价是调度复杂度与通信条数增加，适合“对吞吐要求极高、可承担工程复杂度”的场景；
+
+这些技术的核心逻辑均围绕“**平衡显存、气泡、通信三者关系**”——无绝对最优方案，需根据硬件条件（显存/带宽）、模型规模、训练目标（吞吐/收敛速度）灵活选择，或组合使用（如VPP与ZB-V叠加）以最大化并行效率。
 
 ## 参考文献
 
-- https://zhuanlan.zhihu.com/p/650744349
-- https://zhuanlan.zhihu.com/p/701716465
-- https://blog.csdn.net/just_sort/article/details/135981391
-- https://blog.csdn.net/HaoBBNuanMM/article/details/134095326
-- https://github.com/NVIDIA/Megatron-LM
+1. [Huang, M. Y., et al. "GPipe: Efficient Training of Giant Neural Networks using Pipeline Parallelism." *Proceedings of the 36th International Conference on Machine Learning (ICML)*, 2019.](https://proceedings.mlr.press/v97/huang19h.html)
+2. [Narayanan, D., et al. "PipeDream: Fast and Efficient Pipeline Parallel DNN Training." *Proceedings of the 27th Symposium on Operating Systems Principles (SOSP)*, 2019.](https://dl.acm.org/doi/10.1145/3341301.3359646)
+3. [Jain, S., et al. "Efficient Memory Management for Pipeline Parallelism." *Proceedings of the 4th Conference on Machine Learning and Systems (MLSys)*, 2021.](https://proceedings.mlsys.org/paper/2021/file/938331137a7123d4f113320917215465-Paper.pdf)
+4. [Anandkumar, A., et al. "Zero-Bubble Pipeline Parallelism for DNN Training." *arXiv preprint arXiv:2210.02020*, 2022.](https://arxiv.org/abs/2210.02020)
+5. [Zhang, Y., et al. "Hanayo: Wave-like Pipeline Parallelism for Efficient DNN Training." *Proceedings of the 30th International Symposium on High-Performance Parallel and Distributed Computing (HPDC)*, 2021.](https://dl.acm.org/doi/10.1145/3431379.3460627)
+6. [Pratishraj, D. "Demystifying Virtual Pipeline Parallelism in Llama 3 Model Training." *Medium*, 2024.](https://medium.com/@dpratishraj7991/demystifying-virtualpipeline-parallelism-in-llama-3-model-training-faf2fe7e60e5)
+7. [NVIDIA. "Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism." *GitHub Repository*, 2024.](https://github.com/NVIDIA/Megatron-LM)
+8. [知乎专栏. "流水线并行（PP）：从GPipe到1F1B的演进." *知乎*, 2023.](https://zhuanlan.zhihu.com/p/650744349)
+9. [知乎专栏. "深入理解PipeDream：1F1B调度的显存与吞吐权衡." *知乎*, 2024.](https://zhuanlan.zhihu.com/p/701716465)
+10. [CSDN博客. "大模型流水并行：VPP的通信开销与优化实践." *CSDN博客*, 2024.](https://blog.csdn.net/just_sort/article/details/135981391)
+11. [CSDN博客. "ZB-V调度的工程落地：多Stream与NCCL通信优化." *CSDN博客*, 2024.](https://blog.csdn.net/HaoBBNuanMM/article/details/134095326)
