@@ -398,45 +398,43 @@ AI 算力能耗巨大，需软硬件多栈协同优化每 FLOP（浮点运算）
 
 ## 9.引用与参考
 
-https://zh.wikipedia.org/wiki/Fortran#FORTRAN 
+[Fortran](https://zh.wikipedia.org/wiki/Fortran#FORTRAN)
 
-https://zh.wikipedia.org/wiki/OpenMP
+[OpenMP](https://zh.wikipedia.org/wiki/OpenMP)
 
-https://www.incredibuild.cn/blog/cuda-vs-opencl-gpu-bianchenggaiyongshenme
+[Cuda和OpenCL](https://www.incredibuild.cn/blog/cuda-vs-opencl-gpu-bianchenggaiyongshenme)
 
-https://zhuanlan.zhihu.com/p/697611565
+[oneAPI的体系架构和SYCL](https://zhuanlan.zhihu.com/p/697611565)
 
-https://www.intel.com/content/www/us/en/developer/tools/oneapi/overview.html
+[oneAPI英特尔主页](https://www.intel.com/content/www/us/en/developer/tools/oneapi/overview.html)
 
-https://www.hiascend.com/software/cann
+[CANN](https://www.hiascend.com/software/cann)
 
-https://developer.aliyun.com/article/1644057
+[Autotuning原理](https://developer.aliyun.com/article/1644057)
 
-https://cloud.tencent.com/developer/article/2540075
+[编译器革命：MLIR 的 AI 硬件统一中间表示](https://cloud.tencent.com/developer/article/2540075)
 
-https://zhuanlan.zhihu.com/p/12890124532
+[Triton：用于分块神经网络计算的中间语言和编译器](https://zhuanlan.zhihu.com/p/12890124532)
 
-https://blog.csdn.net/weixin_54015549/article/details/130704776
+[NFS与SAN](https://blog.csdn.net/weixin_54015549/article/details/130704776)
 
-https://blog.csdn.net/Long_xu/article/details/131317471
-
-https://blog.csdn.net/bandaoyu/article/details/112859853
-
-https://blog.csdn.net/weixin_54015549/article/details/130704776
+[CXL（Compute Express Link）技术](https://blog.csdn.net/Long_xu/article/details/131317471)
                        
-https://zhuanlan.zhihu.com/p/710878933                            
+[UCX](https://zhuanlan.zhihu.com/p/710878933)                            
                         
-https://blog.csdn.net/weixin_43728590/article/details/107211981
+[并行编程模型](https://blog.csdn.net/weixin_43728590/article/details/107211981)
 
-https://blog.csdn.net/zhengxianghdu/article/details/132226610
+[RDMA](https://blog.csdn.net/bandaoyu/article/details/112859853)
 
-https://blog.csdn.net/Clownseven/article/details/149598820
+[RDMA在典型场景下的技术应用分析与探索](https://blog.csdn.net/zhengxianghdu/article/details/132226610)
 
-https://cloud.tencent.com/developer/article/2474846
+[智能化运维：AI驱动的服务器性能预测与优化策略](https://blog.csdn.net/Clownseven/article/details/149598820)
 
-https://blog.csdn.net/qq871325148/article/details/145849748
+[GPU 资源调度：k8s-device-plugin 知多少 ？](https://cloud.tencent.com/developer/article/2474846)
 
-https://developer.baidu.com/article/details/3220980
+[【云原生】深入浅出K8s设备插件技术（Device Plugin）](https://blog.csdn.net/qq871325148/article/details/145849748)
 
-https://blog.csdn.net/shy_1762538422/article/details/140234590
+[HPC中的调度器介绍](https://developer.baidu.com/article/details/3220980)
+
+[Linux定时任务详解全面掌握cron和at命令](https://blog.csdn.net/shy_1762538422/article/details/140234590)
 
