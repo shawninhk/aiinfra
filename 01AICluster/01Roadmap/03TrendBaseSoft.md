@@ -390,21 +390,15 @@ AI 算力能耗巨大，需软硬件多栈协同优化每 FLOP（浮点运算）
 
 本文从编译器与运行时、计算库、存储系统、通信中间件和调度系统五个方面，梳理 HPC 基础软件的发展历程与趋势：HPC 基础软件正朝着智能化（如 AI 驱动调度、自动调优）、一体化（如存算融合、多协议协同）、开放生态（如 oneAPI、MLIR）方向演进，未来需持续突破硬件碎片化、存储计算失衡、能源效率等挑战，为高性能计算与 AI 应用提供更坚实的软件支撑。
 
-## 本节视频
+## 8. 本节视频
 
 <html>
 <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=114786238992560&bvid=BV1Sr3YzXEQa&cid=30819877532&p=1&danmaku=0&t=30&autoplay=0" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
 </html>
 
-!!!!!!
-参考与引用不要列太多没用的，重点参考了使用了别人的内容才记录下来。而且要注意格式 - [XX
-](link)
+## 9.引用与参考
 
-## reference
-
-https://zh.wikipedia.org/wiki/Fortran#FORTRAN
-
-https://www.qast.com/pgroup/htm/about.htm 
+https://zh.wikipedia.org/wiki/Fortran#FORTRAN 
 
 https://zh.wikipedia.org/wiki/OpenMP
 
@@ -416,151 +410,33 @@ https://www.intel.com/content/www/us/en/developer/tools/oneapi/overview.html
 
 https://www.hiascend.com/software/cann
 
-https://e.huawei.com/cn/news/ebg/2022/bisheng-c-upgrades-bisheng-compiler
-
-https://baike.baidu.com/item/%E6%AF%95%E6%98%87/53936900?fr=aladdin#reference-3
-
 https://developer.aliyun.com/article/1644057
 
 https://cloud.tencent.com/developer/article/2540075
 
-https://www.eecs.harvard.edu/~htk/publication/2019-mapl-tillet-kung-cox.pdf
-
 https://zhuanlan.zhihu.com/p/12890124532
-
-https://zhuanlan.zhihu.com/p/1895776568367894849
-
-https://zh.wikipedia.org/wiki/BLAS
-
-https://zh.wikipedia.org/wiki/LAPACK
-
-https://zhuanlan.zhihu.com/p/353918898
-
-https://zhuanlan.zhihu.com/p/625259682
-
-https://docs.sciml.ai/Overview/stable/overview/
 
 https://blog.csdn.net/weixin_54015549/article/details/130704776
 
-http://afsapply.ihep.ac.cn/cchelp/zh/local-cluster/storage/Lustre/
-
-https://blog.csdn.net/happy_king_zi/article/details/140865357
-
-https://cloud.tencent.com/developer/article/2501721
-
 https://blog.csdn.net/Long_xu/article/details/131317471
 
-https://www.bytezonex.com/archives/Uh18Kp6l.html
-
-https://www.ctyun.cn/developer/article/680317292572741
-
-https://www.zhihu.com/question/31168972/answer/3520497725
-
 https://blog.csdn.net/bandaoyu/article/details/112859853
-
-https://zhuanlan.zhihu.com/p/710878933
-
-https://blog.csdn.net/weixin_43728590/article/details/107211981
-
-https://blog.csdn.net/zhengxianghdu/article/details/132226610
-
-https://blogs.oracle.com/research/post/a-beginners-guide-to-slurm](https://zh.wikipedia.org/wiki/Fortran#FORTRAN
-
-https://www.qast.com/pgroup/htm/about.htm 
-
-https://zh.wikipedia.org/wiki/OpenMP
-
-https://www.incredibuild.cn/blog/cuda-vs-opencl-gpu-bianchenggaiyongshenme
-
-https://zhuanlan.zhihu.com/p/697611565
-
-https://www.intel.com/content/www/us/en/developer/tools/oneapi/overview.html
-
-https://www.intel.cn/content/www/cn/zh/developer/articles/technical/oneapi-what-is-it.html
-
-https://www.hiascend.com/software/cann
-
-https://developer.huawei.com/home/forum/kunpeng/thread-02106154315995186024-1-1.html
-
-https://e.huawei.com/cn/news/ebg/2022/bisheng-c-upgrades-bisheng-compiler
-
-https://baike.baidu.com/item/%E6%AF%95%E6%98%87/53936900?fr=aladdin#reference-3
-
-https://developer.aliyun.com/article/1644057
-
-https://cloud.tencent.com/developer/article/2540075
-
-https://www.eecs.harvard.edu/~htk/publication/2019-mapl-tillet-kung-cox.pdf
-
-https://zhuanlan.zhihu.com/p/12890124532
-
-https://zhuanlan.zhihu.com/p/1895776568367894849
-
-https://ia800600.us.archive.org/5/items/ittushu-2470/%E6%B8%85%E5%8D%8E%E5%A4%A7%E5%AD%A6%E5%9B%BE%E4%B9%A6%E9%A6%86-%E6%88%98%E7%96%AB%E7%89%88/%E6%96%87%E6%B3%89sp1%E8%A1%A5%E4%B8%81/3207901_%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0_%E8%AF%AD%E9%9F%B3%E8%AF%86%E5%88%AB%E6%8A%80%E6%9C%AF%E5%AE%9E%E8%B7%B5_text.pdf
-
-https://zh.wikipedia.org/wiki/BLAS
-
-https://zh.wikipedia.org/wiki/LAPACK
-
-https://massedcompute.com/faq-answers/?question=How%20do%20cuSPARSE%20and%20SuiteSparse%20compare%20to%20other%20sparse%20linear%20algebra%20libraries%20such%20as%20MKL%20and%20PETSc?
-
-https://zhuanlan.zhihu.com/p/353918898
-
-https://zhuanlan.zhihu.com/p/625259682
-
-https://docs.sciml.ai/Overview/stable/overview/
 
 https://blog.csdn.net/weixin_54015549/article/details/130704776
-
-http://afsapply.ihep.ac.cn/cchelp/zh/local-cluster/storage/Lustre/
-
-https://blog.csdn.net/happy_king_zi/article/details/140865357
-
-https://cloud.tencent.com/developer/article/2501721
-
-https://blog.csdn.net/Long_xu/article/details/131317471
-
-https://www.bytezonex.com/archives/Uh18Kp6l.html
-
-https://www.ctyun.cn/developer/article/680317292572741
-
-https://www.zhihu.com/question/31168972/answer/3520497725
-
-https://blog.csdn.net/bandaoyu/article/details/112859853
-
-https://blog.csdn.net/rgv23456789/article/details/149535923                            
-
-https://blog.csdn.net/weixin_33831673/article/details/90350564?spm=1001.2101.3001.6650.2&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-2-90350564-blog-147961628.235%5Ev43%5Epc_blog_bottom_relevance_base8&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-2-90350564-blog-147961628.235%5Ev43%5Epc_blog_bottom_relevance_base8&utm_relevant_index=5
-
+                       
 https://zhuanlan.zhihu.com/p/710878933                            
                         
 https://blog.csdn.net/weixin_43728590/article/details/107211981
 
-https://blog.csdn.net/weixin_43728590/article/details/107211981?spm=1001.2101.3001.6650.14&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-14-107211981-blog-147961628.235%5Ev43%5Epc_blog_bottom_relevance_base8&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-14-107211981-blog-147961628.235%5Ev43%5Epc_blog_bottom_relevance_base8&utm_relevant_index=20
-
 https://blog.csdn.net/zhengxianghdu/article/details/132226610
-
-https://community.intel.com/t5/Blogs/Tech-Innovation/Artificial-Intelligence-AI/Intel-Shows-OCI-Optical-I-O-Chiplet-Co-packaged-with-CPU-at/post/1582541?profile.language=zh-CN
-
-https://baike.baidu.com/item/%E7%A1%85%E5%85%89%E5%AD%90%E6%8A%80%E6%9C%AF/3273912 
-
-https://blogs.oracle.com/research/post/a-beginners-guide-to-slurm
-
-https://baijiahao.baidu.com/s?id=1836496620762666611&wfr=spider&for=pc
 
 https://blog.csdn.net/Clownseven/article/details/149598820
 
 https://cloud.tencent.com/developer/article/2474846
 
-https://baijiahao.baidu.com/s?id=1841486264036155755&wfr=spider&for=pc
-
 https://blog.csdn.net/qq871325148/article/details/145849748
-
-https://baike.baidu.com/item/Slurm%E5%B7%A5%E4%BD%9C%E8%B0%83%E5%BA%A6%E5%B7%A5%E5%85%B7/22700871
-
-https://www.cnblogs.com/bio-mary/p/13500255.html
 
 https://developer.baidu.com/article/details/3220980
 
-https://blog.csdn.net/shy_1762538422/article/details/140234590)
+https://blog.csdn.net/shy_1762538422/article/details/140234590
 
