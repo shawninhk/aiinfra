@@ -35,14 +35,16 @@
 
 ### **[00. 大模型系统概述](./00Summary/)**
 
-大模型系统概述、Scaling Law 解读、训练推理流程、系统区别及未来趋势。
+系统梳理了大模型关键技术点，涵盖 Scaling Law 的多场景应用、训练与推理全流程技术栈、AI 系统与大模型系统的差异，以及未来趋势如智能体、多模态、轻量化架构和算力升级。
 
-| 编号  | 名称       | 具体内容      |
-|:---:|:--- |:--- |
-| 1      | [Scaling Law 解读](./00Summary/01ScalingLaw) | Scaling Law 在不同场景下的应用与演进  |
-| 2      | [训练推理全流程](./00Summary/02TrainInfer) | 大模型训练与推理全流程及软硬件优化  |
-| 3      | [与 AI 系统区别](./00Summary/03Different) | AI 系统与大模型系统的通用性、资源与软件栈差异  |
-| 3      | [大模型系统发展](./00Summary/04Develop) | 大模型系统未来趋势：技术演进、场景应用与算力生态升级  |
+| 大纲  | 小结       | 链接      | 状态 |
+|:---:|:--- |:--- |:---:|
+| 概述      | 01. [Scaling Law 整体解读](./00Summary/01ScalingLaw.md) | [Markdown](./00Summary/01ScalingLaw.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/01ScalingLaw.html)  | :o: |
+| 概述      | 02. [Standard Scaling Law](./00Summary/02StandardScaling.md) | [Markdown](./00Summary/02StandardScaling.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/02StandardScaling.html)  | :white_check_mark: |
+| 概述      | 03. [Inference Time Scaling Law](./00Summary/03TTScaling.md) | [Markdown](./00Summary/03TTScaling.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/03TTScaling.html)  | :o: |
+| 概述      | 04. [大模型训练与 AI Infra 的关系分析](./00Summary/04TrainingStack.md) | [Markdown](./00Summary/04TrainingStack.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/04TrainingStack.html)  | :white_check_mark: |
+| 概述      | 05. [大模型推理与 AI Infra 的关系分析](./00Summary/05InferStack.md) | [Markdown](./00Summary/05InferStack.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/05InferStack.html) | :white_check_mark: |
+| 概述      | 06. [AI Infra 核心逻辑与行业趋势](./00Summary/06Future.md) | [Markdown](./00Summary/06Future.md), [文章](https://infrasys-ai.github.io/aiinfra-docs/00Summary/06Future.html)  | :white_check_mark: |
 
 ---
 
@@ -51,7 +53,7 @@
 AI 集群架构演进、万卡集群方案、性能建模与优化，GPU/NPU 精度差异及定位方法。
 
 | 编号  | 名称       | 具体内容      | 状态 |
-|:---:|:--- |:--- |:--- |
+|:---:|:--- |:--- |:---:|
 | 1      | [计算集群之路](./01AICluster/01Roadmap/) |  高性能计算集群发展与万卡 AI 集群建设及机房基础设施挑战  | :white_check_mark: |
 | 2      | [L0/L1 AI 集群基建](./01AICluster/02L0L1Base/)   | 服务器节点的基础知识、散热技术的发展与实践       | :white_check_mark: |
 | 3      | [万卡 AI 集群](./01AICluster/03SuperPod/)  | 围绕万卡 AI 集群从存算网络协同、快速交付与紧张工期等挑战   | :white_check_mark: |
@@ -245,10 +247,10 @@ AI 集群云原生篇：容器技术、K8S 编排、AI 云平台与任务调度�
 | 手撕 MOE 代码 | 12 单机多卡 MoE  | [PPT](./06AlgoData/02MoE/11MOECode.pdf), [视频](https://www.bilibili.com/video/BV1JaR5YSEMN) | :white_check_mark: |
 | 视觉 MoE | 13 视觉 MoE 模型  | [PPT](./06AlgoData/02MoE/12MOEFuture.pdf), [视频](https://www.bilibili.com/video/BV1JNQVYBEq7), [文章](./06AlgoData/02MoE/12MOEFuture.md) | :white_check_mark: |
 |:sparkling_heart:|:star2:|:sparkling_heart:| |
-| MOE 实践 :computer: | 01 基于 Huggingface 实现 MOE 推理任务 | [Markdown](./06AlgoData/02MoE/Practice01MOEInfer.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice01MOEInfer.ipynb) | :white_check_mark: |
-| MOE 实践 :computer: | 02 从零开始手撕 MoE | [Markdown](./06AlgoData/02MoE/Practice02SignalMOE.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice02SignalMOE.ipynb) | :white_check_mark: |
-| MOE 实践 :computer: | 03 MoE 从原理到分布式实现 | [Markdown](./06AlgoData/02MoE/Practice03IntrtaMOE.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice03IntrtaMOE.ipynb) | :white_check_mark: |
-| MOE 实践 :computer: | 04 MoE 分布式性能分析 | [Markdown](./06AlgoData/02MoE/Practice04MOEAnalysize.md), [Jupyter](./06AlgoData/02MoE/notebook/Practice04MOEAnalysize.ipynb) | :white_check_mark: |
+| MOE 实践 :computer: | 01 基于 HF 实现 MOE 推理 | [Markdown](./06AlgoData/02MoE/CODE01MOEInfer.md), [Jupyter](./06AlgoData/02MoE/notebook/CODE01MOEInfer.ipynb) | :white_check_mark: |
+| MOE 实践 :computer: | 02 从零开始手撕 MoE | [Markdown](./06AlgoData/02MoE/CODE02SignalMOE.md), [Jupyter](./06AlgoData/02MoE/notebook/CODE02SignalMOE.ipynb) | :white_check_mark: |
+| MOE 实践 :computer: | 03 MoE 从原理到分布式实现 | [Markdown](./06AlgoData/02MoE/CODE03IntrtaMOE.md), [Jupyter](./06AlgoData/02MoE/notebook/CODE03IntrtaMOE.ipynb) | :white_check_mark: |
+| MOE 实践 :computer: | 04 MoE 分布式性能分析 | [Markdown](./06AlgoData/02MoE/CODE04MOEAnalysize.md), [Jupyter](./06AlgoData/02MoE/notebook/CODE04MOEAnalysize.ipynb) | :white_check_mark: |
 
 ---
 
