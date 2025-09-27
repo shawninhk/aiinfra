@@ -10,6 +10,8 @@
 
 ## 微调的发展之路
 
+!!!!!!!!多看看不同的文章和综述，这里跟我的理解不一致，近 5 年才是微调快速发展期。PEFT、混合架构、自动化融合期。
+
 微调的发展大致可以分为三个阶段：特征迁移时代（2013–2017）、任务微调时代（2018–2020）和快速发展时代（2021–至今）。这三个阶段不单单反映了技术方法的演进，更体现了模型与人类交互方式的转变：从借用通用特征，到适配特定任务，再到理解人类意图并遵循价值观。微调的目标从提升单一任务指标，逐步发展为塑造模型的通用能力、安全边界与推理行为。
 
 ![微调的发展之路](images/01Introduction03.png)
@@ -22,17 +24,24 @@
 
 BERT 及其后继者（如 RoBERTa、ALBERT）迅速在 GLUE、SQuAD 等多个基准数据集上刷新纪录，微调成为提升任务性能的“黄金标准”。然而，这一阶段的微调仍是任务封闭式的：每个任务需独立微调一个模型，模型无法理解自然语言指令，还难以与人类进行真正产生交互。
 
+!!!!!!!!!
+下面的梳理有问题，再去多看看技术，RL、DPO 都属于后训练不是微调，多模态的微调，文生图的微调都没有。
+
 **快速发展时代（2021–至今）**。随着 GPT-3 展示出强大的上下文学习能力，研究者意识到语言模型的价值不在于完成单一任务，而在于作为通用智能体与人类交互协作。在这一阶段，微调得到了快速的发展，其主要可以从两个并行的主线理解，一个是促使模型与人类意图对齐的主线，另外一个是如何更高效地微调模型主线。首先是在 2021-2022 年，FLAN 与 T0 系统性验证了指令微调的有效性，使模型真正开始走向与人类交互的道路。同期，CoT 通过思维链激发多步推理，并迅速被纳入 SFT 数据，使模型“学会思考”，让模型能够像人类一样一步一步输出自己的思考过程。2022 年，InstructGPT 引入 RLHF，通过人类偏好数据训练奖励模型，并结合 PPO 强化学习优化策略，首次实现大规模人类价值观对齐。次年，DPO 提出一种简洁高效的替代方案——无需显式奖励模型和强化学习，仅用一个监督式损失函数即可直接优化偏好对，在效果媲美 RLHF 的同时大幅降低实现复杂度，迅速成为开源社区主流。2024-2025 年对齐技术进一步精细化，读者感兴趣再自行去阅读相关文献如 ORPO（Odds Ratio Preference Optimization）、KTO（Kahneman-Tversky Optimization）等。这一条主线让模型从 BERT 时代仅能机械地执行特定任务转变成能与人类交互地真正的人工智能，极大地促进了人工智能的发展。另外一条主线则是微调效率的革命，面对百亿、千亿参数模型带来的显存与存储压力，这条主线是让大模型为不同组织特定需求的对齐落地的重要技术。早在 2019 年，Adapter 就被提出用于高效微调 BERT，首次系统性验证“冻结主干 + 插件微调”的可行性，为 PEFT 奠定思想基础，随着 GPT-3 展示千亿参数模型的潜力，研究者亟需更高效的微调方案。2021 年成为 PEFT 的“黄金元年”，三大代表性方法相继提出，分别是 Prefix Tuning、Prompt Tuning 和 LoRA。如下图所示，在 2021 年之后，PEFT 在各个领域（如 LLM、VFM 等）上激增，由于 LoRA 的强大优点，它被广泛集成到主流深度学习框架，进一步促进了后续 PEFT 的发展。
 
 ![PEFT的发展趋势](images/01Introduction02.png)
 
 ## 主流微调方法
 
+!!!!!!!!!这里也不太多，微调的方法是从全参微调、到参数高效微调 PEFT、最后是混合架构微调（MOE、多模态、量化+微调）
+
 随着微调技术的发展，一系列不同的方法应运而生，以应对不同的性能需求、资源限制和任务目标。目前，主流的微调方法可以从不同维度进行分类，而理解这些分类方式，有助于我们根据具体需求选择最合适的技术路线。本章将从以下两个核心维度展开介绍：训练目标与流程和微调的参数规模。
 
 ### 按训练流程划分
 
 为了完整清晰地描述整个流程，本文将一些与微调关系不那么密切的概念（如”预训练“等）也统一放在此处讲，如下图所示，金色部分指的是使用的场景不多，蓝色部分指的是常规训练流程中都会涉及的。
+
+!!!!!!! 这里没搞清楚预训练、后训练、微调之间的关系，建议看看 DeepSeek v3 是怎么出来的。每一个阶段，每一个步骤。
 
 ![按训练流程划分](./images/01Introduction01.png)
 
@@ -115,12 +124,12 @@ BERT 及其后继者（如 RoBERTa、ALBERT）迅速在 GLUE、SQuAD 等多个�
 
 ## 参考与引用
 
-[1] Wu X K, Chen M, Li W, Wang R, Lu L, Liu J, Hwang K, Hao Y, Pan Y, Meng Q, et al. LLM Fine-Tuning: Concepts, Opportunities, and Challenges[J]. Big Data and Cognitive Computing, 2025, 9(4): 87. DOI:10.3390/bdcc9040087.
+- [1] Wu X K, Chen M, Li W, Wang R, Lu L, Liu J, Hwang K, Hao Y, Pan Y, Meng Q, et al. LLM Fine-Tuning: Concepts, Opportunities, and Challenges[J]. Big Data and Cognitive Computing, 2025, 9(4): 87. DOI:10.3390/bdcc9040087.
 
-[2] Devlin J, Chang M W, Lee K, et al. Bert: Pre-training of deep bidirectional transformers for language understanding[C]//Proceedings of the 2019 conference of the North American chapter of the association for computational linguistics: human language technologies, volume 1 (long and short papers). 2019: 4171-4186.
+- [2] Devlin J, Chang M W, Lee K, et al. Bert: Pre-training of deep bidirectional transformers for language understanding[C]//Proceedings of the 2019 conference of the North American chapter of the association for computational linguistics: human language technologies, volume 1 (long and short papers). 2019: 4171-4186.
 
-[3] Wei J, Wang X, Schuurmans D, et al. Chain-of-thought prompting elicits reasoning in large language models[J]. Advances in neural information processing systems, 2022, 35: 24824-24837.
+- [3] Wei J, Wang X, Schuurmans D, et al. Chain-of-thought prompting elicits reasoning in large language models[J]. Advances in neural information processing systems, 2022, 35: 24824-24837.
 
-[4] Rafailov R, Sharma A, Mitchell E, et al. Direct preference optimization: Your language model is secretly a reward model[J]. Advances in neural information processing systems, 2023, 36: 53728-53741.
+- [4] Rafailov R, Sharma A, Mitchell E, et al. Direct preference optimization: Your language model is secretly a reward model[J]. Advances in neural information processing systems, 2023, 36: 53728-53741.
 
-[5] Zhang D, Feng T, Xue L, et al. Parameter-efficient fine-tuning for foundation models[J]. arXiv preprint arXiv:2501.13787, 2025.
+- [5] Zhang D, Feng T, Xue L, et al. Parameter-efficient fine-tuning for foundation models[J]. arXiv preprint arXiv:2501.13787, 2025.
