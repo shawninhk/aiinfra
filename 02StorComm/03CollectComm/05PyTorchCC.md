@@ -1,6 +1,6 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# 06.通信域与 PyTorch 实现
+# 05.通信域与 PyTorch 实现
 
 Author by: SingularityKChen
 
