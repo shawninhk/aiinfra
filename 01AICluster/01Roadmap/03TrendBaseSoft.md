@@ -1,8 +1,8 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# 03.HPC 基础软件发展趋势
-<!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
-Author: 陈悦孜
+# 03.HPC 基础软件发展趋势(DONE)
+
+> Author by: 陈悦孜
 
 HPC 基础软件是连接硬件与应用的核心桥梁，其发展始终围绕资源高效调度、数据高速流动、计算极致优化三大目标，主要涵盖调度、存储、通信、编译、计算库及基础算法六大维度。
 
@@ -254,6 +254,7 @@ CXL（Compute Express Link）是 2020 年由英特尔、戴尔、惠普等公司
 例如天翼云开发的数据自动迁移引擎，基于访问日志与生命周期策略实现数据跨介质自动迁移——新写入业务数据先存于 NVMe SSD，随访问频率下降逐步迁移至 SATA SSD 或 HDD；同时为 IO 密集型业务的临时数据（如数据库临时表、实时计算中间结果）提供专属高性能存储分区，避免资源竞争。通过这种精细化管理，系统在混合负荷场景下整体 IO 性能提升超 50%，同时成本降低 30%。
 
 ## 4. 通信中间件
+
 通信中间件在 HPC 领域发挥着至关重要的作用，从卡间互联到节点互联，各层级通信技术均历经多代发展。
 
 ### 4.1 MPI 统治（1990s-2010s）
@@ -398,43 +399,23 @@ AI 算力能耗巨大，需软硬件多栈协同优化每 FLOP（浮点运算）
 
 ## 9.引用与参考
 
-[Fortran](https://zh.wikipedia.org/wiki/Fortran#FORTRAN)
-
-[OpenMP](https://zh.wikipedia.org/wiki/OpenMP)
-
-[Cuda和OpenCL](https://www.incredibuild.cn/blog/cuda-vs-opencl-gpu-bianchenggaiyongshenme)
-
-[oneAPI的体系架构和SYCL](https://zhuanlan.zhihu.com/p/697611565)
-
-[oneAPI英特尔主页](https://www.intel.com/content/www/us/en/developer/tools/oneapi/overview.html)
-
-[CANN](https://www.hiascend.com/software/cann)
-
-[Autotuning原理](https://developer.aliyun.com/article/1644057)
-
-[编译器革命：MLIR 的 AI 硬件统一中间表示](https://cloud.tencent.com/developer/article/2540075)
-
-[Triton：用于分块神经网络计算的中间语言和编译器](https://zhuanlan.zhihu.com/p/12890124532)
-
-[NFS与SAN](https://blog.csdn.net/weixin_54015549/article/details/130704776)
-
-[CXL（Compute Express Link）技术](https://blog.csdn.net/Long_xu/article/details/131317471)
-                       
-[UCX](https://zhuanlan.zhihu.com/p/710878933)                            
-                        
-[并行编程模型](https://blog.csdn.net/weixin_43728590/article/details/107211981)
-
-[RDMA](https://blog.csdn.net/bandaoyu/article/details/112859853)
-
-[RDMA在典型场景下的技术应用分析与探索](https://blog.csdn.net/zhengxianghdu/article/details/132226610)
-
-[智能化运维：AI驱动的服务器性能预测与优化策略](https://blog.csdn.net/Clownseven/article/details/149598820)
-
-[GPU 资源调度：k8s-device-plugin 知多少 ？](https://cloud.tencent.com/developer/article/2474846)
-
-[【云原生】深入浅出K8s设备插件技术（Device Plugin）](https://blog.csdn.net/qq871325148/article/details/145849748)
-
-[HPC中的调度器介绍](https://developer.baidu.com/article/details/3220980)
-
-[Linux定时任务详解全面掌握cron和at命令](https://blog.csdn.net/shy_1762538422/article/details/140234590)
-
+- [Fortran](https://zh.wikipedia.org/wiki/Fortran#FORTRAN)
+- [OpenMP](https://zh.wikipedia.org/wiki/OpenMP)
+- [Cuda和OpenCL](https://www.incredibuild.cn/blog/cuda-vs-opencl-gpu-bianchenggaiyongshenme)
+- [oneAPI的体系架构和SYCL](https://zhuanlan.zhihu.com/p/697611565)
+- [oneAPI英特尔主页](https://www.intel.com/content/www/us/en/developer/tools/oneapi/overview.html)
+- [CANN](https://www.hiascend.com/software/cann)
+- [Autotuning原理](https://developer.aliyun.com/article/1644057)
+- [编译器革命：MLIR 的 AI 硬件统一中间表示](https://cloud.tencent.com/developer/article/2540075)
+- [Triton：用于分块神经网络计算的中间语言和编译器](https://zhuanlan.zhihu.com/p/12890124532)
+- [NFS与SAN](https://blog.csdn.net/weixin_54015549/article/details/130704776)
+- [CXL（Compute Express Link）技术](https://blog.csdn.net/Long_xu/article/details/131317471)
+- [UCX](https://zhuanlan.zhihu.com/p/710878933)
+- [并行编程模型](https://blog.csdn.net/weixin_43728590/article/details/107211981)
+- [RDMA](https://blog.csdn.net/bandaoyu/article/details/112859853)
+- [RDMA在典型场景下的技术应用分析与探索](https://blog.csdn.net/zhengxianghdu/article/details/132226610)
+- [智能化运维：AI驱动的服务器性能预测与优化策略](https://blog.csdn.net/Clownseven/article/details/149598820)
+- [GPU 资源调度：k8s-device-plugin 知多少 ？](https://cloud.tencent.com/developer/article/2474846)
+- [【云原生】深入浅出K8s设备插件技术（Device Plugin）](https://blog.csdn.net/qq871325148/article/details/145849748)
+- [HPC中的调度器介绍](https://developer.baidu.com/article/details/3220980)
+- [Linux定时任务详解全面掌握cron和at命令](https://blog.csdn.net/shy_1762538422/article/details/140234590)
