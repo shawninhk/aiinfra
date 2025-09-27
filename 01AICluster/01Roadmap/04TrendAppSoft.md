@@ -1,9 +1,8 @@
 <!--Copyright © ZOMI 适用于[License](https://github.com/Infrasys-AI/AIInfra)版权许可-->
 
-# 03.HPC 应用软件发展趋势
+# 03.HPC 应用软件发展趋势(DONE)
 
-Author by：陈悦孜
-
+> Author by：陈悦孜
 
 ## 1. 应用发展历程
 
@@ -80,9 +79,7 @@ WRF 和 MM5 都是开源的、广泛使用的中尺度数值天气预报模型�
 <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=114786238992560&bvid=BV1Sr3YzXEQa&cid=30819877532&p=1&danmaku=0&t=30&autoplay=0" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
 </html>
 
-
 ## 5. 引用与参考
-[LASNEX](https://en.wikipedia.org/wiki/LASNEX)
-[MM5](https://en.wikipedia.org/wiki/MM5_(weather_model))
 
-
+- [LASNEX](https://en.wikipedia.org/wiki/LASNEX)
+- [MM5](https://en.wikipedia.org/wiki/MM5_(weather_model))
