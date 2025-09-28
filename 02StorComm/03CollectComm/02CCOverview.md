@@ -4,13 +4,15 @@
 
 Author by: SingularityKChen
 
+!!!!!!! XCCL是什么？
+
 本章聚焦“AI 与通信的关系”与“XCCL 基本架构”。我们将围绕**并行策略、集合通信原语、通信量与拓扑、计算/通信重叠**这一主线，解释不同并行方式为何需要 AllReduce / AllGather / All2All / Send-Recv 等原语、需要传多少数据、在真实网络与实现中如何落地，以及 XCCL 在训练框架与通信库之间的承上启下角色。
 
 ## AI 与通信关系
 
 本节简要回顾神经网络及其训练过程的基础计算，并回顾近年来 AI 训练和推理过程中涉及的分布式和并行计算模式。
 
-### 单卡训练 AI 模型
+### 从单卡到多卡通信
 
 神经网络训练的过程是神经网络模型通过梯度下降算法优化参数的过程。在单卡训练中，神经网络模型的训练过程主要依赖于单个 GPU 卡的计算能力。
 
@@ -86,22 +88,55 @@ FSDP 前向按需 **AllGather** 权重分片，反向通过 **ReduceScatter** �
 > 算法上，Ring 与 HD 在单位数据上的总通信量接近，但步数差异使得它们在小包/高延迟和超大包/带宽饱和的两端各有优势。
 > 系统上，分层 AllReduce、就近通信与合适的 bucket 粒度，几乎是所有大规模训练稳定扩展到多机多节点的共同秘诀。
 
+## 集合通信与分布式
+
+!!!!!!!!!!!分布式训练的内容，重点的是讲解各种并行，对集合通信的影响，特别是深入，一定要深入，例如传输多少数据量。不同的集合通信的源语具体对模型训练和推理的影响。
 
 ## XCCL 基本架构
+
+!!!!!!!写文章是为了更加深入理解这个知识点的原理，这里 XCCL 基本架构，没有展开，到底 XCCL 有哪些模块，有哪些内容。这块要自己深入 看不同的 XCCL 库，然后抽象出来一个共性的架构，这是我强调的来源于视频的内容，但是要比视频的内容深入很多很多的原因
 
 XCCL（XXXX Collective Communication Library）架构源自于高性能计算（HPC）的集合通信架构，经过优化和演进，以满足当前 AI 场景的特殊通信需求。本节从 HPC 和 XCCL 通信架构对比介绍，展示二者的异同。
 
 ### 计算与通信解耦
 
-在传统的神经网络训练过程中，每一层计算得到的梯度会立即进行集合通信（如 AllReduce），这种计算与通信同步串行的方式严重影响了集群的整体算力利用率（Model Flops Utilization，MFU）。例如，以 GPT-3 为例，若每层梯度计算需要 1ms，通信需要 500ms，则整个训练过程将显著延长。
+!!!!!!例如下面的内容就非常粗浅，一定要学深入，多看论文，多思考。下面是我改好的。
 
-为解决这一问题，XCCL 采用**计算与通信解耦**的策略，将计算和通信两个过程独立执行，分别优化。通过性能优化策略减少通信频率，提升集群训练性能（HFU/MFU）并防止通信等待时间过长导致的“假死锁”问题。
+在大模型训练中，集群算力利用率（MFU）直接决定训练周期，而传统 “计算 - 通信串行” 模式是制约 MFU 的核心瓶颈。其根本问题在于强同步依赖：每一层网络计算出梯度后，必须等待该梯度通过 AllReduce 等集合通信完成跨节点同步，才能启动下一层计算。
+
+以 6710 亿参数的 DeepSeek-V3 为例，其包含 61 个 Transformer 层，且第 4 至 61 层为 MoE 架构，这类架构天然存在专家数据跨节点调度需求，通信压力显著高于密集模型。若采用传统串行模式，按实测数据单层级计算耗时 10ms、跨节点通信耗时 3ms 计算，每层总耗时将达 13ms，且 MoE 架构未优化时计算：通信比可降至 1:1，大量 GPU 计算单元因等待专家数据传输陷入闲置，2048 卡集群的算力浪费问题尤为突出。
 
 ![02CCOverview09](./images/02CCOverview09.png)
 
-上图 Stream 77 和 14 分别是计算和通信的进程。
+上图 Stream 77 和 14 分别是计算和通信的进程。!!!!!!请继续补充，说明原理，建议换一个图，自己做个 profiling，然后截图。
 
-### 分布式加速库
+为解决这一问题，XCCL 采用**计算与通信解耦**的策略，将计算和通信两个过程独立执行，分别优化。通过性能优化策略减少通信频率，提升集群训练性能（HFU/MFU）并防止通信等待时间过长导致的“假死锁”问题。XCCL、NCCL 等集合通信库的 “计算与通信解耦” 策略，支撑千卡 / 万卡级集群高效运行，成为大模型工程化落地的关键技术基石：
+
+- 异步 Stream 并行调度：依托 GPU Stream 实现计算与通信的物理隔离。计算 Stream 无需等待上一层通信完成，可连续推进下一层 FFN 与 MLA 模块计算；通信 Stream 则异步抓取已就绪的梯度与特征数据，通过 Ring AllReduce 协议后台传输，使总耗时从 “计算 + 通信” 逼近纯计算耗时。
+
+- 通信粒度优化：解耦后可灵活合并通信任务，例如累积多层梯度后执行一次 AllReduce，将通信次数从 “每层 1 次” 降至 “每 N 层 1 次”，减少通信启动开销与带宽占用，进一步降低通信对流程的影响。
+
+- 死锁防护：传统串行中单个节点通信阻塞会导致全集群等待（“假死锁”）；解耦后计算与通信独立，局部通信异常时，其他节点计算仍可推进，通信模块可重试容错，避免全集群挂起。
+
+### HPC 到 AI 通信栈基本架构
+
+在经典 HPC 中，MPI/OpenSHMEM/UCX 面向传统的高性能计算任务，通信模式以阶段性、批式居多；而在 AI 训练里，高频次的梯度同步、参数/激活的分片汇聚、token 级路由使通信更贴合模型结构。
+
+![02CCOverview11](./images/02CCOverview11.png)
+
+因此栈内自上而下发生了迁移。编程模型从 MPI 走向 NCCL/Gloo/oneCCL/MSCCL 等面向深度学习的库。通信原语以 AllReduce / AllGather / ReduceScatter / All2All / P2P 为主，与并行方式对应。拓扑结构从超算常见的 Hypercube/Dragonfly 转向更贴合深度学习训练通信场景的 Ring/Torus/分层 Fat-Tree。硬件端引入 NVLink/NVSwitch、RoCE/IB RDMA 与 NPU/TPU 特有的片内外直连，代替部分传统 PCIe 与 RoCE 通道，显著降低节点内的同步成本，同时通过分级/就近通信降低跨节点的同步成本。
+
+![03CCPrimtive01](./images/03CCPrimtive01.png)
+
+从用户视角看，XCCL 是“通信执行层”的统一入口：上承 PyTorch 与分布式控制器（Megatron-LM/MindSpeed），下接 ProcessGroup（NCCL/HCCL/Gloo…）与物理互联（RDMA、NVLink、RoCE、PCIe/CXL、SHMEM）。训练过程中，框架把张量放入 bucket，控制器在后台协调各 rank 的时序与分组，XCCL 则在独立的通信流中执行对应原语，并通过 event 与同步点把结果安全地交回计算流。这样既能充分占满节点内高带宽链路，也便于用分层/分级在跨节点时减少长尾与抖动。
+
+### XCCL 基本架构
+
+!!!!!!! 看代码，抽象处理 XCCL 的架构
+
+### 接入框架与分布式加速库
+
+!!!!!!!!! 太浅了，到底 XCCL 这些库，是如何接入 pytorch 这个框架的？代码和架构图示例，深入去学习了解。
 
 训练框架（如 PyTorch）上层接管“何时、对哪些张量、以什么粒度发起通信”，最终仍通过 `torch.distributed` 的 `ProcessGroup` 调用底层通信库（NCCL/HCCL/Gloo）：
 
@@ -115,20 +150,6 @@ XCCL（XXXX Collective Communication Library）架构源自于高性能计算（
 
 > 加速库的加速，大多来自粒度控制（分片/bucket）、触发时机（重叠/合并）、分层通信（节点内优先）与对底层 ProcessGroup 的正确使用，而非绕开 NCCL/HCCL 另起炉灶。
 
-### HPC 到 AI 通信栈基本架构
-
-在经典 HPC 中，MPI/OpenSHMEM/UCX 面向传统的高性能计算任务，通信模式以阶段性、批式居多；而在 AI 训练里，高频次的梯度同步、参数/激活的分片汇聚、token 级路由使通信更贴合模型结构。
-
-![02CCOverview11](./images/02CCOverview11.png)
-
-因此栈内自上而下发生了迁移。编程模型从 MPI 走向 NCCL/Gloo/oneCCL/MSCCL 等面向深度学习的库。通信原语以 AllReduce / AllGather / ReduceScatter / All2All / P2P 为主，与并行方式对应。拓扑结构从超算常见的 Hypercube/Dragonfly 转向更贴合深度学习训练通信场景的 Ring/Torus/分层 Fat-Tree。硬件端引入 NVLink/NVSwitch、RoCE/IB RDMA 与 NPU/TPU 特有的片内外直连，代替部分传统 PCIe 与 RoCE 通道，显著降低节点内的同步成本，同时通过分级/就近通信降低跨节点的同步成本。
-
-### XCCL 在 AI 系统中的位置
-
-![03CCPrimtive01](./images/03CCPrimtive01.png)
-
-从用户视角看，XCCL 是“通信执行层”的统一入口：上承 PyTorch/MindSpore 与分布式控制器（Megatron-LM/MindSpeed），下接 ProcessGroup（NCCL/HCCL/Gloo…）与物理互联（RDMA、NVLink、RoCE、PCIe/CXL、SHMEM）。训练过程中，框架把张量放入 bucket，控制器在后台协调各 rank 的时序与分组，XCCL 则在独立的通信流中执行对应原语，并通过 event 与同步点把结果安全地交回计算流。这样既能充分占满节点内高带宽链路，也便于用分层/分级在跨节点时减少长尾与抖动。
-
 ## 总结与思考
 
 通过本章的学习，我们知道**并行方式决定原语，原语决定通信量与拓扑选择**，并说明了 XCCL 在框架调度和通信执行之间如何通过 bucket、分层与流/事件机制达成**计算-通信的高效重叠**。理解这些映射关系，是扩大模型规模、提升集群 MFU、降低网络成本的重要前提。
@@ -138,3 +159,7 @@ XCCL（XXXX Collective Communication Library）架构源自于高性能计算（
 <html>
 <iframe src="https://player.bilibili.com/player.html?aid=1255396066&bvid=BV18J4m1G7UU&cid=1570235726&page=1&as_wide=1&high_quality=1&danmaku=0&autoplay=0" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
 </html>
+
+## 参考与引用
+
+!!!!!!!!参考的论文链接，自己得去看论文
